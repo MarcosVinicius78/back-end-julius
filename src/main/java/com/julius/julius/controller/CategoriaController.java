@@ -20,7 +20,7 @@ import com.julius.julius.service.CategoriaService;
 
 import lombok.RequiredArgsConstructor;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/categoria")
@@ -49,7 +49,7 @@ public class CategoriaController {
     }
     
 
-    
+
     @PutMapping
     public ResponseEntity<?> atualizarCategoria(@RequestBody CategoriaResponseDto categoriaResponseDto){
 
