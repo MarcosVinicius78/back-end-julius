@@ -2,6 +2,7 @@ package com.julius.julius.models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -72,10 +73,10 @@ public class Produto {
 
     @Column(name =  "data_criacao", updatable=false)
     @CreationTimestamp
-    private LocalDateTime dataCriacao;
+    private Date dataCriacao;
 
     @Column(name = "data_atualizacao")
     @UpdateTimestamp
-    private LocalDateTime dataAtualizacao;
+    private Date dataAtualizacao;
 
 }
