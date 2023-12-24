@@ -16,7 +16,7 @@ import com.julius.julius.service.LojaService;
 
 import lombok.RequiredArgsConstructor;
 
-@CrossOrigin(origins =  "*")
+// @CrossOrigin(origins =  "*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/loja")

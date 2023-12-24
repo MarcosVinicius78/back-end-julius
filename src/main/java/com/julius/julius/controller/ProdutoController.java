@@ -26,7 +26,7 @@ import com.julius.julius.service.ProdutoService;
 
 import lombok.RequiredArgsConstructor;
 
-@CrossOrigin(origins = "http://localhost:4200")
+// @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/produto")
 @RequiredArgsConstructor
