@@ -114,4 +114,9 @@ public class ProdutoService {
     public void apagarVariosProdutos(List<Long> produtosSelecionados) {
         produtoRepository.deleteByIdIn(produtosSelecionados);
     }
+
+    public List<ProdutoResponseDto> pesquisarProdutos(String termoPesquisa) {
+        // Implemente a lógica de pesquisa no repositório
+        return produtoRepository.findByTituloContainingIgnoreCase(termoPesquisa).stream().map(ProdutoResponseDto::toResonse).toList();
+    }
 }

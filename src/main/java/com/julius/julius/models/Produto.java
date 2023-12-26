@@ -18,6 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,6 +60,9 @@ public class Produto {
 
     @Column(name = "url_imagem")
     private byte[] imagem;
+
+    @OneToMany(mappedBy = "produto")
+    private List<Report> reports;
 
     @ManyToOne
     @JoinColumn(name = "fk_categoria")
