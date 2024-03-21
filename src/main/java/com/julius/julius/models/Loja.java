@@ -32,10 +32,10 @@ public class Loja {
     private Long id;
 
     @Column(name = "nome_loja")
-    private String nome_loja;
+    private String nomeLoja;
  
-    @Column(name = "imagem")
-    private byte[] imagem;
+    @Column(name = "url_imagem")
+    private String urlImagem;
 
     @ManyToMany(mappedBy = "lojas", fetch = FetchType.EAGER)
     private List<Produto> produtos = new ArrayList<>();

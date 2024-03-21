@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 
 @RestController
-@RequestMapping("report")
+@RequestMapping("/report")
 @RequiredArgsConstructor
 public class ReportController {
 

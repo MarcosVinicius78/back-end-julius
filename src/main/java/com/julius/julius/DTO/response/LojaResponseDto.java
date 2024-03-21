@@ -5,14 +5,14 @@ import com.julius.julius.models.Loja;
 public record LojaResponseDto(
     Long id,
     String nome_loja,
-    byte[] imagem
+    String urlImagem
 ) {
 
     public static LojaResponseDto toResonse(Loja loja){
         return new LojaResponseDto(
             loja.getId(),
-            loja.getNome_loja(),
-            loja.getImagem()
+            loja.getNomeLoja(),
+            loja.getUrlImagem()
         );
     }
 

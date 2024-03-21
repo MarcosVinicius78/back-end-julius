@@ -46,20 +46,26 @@ public class Produto {
     @Column(name = "preco")
     private String preco;
 
+    @Column(name = "preco_parcelado")
+    private String precoParcelado;
+
     @Column(name = "descricao")
     private String descricao;
+
+    @Column(name = "cupom")
+    private String cupom;
+    
+    @Column(name = "frete_variacoes")
+    private String freteVariacoes;
 
     @Column(name = "link")
     private String link;
 
-    @Column(name = "cupom")
-    private String cupom;
-
-    @Column(name = "titulopequeno")
-    private String tituloPequeno;
-
+    @Column(name = "mensagem_adicional")
+    private String mensagemAdicional;
+    
     @Column(name = "url_imagem")
-    private byte[] imagem;
+    private String urlImagem;
 
     @OneToMany(mappedBy = "produto")
     private List<Report> reports;

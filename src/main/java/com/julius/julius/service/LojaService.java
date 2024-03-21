@@ -28,100 +28,57 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LojaService {
 
-    // private final String caminho =
-    // "C:\\Users\\marco\\OneDrive\\Documentos\\Julius da promo back
-    // end\\julius\\src\\main\\resources\\static\\lojas";
-
-    private static final String UPLOAD_DIR = "uploads";
+    private static final String UPLOAD_DIR = "uploads/lojas";
 
     private final LojaRepository lojaRepository;
-
-    // public Resource listarLojas() {
-
-    // Resource resource = null;
-
-    // try {
-
-    // Path imagemPath = Path.of(UPLOAD_DIR, "download.png");
-    // resource = new UrlResource(imagemPath.toUri());
-
-    // } catch (Exception e) {
-    // // TODO: handle exception
-    // }
-
-    // return resource;
-    // }
 
     public List<LojaResponseDto> listarLojas() {
         return lojaRepository.findAll().stream().map(LojaResponseDto::toResonse).toList();
     }
 
-    public Loja salvarLoja(LojaSalvarDto loja) {
+    public Resource loadImagemAResource(String imagemNome){
+        try {
+            File uploadDir = new File(UPLOAD_DIR);
 
-        if (loja.url_imagem() != null && !loja.url_imagem().isEmpty()) {
-            byte[] imageByte = Base64.getDecoder().decode(loja.url_imagem());
+            Path imagemPath = Paths.get(uploadDir.getAbsolutePath()).resolve(imagemNome);
+            Resource resource = new UrlResource(imagemPath.toUri());
 
-            Loja lojaSalvar = Loja.builder()
-                    .nome_loja(loja.nome_loja())
-                    .imagem(imageByte)
-                    .build();
-            Loja lojaSalva = lojaRepository.save(lojaSalvar);
-            return lojaSalva;
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
         return null;
-
     }
 
-    // public Loja salvarLoja(String nome_loja, MultipartFile file){
+    public LojaResponseDto salvarLoja(String nomeLoja, MultipartFile file) {
 
-    // try {
-    // File uploadsDir = new File(UPLOAD_DIR);
-    // if (!uploadsDir.exists()) {
-    // uploadsDir.mkdirs();
-    // }
+        try {
+            File uploadsDir = new File(UPLOAD_DIR);
+            if (!uploadsDir.exists()) {
+                uploadsDir.mkdirs();
+            }
 
-    // Date data = new Date();
+            Date data = new Date();
 
-    // String fileName = file.getOriginalFilename();
-    // Path filePath = Path.of(uploadsDir.getAbsolutePath(),
-    // data.getTime()+fileName);
+            String fileName = file.getOriginalFilename();
+            String nomeImagem = data.getTime() + fileName;
+            Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
 
-    // Files.copy(file.getInputStream(), filePath,
-    // StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(file.getInputStream(), filePath,
+                    StandardCopyOption.REPLACE_EXISTING);
 
-    // String imageUrl = uploadsDir.getAbsolutePath() + fileName;
+            Loja lojaSalva = Loja.builder()
+                    .nomeLoja(nomeLoja)
+                    .urlImagem(nomeImagem)
+                    .build();
 
-    // Loja lojaSalva = Loja.builder()
-    // .nome_loja(nome_loja)
-    // .url_imagem(imageUrl)
-    // .build();
-    // return this.lojaRepository.save(lojaSalva);
+            return LojaResponseDto.toResonse(this.lojaRepository.save(lojaSalva));
 
-    // } catch (Exception e) {
-    // return null;
-    // }
+        } catch (Exception e) {
+            return null;
+        }
 
-    // }
-
-    // public Loja salvarLoja(String nome_loja, MultipartFile imagem){
-
-    // String nomeArquivo = StringUtils.cleanPath(imagem.getOriginalFilename());
-    // Date date = new Date();
-    // Path caminhoDestino = Paths.get(caminho).resolve(date.getTime()+nomeArquivo);
-    // String url_imagem = caminhoDestino.toString();
-    // try {
-    // Files.copy(imagem.getInputStream(), caminhoDestino);
-
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-
-    // Loja loja = Loja.builder()
-    // .nome_loja(nome_loja)
-    // .url_imagem(url_imagem)
-    // .build();
-
-    // return lojaRepository.save(loja);
-    // }
+    }
 }

@@ -12,10 +12,9 @@ public record ProdutoResponseDto(
         String preco,
         String descricao,
         String cupom,
-        String tituloPequeno,
         String link,
         Date dataCriacao,
-        byte[] imagem,
+        String imagem,
         LojaResponseDto loja
 
 ) {
@@ -27,10 +26,9 @@ public record ProdutoResponseDto(
             produto.getPreco(),
             produto.getDescricao(),
             produto.getCupom(),
-            produto.getTituloPequeno(),
             produto.getLink(),
             produto.getDataCriacao(),
-            produto.getImagem(),
+            produto.getUrlImagem(),
             LojaResponseDto.toResonse(produto.getLojas().get(0))
         );
     }

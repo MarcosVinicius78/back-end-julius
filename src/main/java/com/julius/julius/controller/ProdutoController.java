@@ -1,10 +1,15 @@
 package com.julius.julius.controller;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.julius.julius.DTO.ProdutoAtualizarDto;
 import com.julius.julius.DTO.ProdutoSalvarDto;
@@ -25,7 +31,6 @@ import com.julius.julius.service.ProdutoService;
 
 import lombok.RequiredArgsConstructor;
 
-// @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/produto")
 @RequiredArgsConstructor
@@ -49,15 +54,21 @@ public class ProdutoController {
         return new ResponseEntity<>(produtos, HttpStatus.OK);
     }
 
-    @PostMapping()
-    public ResponseEntity<ProdutoResponseDto> salvarProduto(@RequestBody ProdutoSalvarDto produtoSalvarDto) {
+    @PostMapping("/salvar")
+    public ResponseEntity<ProdutoResponseDto> salvarProduto(@RequestBody ProdutoSalvarDto produtoSalvarDto) throws IOException {
         
         return ResponseEntity.ok().body(produtoService.salvarProduto(produtoSalvarDto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletarProduto(@PathVariable Long id){
-        this.produtoService.apagarProduto(id);
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("id") Long id) throws FileUploadException {
+        produtoService.salvarImagemProduto(file, id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id, @RequestParam("urlImagem") String urlImagem) throws FileNotFoundException{
+        this.produtoService.apagarProduto(id,urlImagem);
         return ResponseEntity.ok().build();
     }
 
@@ -91,5 +102,21 @@ public class ProdutoController {
     public ResponseEntity<List<ProdutoResponseDto>> pesquisarProdutos(@RequestParam String termoPesquisa) {
         List<ProdutoResponseDto> resultados = produtoService.pesquisarProdutos(termoPesquisa);
         return ResponseEntity.ok().body(resultados);
+    }
+
+    @GetMapping("/download/{imagem}")
+    public ResponseEntity<Resource> downloadImagem(@PathVariable String imagem) throws FileNotFoundException{
+
+        Resource resource = null;
+        if (imagem != null) {
+            resource = produtoService.loadImagemAResource(imagem);
+        }
+
+        if (resource.exists()) {
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        }
+
+        return ResponseEntity.notFound().build();
     }
 }

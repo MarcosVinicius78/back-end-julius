@@ -49,8 +49,6 @@ public class BannersService {
             String nomeImagem = data.getTime() + fileName;
             Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
 
-
-
             Files.copy(file.getInputStream(), filePath,
                     StandardCopyOption.REPLACE_EXISTING);
 
