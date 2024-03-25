@@ -11,6 +11,6 @@ services:
   database:
     image: postgres:latest
     ports:
-      - "5432:5432"  # Mapeie a porta do contêiner para uma porta no host
+      - "5433:5432"  # Mapeie a porta do contêiner para uma porta no host
     environment:
       POSTGRES_PASSWORD: root
