@@ -18,6 +18,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.julius.julius.filter.CsrfCookieFilter;
 import com.julius.julius.filter.JWTGeneratorFilter;
@@ -43,13 +44,16 @@ public class SecurityFilter {
                 @Nullable
                 public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                     CorsConfiguration config = new CorsConfiguration();
+                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-                    config.setAllowedOrigins(Collections.singletonList("/**"));
+                    config.setAllowCredentials(true);
+                    config.addAllowedOrigin("*");
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowCredentials(true);
                     config.setAllowedHeaders(Collections.singletonList("*"));
                     config.setExposedHeaders(Arrays.asList("Authorization"));
                     config.setMaxAge(3600L);
+                    source.registerCorsConfiguration("/**", config);
 
                     return config;
                 }
