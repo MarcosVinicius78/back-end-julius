@@ -34,8 +34,7 @@ services:
   #Back-end Spring Boot Application
   scrum-app:
     #The docker file in scrum-app build the jar and provides the docker image with the following name.
-    build:
-      context: /
+    build: .
     container_name: scrum-app
 
     #Environment variables for Spring Boot Application.
