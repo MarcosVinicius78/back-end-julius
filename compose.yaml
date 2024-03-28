@@ -63,9 +63,9 @@ services:
 volumes:
   scrum-data:
 
-# networks:
-#   dev-network:
-#     driver: bridge
+networks:
+  dev-network:
+    driver: bridge
 
 
 # services:
