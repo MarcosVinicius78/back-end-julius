@@ -44,7 +44,7 @@ public class SecurityFilter {
                 public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                     CorsConfiguration config = new CorsConfiguration();
 
-                    config.setAllowedOrigins(Collections.singletonList("*"));
+                    config.setAllowedOrigins(Collections.singletonList("/**"));
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowCredentials(true);
                     config.setAllowedHeaders(Collections.singletonList("*"));
