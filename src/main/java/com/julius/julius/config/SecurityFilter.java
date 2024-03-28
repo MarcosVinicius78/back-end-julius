@@ -37,29 +37,32 @@ public class SecurityFilter {
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
 
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).cors(cors -> {
-            cors.configurationSource(new CorsConfigurationSource() {
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        // .cors(
+            // cors -> {
+        //     cors.configurationSource(new CorsConfigurationSource() {
 
-                @Override
-                @Nullable
-                public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                    CorsConfiguration config = new CorsConfiguration();
-                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        //         @Override
+        //         @Nullable
+        //         public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+        //             CorsConfiguration config = new CorsConfiguration();
+        //             UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-                    config.setAllowCredentials(true);
-                    config.addAllowedOrigin("*");
-                    config.setAllowedMethods(Collections.singletonList("*"));
-                    config.setAllowCredentials(true);
-                    config.setAllowedHeaders(Collections.singletonList("*"));
-                    config.setExposedHeaders(Arrays.asList("Authorization"));
-                    config.setMaxAge(3600L);
-                    source.registerCorsConfiguration("/**", config);
+        //             config.setAllowCredentials(true);
+        //             config.addAllowedOrigin("*");
+        //             config.setAllowedMethods(Collections.singletonList("*"));
+        //             config.setAllowCredentials(true);
+        //             config.setAllowedHeaders(Collections.singletonList("*"));
+        //             config.setExposedHeaders(Arrays.asList("Authorization"));
+        //             config.setMaxAge(3600L);
+        //             source.registerCorsConfiguration("/**", config);
 
-                    return config;
-                }
+        //             return config;
+        //         }
 
-            });
-        });
+        //     });
+        // }
+        
 
         http.csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
