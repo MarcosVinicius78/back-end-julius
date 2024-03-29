@@ -57,11 +57,11 @@ public class SecurityFilter {
             });
         });
 
-        http.csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**")
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+        http.csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).disable()
+                // .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 // .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTGeneratorFilter(), BasicAuthenticationFilter.class)
-                .addFilterBefore(new JWTValidationFilter(), BasicAuthenticationFilter.class);
+                .addFilterBefore(new JWTValidationFilter(), BasicAuthenticationFilter.class));
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET,"/produto/**").permitAll()
