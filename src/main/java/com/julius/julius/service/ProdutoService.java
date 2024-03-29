@@ -207,6 +207,8 @@ public class ProdutoService {
 
     public Resource loadImagemAResource(String imagemNome) throws FileNotFoundException {
 
+        System.out.println(imagemNome);
+
         try {
             File uploadDir = new File(UPLOAD_DIR);
 
