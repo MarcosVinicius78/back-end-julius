@@ -44,7 +44,8 @@ public class SecurityFilter {
                 public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                     CorsConfiguration config = new CorsConfiguration();
 
-                    config.setAllowedOrigins(Collections.singletonList("http://10.0.0.253"));
+                    // config.setAllowedOrigins(Collections.singletonList("http://10.0.0.253"));
+                    config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowCredentials(true);
                     config.setAllowedHeaders(Collections.singletonList("*"));
@@ -66,7 +67,7 @@ public class SecurityFilter {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET,"/produto/**").permitAll()
                 .requestMatchers("/produto/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/categoria/**").permitAll()
+                .requestMatchers(HttpMethod.GET,"/categoria/**").permitAll()
                 .requestMatchers("/categoria/**").authenticated()
                 .requestMatchers( "/loja/**").permitAll()
                 // .requestMatchers("/loja").authenticated()

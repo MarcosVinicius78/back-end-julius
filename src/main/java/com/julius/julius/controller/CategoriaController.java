@@ -34,8 +34,8 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Categoria> salvarCategoria(@RequestBody CategoriaSalvar categoriaSalvar) {
-        return ResponseEntity.ok().body(this.categoriaService.salvarCategoria(categoriaSalvar));
+    public ResponseEntity<CategoriaResponseDto> salvarCategoria(@RequestBody String nome_categoria) {
+        return ResponseEntity.ok().body(this.categoriaService.salvarCategoria(nome_categoria));
     }
 
     @GetMapping("/{id}")
@@ -43,7 +43,7 @@ public class CategoriaController {
         return ResponseEntity.ok().body(categoriaService.pegarCategoria(id));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public void apagarCategoria(@PathVariable Long id) {
         this.categoriaService.apagarCategoria(id);
     }

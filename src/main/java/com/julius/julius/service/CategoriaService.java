@@ -18,12 +18,12 @@ public class CategoriaService {
     
     public final CategoriaRepository categoriaRepository;
 
-    public Categoria salvarCategoria(CategoriaSalvar categoriaSalvar){
+    public CategoriaResponseDto salvarCategoria(String categoriaSalvar){
 
         Categoria categoria = Categoria.builder()
-                                .nome_categoria(categoriaSalvar.nome_categoria())
+                                .nome_categoria(categoriaSalvar)
                                 .build();
-        return categoriaRepository.save(categoria);
+        return CategoriaResponseDto.toResonse(categoriaRepository.save(categoria));
     }
 
     public List<CategoriaResponseDto> listarCategoria(){
