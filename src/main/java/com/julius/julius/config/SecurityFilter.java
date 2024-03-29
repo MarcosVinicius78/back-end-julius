@@ -18,7 +18,6 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.julius.julius.filter.CsrfCookieFilter;
 import com.julius.julius.filter.JWTGeneratorFilter;
@@ -44,23 +43,19 @@ public class SecurityFilter {
                 @Nullable
                 public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                     CorsConfiguration config = new CorsConfiguration();
-                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-                    config.setAllowCredentials(true);
-                    config.addAllowedOrigin("*");
+                    config.setAllowedOrigins(Collections.singletonList("http://10.0.0.253:8080/"));
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowCredentials(true);
                     config.setAllowedHeaders(Collections.singletonList("*"));
                     config.setExposedHeaders(Arrays.asList("Authorization"));
                     config.setMaxAge(3600L);
-                    source.registerCorsConfiguration("/**", config);
 
                     return config;
                 }
 
             });
-        }
-        );
+        });
 
         http.csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
