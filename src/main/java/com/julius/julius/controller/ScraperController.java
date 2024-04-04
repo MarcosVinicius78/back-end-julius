@@ -1,23 +1,19 @@
 package com.julius.julius.controller;
 
-import java.util.concurrent.TimeUnit;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.edge.EdgeOptions;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.julius.julius.DTO.response.ProdutoScraperDTO;
-import com.julius.julius.models.Produto;
 import com.julius.julius.service.ProdutoService;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -32,16 +28,21 @@ public class ScraperController {
 
         try {
 
-            System.setProperty("webdriver.edge.driver", "chromedriver_win32/msedgedriver.exe");
-            EdgeOptions options = new EdgeOptions();
+            WebDriverManager.firefoxdriver().setup();
 
+            // System.setProperty("webdriver.edge.driver", "chromedriver_win32/msedgedriver.exe");
+            // System.setProperty("webdriver.edge.driver", "chromedriver_win32/chromedriver");
+            // EdgeOptions options = new EdgeOptions();
+
+            ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
             options.addArguments("window-size=800,600");
             options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
 
-            WebDriver driver = new EdgeDriver(options);
+            // WebDriver driver = new EdgeDriver(options);
+            WebDriver driver = new ChromeDriver(options);
 
             driver.get(url);
 
