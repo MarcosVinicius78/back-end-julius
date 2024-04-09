@@ -28,7 +28,8 @@ public class ScraperController {
 
         try {
 
-            WebDriverManager.firefoxdriver().setup();
+            // WebDriverManager.firefoxdriver().setup();
+            WebDriverManager.chromedriver().setup();
 
             // System.setProperty("webdriver.edge.driver", "chromedriver_win32/msedgedriver.exe");
             // System.setProperty("webdriver.edge.driver", "chromedriver_win32/chromedriver");
