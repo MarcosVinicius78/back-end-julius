@@ -5,6 +5,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,13 +31,14 @@ public class ScraperController {
         try {
 
             // WebDriverManager.firefoxdriver().setup();
-            WebDriverManager.chromedriver().setup();
+            // WebDriverManager.chromedriver().setup();
 
             // System.setProperty("webdriver.edge.driver", "chromedriver_win32/msedgedriver.exe");
             // System.setProperty("webdriver.edge.driver", "chromedriver_win32/chromedriver");
             // EdgeOptions options = new EdgeOptions();
 
-            ChromeOptions options = new ChromeOptions();
+            FirefoxOptions options = new FirefoxOptions();
+            // ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
@@ -43,7 +46,8 @@ public class ScraperController {
             options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
 
             // WebDriver driver = new EdgeDriver(options);
-            WebDriver driver = new ChromeDriver(options);
+            // WebDriver driver = new ChromeDriver(options);
+            WebDriver driver = new FirefoxDriver();
 
             driver.get(url);
 
