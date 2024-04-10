@@ -37,6 +37,7 @@ public class ScraperController {
 
             FirefoxOptions options = new FirefoxOptions();
             // ChromeOptions options = new ChromeOptions();
+            System.setProperty("webdriver.firefox.bin", "/usr/bin/firefox");
             // options.setBinary("/usr/bin/firefox");
             // options.addArguments("--headless");
             // options.addArguments("--no-sandbox");
