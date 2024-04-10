@@ -28,7 +28,7 @@ public class ScraperController {
 
         try {
 
-            WebDriverManager.firefoxdriver().setup();
+            // WebDriverManager.firefoxdriver().setup();
             
             // WebDriverManager.chromedriver().setup();
 
