@@ -32,6 +32,7 @@ public class ScraperController {
             
             // WebDriverManager.chromedriver().setup();
 
+            System.setProperty("webdriver.gecko.driver", "chromedriver_win32/geckodriver");
             // System.setProperty("webdriver.edge.driver", "chromedriver_win32/msedgedriver.exe");
             // System.setProperty("webdriver.edge.driver", "chromedriver_win32/chromedriver");
             // EdgeOptions options = new EdgeOptions();
