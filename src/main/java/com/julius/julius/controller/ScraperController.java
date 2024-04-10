@@ -3,8 +3,6 @@ package com.julius.julius.controller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +29,7 @@ public class ScraperController {
         try {
 
             WebDriverManager.firefoxdriver().setup();
+            
             // WebDriverManager.chromedriver().setup();
 
             // System.setProperty("webdriver.edge.driver", "chromedriver_win32/msedgedriver.exe");
@@ -39,6 +38,7 @@ public class ScraperController {
 
             FirefoxOptions options = new FirefoxOptions();
             // ChromeOptions options = new ChromeOptions();
+            options.setBinary("/usr/bin/firefox");
             options.addArguments("--headless");
             options.addArguments("--no-sandbox");
             options.addArguments("--disable-dev-shm-usage");
@@ -47,7 +47,7 @@ public class ScraperController {
 
             // WebDriver driver = new EdgeDriver(options);
             // WebDriver driver = new ChromeDriver(options);
-            WebDriver driver = new FirefoxDriver();
+            WebDriver driver = new FirefoxDriver(options);
 
             driver.get(url);
 
