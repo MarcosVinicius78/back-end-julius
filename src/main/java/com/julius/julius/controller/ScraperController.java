@@ -28,23 +28,21 @@ public class ScraperController {
 
         try {
 
-            // WebDriverManager.firefoxdriver().setup();
+            WebDriverManager.firefoxdriver().setup();
             
             // WebDriverManager.chromedriver().setup();
 
-            System.setProperty("webdriver.gecko.driver", "chromedriver_win32/geckodriver");
-            // System.setProperty("webdriver.edge.driver", "chromedriver_win32/msedgedriver.exe");
             // System.setProperty("webdriver.edge.driver", "chromedriver_win32/chromedriver");
             // EdgeOptions options = new EdgeOptions();
 
             FirefoxOptions options = new FirefoxOptions();
             // ChromeOptions options = new ChromeOptions();
-            options.setBinary("/usr/bin/firefox");
-            options.addArguments("--headless");
-            options.addArguments("--no-sandbox");
-            options.addArguments("--disable-dev-shm-usage");
-            options.addArguments("window-size=800,600");
-            options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
+            // options.setBinary("/usr/bin/firefox");
+            // options.addArguments("--headless");
+            // options.addArguments("--no-sandbox");
+            // options.addArguments("--disable-dev-shm-usage");
+            // options.addArguments("window-size=800,600");
+            // options.addArguments("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
 
             // WebDriver driver = new EdgeDriver(options);
             // WebDriver driver = new ChromeDriver(options);
