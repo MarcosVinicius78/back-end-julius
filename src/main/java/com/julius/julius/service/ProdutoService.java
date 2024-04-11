@@ -106,8 +106,6 @@ public class ProdutoService {
             String nomeImagem = data.getTime() + fileName;
             Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
 
-
-
             InputStream is = file.openStream();
             OutputStream os = new FileOutputStream(filePath.toString());
 
@@ -125,6 +123,7 @@ public class ProdutoService {
 
             // Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
     
+            System.out.println(filePath.toString());
             System.out.println(nomeImagem);
 
             return nomeImagem;
