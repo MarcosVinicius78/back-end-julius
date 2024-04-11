@@ -104,11 +104,11 @@ public class ProdutoService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return null;
     }
 
-    public ProdutoResponseDto salvarProduto(ProdutoSalvarDto produtoSalvarDto) throws IOException {
+    public ProdutoResponseDto salvarProduto(ProdutoSalvarDto produtoSalvarDto) {
 
         Optional<Categoria> categoria = categoriaRepository.findById(produtoSalvarDto.id_categoria());
         Optional<Loja> loja = lojaRepository.findById(produtoSalvarDto.id_loja());
