@@ -118,6 +118,7 @@ public class ProdutoService {
         Produto produto = new Produto();
 
         if (!produtoSalvarDto.urlImagem().equals("")) {
+            System.out.println(produtoSalvarDto.urlImagem());
             produto.setUrlImagem(salvarImagem(produtoSalvarDto.urlImagem()));
         }
 
