@@ -99,6 +99,8 @@ public class ProdutoService {
     
             Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
     
+            System.out.println(nomeImagem);
+
             return nomeImagem;
             
         } catch (Exception e) {
@@ -129,6 +131,9 @@ public class ProdutoService {
         produto.setCategoria(categoria.get());
         produto.getLojas().add(loja.get());
         produto.setLink(produtoSalvarDto.link());
+
+        System.out.println(produto.toString());
+        System.out.println(produto.getUrlImagem());
 
         loja.get().getProdutos().add(produto);
 
