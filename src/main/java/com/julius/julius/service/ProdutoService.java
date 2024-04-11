@@ -3,7 +3,6 @@ package com.julius.julius.service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,9 +36,6 @@ import com.julius.julius.repository.ProdutoRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
-import java.io.*;
-import java.net.*;
 
 @Service
 @RequiredArgsConstructor
@@ -105,25 +101,11 @@ public class ProdutoService {
             System.out.println(fileName);
             String nomeImagem = data.getTime() + fileName;
             Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-
-            InputStream is = file.openStream();
-            OutputStream os = new FileOutputStream(filePath.toString());
-
-            // Lê os bytes da imagem e escreve no arquivo local
-            byte[] b = new byte[2048];
-            int length;
-            while ((length = is.read(b)) != -1) {
-                os.write(b, 0, length);
-            }
-
-            is.close();
-            os.close();
-
-
-
-            // Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-    
+            
             System.out.println(filePath.toString());
+
+            Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    
             System.out.println(nomeImagem);
 
             return nomeImagem;
