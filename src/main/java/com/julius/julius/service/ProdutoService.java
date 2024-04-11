@@ -100,7 +100,7 @@ public class ProdutoService {
             String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
             System.out.println(fileName);
             String nomeImagem = data.getTime() + fileName;
-            Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
+            Path filePath = Path.of(uploadsDir.getAbsolutePath());
             
             System.out.println(filePath.toString());
 
