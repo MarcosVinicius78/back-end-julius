@@ -89,7 +89,7 @@ public class ProdutoService {
             System.out.println("Passou aqui");
 
             File uploadsDir = new File(UPLOAD_DIR);
-            if (uploadsDir.exists()) {
+            if (!uploadsDir.exists()) {
                 uploadsDir.mkdirs();
             }
     
@@ -100,7 +100,7 @@ public class ProdutoService {
             String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
             System.out.println(fileName);
             String nomeImagem = data.getTime() + fileName;
-            Path filePath = Path.of(uploadsDir.getAbsolutePath());
+            Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
             
             System.out.println(filePath.toString());
 
