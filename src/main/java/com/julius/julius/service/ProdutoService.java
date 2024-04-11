@@ -86,6 +86,8 @@ public class ProdutoService {
 
             URL file = new URL(url);
 
+            System.out.println("Passou aqui");
+
             File uploadsDir = new File(UPLOAD_DIR);
             if (uploadsDir.exists()) {
                 uploadsDir.mkdirs();
@@ -93,7 +95,10 @@ public class ProdutoService {
     
             Date data = new Date();
     
+            System.out.println("passou aqui 2");
+
             String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
+            System.out.println(fileName);
             String nomeImagem = data.getTime() + fileName;
             Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
     
