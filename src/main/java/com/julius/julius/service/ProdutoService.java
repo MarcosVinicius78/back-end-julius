@@ -80,24 +80,32 @@ public class ProdutoService {
 
     }
 
-    public String salvarImagem(String url) throws IOException {
+    public String salvarImagem(String url) {
 
-        URL file = new URL(url);
+        try {
 
-        File uploadsDir = new File(UPLOAD_DIR);
-        if (uploadsDir.exists()) {
-            uploadsDir.mkdirs();
+            URL file = new URL(url);
+
+            File uploadsDir = new File(UPLOAD_DIR);
+            if (uploadsDir.exists()) {
+                uploadsDir.mkdirs();
+            }
+    
+            Date data = new Date();
+    
+            String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
+            String nomeImagem = data.getTime() + fileName;
+            Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
+    
+            Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    
+            return nomeImagem;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        Date data = new Date();
-
-        String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
-        String nomeImagem = data.getTime() + fileName;
-        Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-
-        Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        return nomeImagem;
+        
+        return null;
     }
 
     public ProdutoResponseDto salvarProduto(ProdutoSalvarDto produtoSalvarDto) throws IOException {
