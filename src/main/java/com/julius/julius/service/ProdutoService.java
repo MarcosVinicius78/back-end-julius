@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.openqa.selenium.NotFoundException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -86,35 +87,25 @@ public class ProdutoService {
 
             URL file = new URL(url);
 
-            System.out.println("Passou aqui");
-
             File uploadsDir = new File(UPLOAD_DIR);
             if (!uploadsDir.exists()) {
                 uploadsDir.mkdirs();
             }
     
             Date data = new Date();
-    
-            System.out.println("passou aqui 2");
 
             String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
-            System.out.println(fileName);
+    
             String nomeImagem = data.getTime() + fileName;
             Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
             
-            System.out.println(filePath.toString());
-
             Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-    
-            System.out.println(nomeImagem);
 
             return nomeImagem;
             
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new NotFoundException();
         }
-
-        return null;
     }
 
     public ProdutoResponseDto salvarProduto(ProdutoSalvarDto produtoSalvarDto) {
@@ -125,7 +116,6 @@ public class ProdutoService {
         Produto produto = new Produto();
 
         if (!produtoSalvarDto.urlImagem().equals("")) {
-            System.out.println(produtoSalvarDto.urlImagem());
             produto.setUrlImagem(salvarImagem(produtoSalvarDto.urlImagem()));
         }
 
@@ -227,8 +217,6 @@ public class ProdutoService {
     }
 
     public Resource loadImagemAResource(String imagemNome) throws FileNotFoundException {
-
-        System.out.println(imagemNome);
 
         try {
             File uploadDir = new File(UPLOAD_DIR);

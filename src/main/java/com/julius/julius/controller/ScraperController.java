@@ -2,16 +2,11 @@ package com.julius.julius.controller;
 
 import java.io.IOException;
 
-import org.jsoup.Connection;
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.NotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.julius.julius.DTO.response.ProdutoScraperDTO;
 import com.julius.julius.service.ProdutoService;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -36,19 +30,38 @@ public class ScraperController {
     private final ProdutoService produtoService;
 
     @GetMapping
-    public ProdutoScraperDTO getProduto(@RequestParam String url) throws IOException {
+    public ProdutoScraperDTO getProduto(@RequestParam String url) {
 
-        Response response = Jsoup.connect(url)
-                .ignoreContentType(true)
-                .userAgent("Mozilla/5.0 (compatible; 008/0.83; http://www.80legs.com/webcrawler.html) Gecko/2008032620")
-                .referrer("http://www.google.com")
-                .timeout(12000)
-                .followRedirects(true)
-                .execute();
+        Response response;
+        try {
+            response = Jsoup.connect(url)
+                    .ignoreContentType(true)
+                    .userAgent(
+                            "Mozilla/5.0 (compatible; 008/0.83; http://www.80legs.com/webcrawler.html) Gecko/2008032620")
+                    .referrer("https://www.amazon.com.br/")
+                    .timeout(12000)
+                    .followRedirects(true)
+                    .execute();
 
-        Document doc = response.parse();
+            Document doc = response.parse();
 
-       
+            String titulo = doc.getElementById("productTitle").text();
+
+            String precoSalvo = "R$ ";
+
+            String preco = doc.getElementsByClass("a-price-whole").first().text();
+            precoSalvo += preco;
+            preco = doc.getElementsByClass("a-price-fraction").first().text();
+            precoSalvo += preco;
+
+            Element imgElement = doc.select("div#imgTagWrapperId img[src]").first();
+            String urlImagem = imgElement.attr("src");
+
+            return new ProdutoScraperDTO(titulo, precoSalvo, urlImagem);
+
+        } catch (IOException e) {
+            throw new NotFoundException();
+        }
 
         // Configurar opções
         // connection.userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)
@@ -98,21 +111,6 @@ public class ScraperController {
 
         // WebElement valorElemetno =
         // driver.findElement(By.cssSelector("#productTitle"));
-
-        String titulo = doc.getElementById("productTitle").text();
-
-        String precoSalvo = "R$ ";
-
-        String preco = doc.getElementsByClass("a-price-whole").first().text();
-        precoSalvo += preco;
-        preco = doc.getElementsByClass("a-price-fraction").first().text();
-        precoSalvo += preco;
-
-        Element imgElement = doc.select("div#imgTagWrapperId img[src]").first();
-        String urlImagem = imgElement.attr("src");
-
-
-        return new ProdutoScraperDTO(titulo, precoSalvo,urlImagem);
 
         // } catch (Exception e) {
         // e.printStackTrace();

@@ -41,6 +41,7 @@ public class LojaController {
 
     @GetMapping("/mostar-imagem/{nomeImagem}")
     public ResponseEntity<Resource> mostrarImagem(@PathVariable String nomeImagem){
+        
         Resource resource = null;
         if (nomeImagem != null) {
             resource = lojaService.loadImagemAResource(nomeImagem);

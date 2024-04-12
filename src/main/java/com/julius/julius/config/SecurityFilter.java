@@ -44,7 +44,8 @@ public class SecurityFilter {
                 public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                     CorsConfiguration config = new CorsConfiguration();
 
-                    config.setAllowedOrigins(Collections.singletonList("http://10.0.0.12"));
+                    config.setAllowedOrigins(Collections.singletonList("http://systemdevmv.site"));
+                    // config.setAllowedOrigins(Collections.singletonList("http://10.0.0.12"));
                     // config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowCredentials(true);
