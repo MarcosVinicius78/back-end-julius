@@ -44,7 +44,6 @@ public class LojaService {
             Resource resource = new UrlResource(imagemPath.toUri());
 
             if (resource.exists() || resource.isReadable()) {
-                System.out.println(resource.getFile().getName());
                 return resource;
             }
         } catch (Exception e) {

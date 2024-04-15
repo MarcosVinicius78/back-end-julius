@@ -1,5 +1,7 @@
 package com.julius.julius.DTO.response;
 
+import java.util.Date;
+
 import com.julius.julius.models.Produto;
 
 public record ProdutoDto(
@@ -10,6 +12,7 @@ public record ProdutoDto(
     String parcelado,
     String descricao,
     String link,
+    Date dataCriacao,
     String cupom,
     String mensagemAdicional,
     String freteVariacoes,
@@ -26,6 +29,7 @@ public record ProdutoDto(
             produto.getPrecoParcelado(),
             produto.getDescricao(),
             produto.getLink(),
+            produto.getDataCriacao(),
             produto.getCupom(),
             produto.getMensagemAdicional(),
             produto.getFreteVariacoes(),
