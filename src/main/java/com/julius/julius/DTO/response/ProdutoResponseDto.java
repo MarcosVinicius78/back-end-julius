@@ -1,6 +1,5 @@
 package com.julius.julius.DTO.response;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.julius.julius.models.Produto;
@@ -13,6 +12,7 @@ public record ProdutoResponseDto(
         String descricao,
         String cupom,
         String link,
+        String freteVariacoes,
         Date dataCriacao,
         String imagem,
         LojaResponseDto loja
@@ -27,6 +27,7 @@ public record ProdutoResponseDto(
             produto.getDescricao(),
             produto.getCupom(),
             produto.getLink(),
+            produto.getFreteVariacoes(),
             produto.getDataCriacao(),
             produto.getUrlImagem(),
             LojaResponseDto.toResonse(produto.getLojas().get(0))

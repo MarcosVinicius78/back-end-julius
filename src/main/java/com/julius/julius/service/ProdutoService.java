@@ -91,18 +91,18 @@ public class ProdutoService {
             if (!uploadsDir.exists()) {
                 uploadsDir.mkdirs();
             }
-    
+
             Date data = new Date();
 
             String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
-    
+
             String nomeImagem = data.getTime() + fileName;
             Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-            
+
             Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             return nomeImagem;
-            
+
         } catch (Exception e) {
             throw new NotFoundException();
         }
@@ -166,17 +166,17 @@ public class ProdutoService {
         return ProdutoDto.toResonse(produto.get(), lojaResponseDto, categoriaDto);
     }
 
-    public void apagarProduto(Long id,String urlImagem) throws FileNotFoundException {
+    public void apagarProduto(Long id, String urlImagem) throws FileNotFoundException {
 
-        String caminhoImagem = UPLOAD_DIR +"/"+ urlImagem;
+        String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
 
         File arquivoImagem = new File(caminhoImagem);
         if (arquivoImagem.exists()) {
             arquivoImagem.delete();
-        }else{
+        } else {
             throw new FileNotFoundException("arquivo não encontrado");
         }
-        
+
         this.produtoRepository.deleteById(id);
     }
 
@@ -216,7 +216,7 @@ public class ProdutoService {
                 .map(ProdutoResponseDto::toResonse).toList();
     }
 
-    public Resource loadImagemAResource(String imagemNome) throws FileNotFoundException {
+    public Resource loadImagemAResource(String imagemNome) {
 
         try {
             File uploadDir = new File(UPLOAD_DIR);
@@ -232,4 +232,24 @@ public class ProdutoService {
         }
         return null;
     }
+
+    // public byte[] loadImagemAResource(String imagemNome) throws
+    // FileNotFoundException {
+
+    // try{
+    // File uploadDir = new File(UPLOAD_DIR);
+
+    // Path imagemPath = Paths.get(uploadDir.getAbsolutePath()).resolve(imagemNome);
+
+    // System.out.println(imagemPath.toString());
+
+    // byte[] images;
+
+    // images = Files.readAllBytes(new File(imagemPath.toString()).toPath());
+    // return images;
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // }
+    // return null;
+    // }
 }

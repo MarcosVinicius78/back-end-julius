@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,7 +49,8 @@ public class LojaController {
         }
 
         if (resource.exists()) {
-            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+            return ResponseEntity.ok()
+                    .contentType(MediaType.valueOf("image/png"))
                     .body(resource);
         }
 

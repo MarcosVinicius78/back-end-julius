@@ -7,6 +7,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.openqa.selenium.NotFoundException;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,12 +32,12 @@ public class ScraperController {
     private final ProdutoService produtoService;
 
     @GetMapping
-    public ProdutoScraperDTO getProduto(@RequestParam String url) {
+    public ResponseEntity<ProdutoScraperDTO> getProduto(@RequestParam String url) {
 
         Response response;
         try {
             response = Jsoup.connect(url)
-                    .ignoreContentType(true)
+                    .ignoreContentType(false)
                     .userAgent(
                             "Mozilla/5.0 (compatible; 008/0.83; http://www.80legs.com/webcrawler.html) Gecko/2008032620")
                     .referrer("https://www.amazon.com.br/")
@@ -57,12 +59,14 @@ public class ScraperController {
             Element imgElement = doc.select("div#imgTagWrapperId img[src]").first();
             String urlImagem = imgElement.attr("src");
 
-            return new ProdutoScraperDTO(titulo, precoSalvo, urlImagem);
+            return ResponseEntity.ok().body(new ProdutoScraperDTO(titulo, precoSalvo, urlImagem));
 
-        } catch (IOException e) {
-            throw new NotFoundException();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
+        return ResponseEntity.noContent().build();
+        
         // Configurar opções
         // connection.userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64)
         // AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36");
