@@ -1,5 +1,7 @@
 package com.julius.julius.service;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -8,13 +10,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.FileExistsException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
-import org.openqa.selenium.NotFoundException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.julius.julius.DTO.ProdutoAtualizarDto;
 import com.julius.julius.DTO.ProdutoSalvarDto;
 import com.julius.julius.DTO.response.CategoriaResponseDto;
@@ -37,6 +41,7 @@ import com.julius.julius.repository.ProdutoRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import java.awt.*;
 
 @Service
 @RequiredArgsConstructor
@@ -104,7 +109,7 @@ public class ProdutoService {
             return nomeImagem;
 
         } catch (Exception e) {
-            throw new NotFoundException();
+            throw new NotFoundException("Imagem não foi salva");
         }
     }
 
@@ -117,6 +122,8 @@ public class ProdutoService {
 
         if (!produtoSalvarDto.urlImagem().equals("")) {
             produto.setUrlImagem(salvarImagem(produtoSalvarDto.urlImagem()));
+        }else{
+            produto.setUrlImagem("");
         }
 
         produto.setTitulo(produtoSalvarDto.titulo());
@@ -166,18 +173,22 @@ public class ProdutoService {
         return ProdutoDto.toResonse(produto.get(), lojaResponseDto, categoriaDto);
     }
 
-    public void apagarProduto(Long id, String urlImagem) throws FileNotFoundException {
+    public Boolean apagarProduto(Long id, String urlImagem) throws FileExistsException {
 
         String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
-
-        File arquivoImagem = new File(caminhoImagem);
-        if (arquivoImagem.exists()) {
-            arquivoImagem.delete();
-        } else {
-            throw new FileNotFoundException("arquivo não encontrado");
+        this.produtoRepository.deleteById(id);
+        
+        if (!urlImagem.isEmpty()) {
+            System.out.println(urlImagem);
+            File arquivoImagem = new File(caminhoImagem);
+            if (arquivoImagem.exists()) {
+                arquivoImagem.delete();
+            } else {
+                throw new FileExistsException("Imagem não existe");
+            }
         }
 
-        this.produtoRepository.deleteById(id);
+        return true;
     }
 
     public ProdutoResponseDto atualizarProduto(ProdutoAtualizarDto produtoAtualizarDto) {
@@ -193,7 +204,7 @@ public class ProdutoService {
         produto.setLink(produtoAtualizarDto.link());
         produto.setCupom(produtoAtualizarDto.cupom());
         // produto.setTituloPequeno(produtoAtualizarDto.tituloPequeno());
-        // produto.setImagem(converterBase64(produtoAtualizarDto.imagemUrl()));
+        produto.setUrlImagem(produtoAtualizarDto.imagemUrl());
         produto.setCategoria(categoria.get());
         produto.getLojas().add(loja.get());
 
@@ -206,8 +217,10 @@ public class ProdutoService {
     }
 
     @Transactional
-    public void apagarVariosProdutos(List<Long> produtosSelecionados) {
-        produtoRepository.deleteByIdIn(produtosSelecionados);
+    public void apagarVariosProdutos(List<ProdutoDto> produtosSelecionados) {
+        List<Long> ids = produtosSelecionados.stream().map(ProdutoDto::id).toList();
+
+        produtoRepository.deleteByIdIn(ids);
     }
 
     public List<ProdutoResponseDto> pesquisarProdutos(String termoPesquisa) {
@@ -232,6 +245,77 @@ public class ProdutoService {
         }
         return null;
     }
+
+    public byte[] gerarStory(String preco, String titulo, String urlImagem, String frete, String cupom) {
+
+        try {
+            // Carregar a imagem
+            BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/WhatsApp Image 2024-05-07 at 09.16.20.jpeg"));
+
+            Image foto = ImageIO.read(new File(UPLOAD_DIR + "/" + urlImagem));
+
+            int x = (image.getWidth() - foto.getWidth(null)) / 15;
+
+            // Desenhar texto na imagem
+            Graphics2D g = image.createGraphics();
+            g.setColor(Color.BLACK);
+            g.drawImage(foto, 53, 130, 800, 750, null);
+
+            g.setFont(new Font("Arial", Font.BOLD, 90));
+            g.drawString(preco, 280, 1280);
+
+            String titulo1 = "";
+            String titulo2 = titulo;
+            int cortar = 0;
+            System.out.println(titulo);
+            for (int i = 0; i < titulo.length() ; i++) {
+                if (titulo.charAt(i) == ' ') {
+                    cortar = i;
+                }
+                
+                if (i == 23) {
+                    titulo1 = titulo.substring(0, cortar);
+                    System.out.println(cortar);
+                    if (titulo.length() >= 47) {
+                        titulo2 = titulo.substring(cortar, 40);
+                        System.out.println(titulo2);
+                        break;
+                    }else{
+                        titulo2 = titulo.substring(cortar, titulo.length());
+                        break;
+                    }
+                }
+            }
+
+            if (!cupom.isEmpty()) {
+                g.setFont(new Font("Arial", Font.BOLD, 40));
+                g.drawString("Cupom:"+cupom, 395, 1122);
+            }else if (!frete.isEmpty()) {
+                g.setFont(new Font("Arial", Font.BOLD, 40));
+                g.drawString(frete, 500, 1122);
+            }
+
+            
+            g.setFont(new Font("Arial", Font.BOLD, 60));
+            g.drawString(titulo1, 90, 970);
+            
+            g.setFont(new Font("Arial", Font.BOLD, 60));
+            g.drawString(titulo2+"...", 80, 1040);
+            g.dispose();
+
+            // Converter a imagem para um array de bytes
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ImageIO.write(image, "jpg", baos);
+            byte[] bytes = baos.toByteArray();
+
+            // Retornar a imagem gerada
+            return bytes;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new InternalError();
+        }
+    }
+    
 
     // public byte[] loadImagemAResource(String imagemNome) throws
     // FileNotFoundException {

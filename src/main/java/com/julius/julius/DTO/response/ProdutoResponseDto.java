@@ -1,7 +1,9 @@
 package com.julius.julius.DTO.response;
 
 import java.util.Date;
+import java.util.List;
 
+import com.julius.julius.models.Loja;
 import com.julius.julius.models.Produto;
 
 public record ProdutoResponseDto(
@@ -20,6 +22,15 @@ public record ProdutoResponseDto(
 ) {
 
     public static ProdutoResponseDto toResonse(Produto produto) {
+        
+         LojaResponseDto lojaDto = null;
+        
+        List<Loja> lojas = produto.getLojas();
+        if (lojas != null && !lojas.isEmpty()) {
+            // Se houver lojas associadas ao produto, cria o LojaResponseDto
+            lojaDto = LojaResponseDto.toResonse(lojas.get(0));
+        }
+
         return new ProdutoResponseDto(
             produto.getId(),
             produto.getTitulo(),
@@ -30,7 +41,7 @@ public record ProdutoResponseDto(
             produto.getFreteVariacoes(),
             produto.getDataCriacao(),
             produto.getUrlImagem(),
-            LojaResponseDto.toResonse(produto.getLojas().get(0))
+            lojaDto
         );
     }
 

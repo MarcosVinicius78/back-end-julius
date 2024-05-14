@@ -49,7 +49,15 @@ public class ReportService {
     }
 
     @Transactional
-    public void apagarVariosReports(List<Long> reportsSelecionados) {
-        reportRepository.deleteByIdIn(reportsSelecionados);
+    public Boolean apagarVariosReports(List<ReportsResponseDto> reportsSelecionados) {
+
+        List<Long> ids = reportsSelecionados.stream().map(ReportsResponseDto::id).toList();
+
+        
+        if (reportRepository.deleteByIdIn(ids)) {
+            return true;
+        }
+
+        return false;
     }
 }

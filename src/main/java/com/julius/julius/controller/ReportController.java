@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.julius.julius.DTO.response.ReportsResponseDto;
 import com.julius.julius.service.ReportService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
@@ -43,7 +45,7 @@ public class ReportController {
         return ResponseEntity.ok().body(reportService.listarReports(pageable));
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> apagarReport(@PathVariable Long id){
         
         reportService.apagarReport(id);
@@ -52,11 +54,15 @@ public class ReportController {
     }
 
     @PostMapping("/apagar-varios")
-    public ResponseEntity<Integer> apagarVariosProdutos(@RequestBody List<Long> reportsSelecionados){
+    public ResponseEntity<Integer> apagarVariosProdutos(@RequestBody List<ReportsResponseDto> reportsSelecionados){
 
-        reportService.apagarVariosReports(reportsSelecionados);
+        if (reportsSelecionados != null) {
+            reportService.apagarVariosReports(reportsSelecionados);
+            return ResponseEntity.ok().body(reportsSelecionados.size());
+        }
 
-        return ResponseEntity.ok().body(reportsSelecionados.size());
+        return ResponseEntity.notFound().build();
+
     }
     
 }

@@ -1,17 +1,8 @@
 package com.julius.julius.controller;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
+import org.apache.commons.io.FileExistsException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -29,7 +20,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,6 +29,7 @@ import com.julius.julius.DTO.response.ProdutoDto;
 import com.julius.julius.DTO.response.ProdutoResponseDto;
 import com.julius.julius.service.ProdutoService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -48,17 +39,15 @@ public class ProdutoController {
 
     private final ProdutoService produtoService;
 
-    private static final String UPLOAD_DIR = "uploads/produtos";
-
     @GetMapping("{id}")
-    public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id){
+    public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id) {
         return ResponseEntity.ok().body(produtoService.pegarProduto(id));
     }
 
     @GetMapping()
     public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosPaginacao(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
+
         Pageable pageable = PageRequest.of(page, size);
 
         Page<ProdutoResponseDto> produtos = produtoService.getProdutosPaginados(pageable);
@@ -67,25 +56,34 @@ public class ProdutoController {
     }
 
     @PostMapping("/salvar")
-    public ResponseEntity<ProdutoResponseDto> salvarProduto(@RequestBody ProdutoSalvarDto produtoSalvarDto) {
-        
-        return ResponseEntity.ok().body(produtoService.salvarProduto(produtoSalvarDto));
+    public ResponseEntity<ProdutoResponseDto> salvarProduto(@RequestBody @Valid ProdutoSalvarDto produtoSalvarDto) {
+
+        if (produtoSalvarDto != null) {
+            return ResponseEntity.ok().body(produtoService.salvarProduto(produtoSalvarDto));
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("id") Long id) throws FileUploadException {
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("id") Long id)
+            throws FileUploadException {
         produtoService.salvarImagemProduto(file, id);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id, @RequestParam("urlImagem") String urlImagem) throws FileNotFoundException{
-        this.produtoService.apagarProduto(id,urlImagem);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id, @RequestParam("urlImagem") String urlImagem)
+            throws FileExistsException {
+        Boolean apagado = this.produtoService.apagarProduto(id, urlImagem);
+        if (apagado) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.badRequest().build();
     }
 
     @PutMapping
-    public ResponseEntity<ProdutoResponseDto> atualizarProduto(@RequestBody ProdutoAtualizarDto produtoAtualizarDto){
+    public ResponseEntity<ProdutoResponseDto> atualizarProduto(@RequestBody ProdutoAtualizarDto produtoAtualizarDto) {
         return ResponseEntity.ok().body(this.produtoService.atualizarProduto(produtoAtualizarDto));
     }
 
@@ -103,7 +101,7 @@ public class ProdutoController {
     }
 
     @PostMapping("/apagar-varios")
-    public ResponseEntity<Integer> apagarVariosProdutos(@RequestBody List<Long> produtosSelecionados){
+    public ResponseEntity<Integer> apagarVariosProdutos(@RequestBody @Valid List<ProdutoDto> produtosSelecionados) {
 
         produtoService.apagarVariosProdutos(produtosSelecionados);
 
@@ -126,55 +124,24 @@ public class ProdutoController {
 
         if (resource.exists()) {
             return ResponseEntity.status(HttpStatus.OK)
-				.contentType(MediaType.valueOf("image/png"))
-				.body(resource);
+                    .contentType(MediaType.valueOf("image/jpg"))
+                    .body(resource);
         }
 
         return ResponseEntity.notFound().build();
     }
 
-
-
-
     @GetMapping("/generate-image")
-    public ResponseEntity<byte[]> generateImage() {
-        try {
-            // Carregar a imagem
-            BufferedImage image = ImageIO.read(new File(UPLOAD_DIR+"/Screenshot_20240423-213333.jpg"));
+    public ResponseEntity<byte[]> generateImage(@RequestParam(name = "preco", required = false) String preco,
+            @RequestParam("titulo") String titulo, @RequestParam("urlImagem") String urlImagem,
+            @RequestParam("frete") String frete, @RequestParam("cupom") String cupom) {
 
-            // Desenhar texto na imagem
-            Graphics2D g = image.createGraphics();
-            g.setColor(Color.BLACK);
-            
-            g.setFont(new Font("Arial", Font.BOLD, 80));
-            g.drawString("R$ 500,00", 400, 1510);
-
-            g.setFont(new Font("Arial", Font.BOLD, 60));
-            drawText(g,String.valueOf("Acer Nitro 5 i5, 256GB SSD \n+ 5GB RAM"), 80, 1200);
-
-            g.dispose();
-
-            // Converter a imagem para um array de bytes
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(image, "jpg", baos);
-            byte[] bytes = baos.toByteArray();
-
-            // Retornar a imagem gerada
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.IMAGE_JPEG);
-            return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        byte[] bytes = produtoService.gerarStory(preco, titulo, urlImagem, frete, cupom);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(bytes.length);
+        headers.setContentDispositionFormData("attachment", "nome_da_imagem.jpg");
+        return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
 
-    private void drawText(Graphics2D g, String text, int x, int y) {
-        String[] lines = text.split("\n");
-        int lineHeight = g.getFontMetrics().getHeight();
-        for (String line : lines) {
-            g.drawString(line, x, y);
-            y += lineHeight;
-        }
-    }
 }

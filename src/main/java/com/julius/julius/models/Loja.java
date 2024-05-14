@@ -3,6 +3,7 @@ package com.julius.julius.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,7 +35,7 @@ public class Loja {
     @Column(name = "nome_loja")
     private String nomeLoja;
  
-    @Column(name = "url_imagem")
+    @Column(name = "url_imagem", nullable = false)
     private String urlImagem;
 
     @ManyToMany(mappedBy = "lojas", fetch = FetchType.EAGER)

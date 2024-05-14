@@ -65,17 +65,31 @@ public class JWTValidationFilter extends OncePerRequestFilter{
                     return false;
                 }else if(path.contains("/categoria")){
                     return false;
+                }else if(path.contains("/loja")){
+                    return false;
+                }else if(path.contains("/post")){
+                    return false;
                 }
             case "PUT":
                 if (path.contains("/produto")) {
                     return false;
                 }else if(path.contains("/categoria")){
                     return false;
+                }else if(path.contains("/loja")){
+                    return false;
+                }else if(path.contains("/post")){
+                    return false;
                 }
             case "DELETE":
                 if (path.contains("/produto")) {
                     return false;
                 }else if(path.contains("/categoria")){
+                    return false;
+                }else if(path.contains("/report")){
+                    return false;
+                }else if(path.contains("/loja")){
+                    return false;
+                }else if(path.contains("/post")){
                     return false;
                 }
         }

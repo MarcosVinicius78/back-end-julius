@@ -16,6 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -44,9 +45,10 @@ public class SecurityFilter {
                 public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                     CorsConfiguration config = new CorsConfiguration();
 
-                    config.setAllowedOrigins(Collections.singletonList("https://www.systemdevmv.site"));
+                    // config.setAllowedOrigins(Collections.singletonList("https://www.systemdevmv.site"));
                     // config.setAllowedOrigins(Collections.singletonList("http://10.0.0.12"));
-                    // config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+                    config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+                    // config.setAllowedOrigins(Collections.singletonList("https://fc6mxmb4-4200.brs.devtunnels.ms"));
                     config.setAllowedMethods(Collections.singletonList("*"));
                     config.setAllowCredentials(true);
                     config.setAllowedHeaders(Collections.singletonList("*"));
@@ -59,7 +61,7 @@ public class SecurityFilter {
             });
         });
 
-        http.csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**", "/generate-image")
+        http.csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**", "/generate-image","/report/**","/post/**")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 // .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTGeneratorFilter(), BasicAuthenticationFilter.class)
@@ -70,14 +72,16 @@ public class SecurityFilter {
                 .requestMatchers("/produto/**").authenticated()
                 .requestMatchers(HttpMethod.GET,"/categoria/**").permitAll()
                 .requestMatchers("/categoria/**").authenticated()
-                .requestMatchers( "/loja/**").permitAll()
-                // .requestMatchers("/loja").authenticated()
-                .requestMatchers(HttpMethod.GET, "/report").permitAll()
-                .requestMatchers("report/**").authenticated()
+                .requestMatchers(HttpMethod.GET ,"/loja/**").permitAll()
+                .requestMatchers("/loja/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/report/**").permitAll()
+                .requestMatchers("/report/**").authenticated()
                 .requestMatchers("/user").authenticated()
                 .requestMatchers("/banners/**").permitAll()
                 .requestMatchers("/generate-image").permitAll()
-                .requestMatchers(HttpMethod.GET, "/scraper").permitAll())
+                .requestMatchers(HttpMethod.GET, "/scraper/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/post/**").permitAll()
+                .requestMatchers("/post/**").authenticated())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
 

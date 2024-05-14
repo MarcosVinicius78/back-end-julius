@@ -24,5 +24,5 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Query("SELECT r FROM Report r ORDER BY r.dataCriacao DESC")
     Page<Produto> findFirstByOrderByDataCadastroDesc(Pageable pageable);
 
-    void deleteByIdIn(List<Long> reports);
+    Boolean deleteByIdIn(List<Long> reports);
 }

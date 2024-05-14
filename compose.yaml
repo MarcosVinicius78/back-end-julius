@@ -1,12 +1,3 @@
-# # version: '3.8'
-
-# # services:
-#   # backend:
-#   #   build:
-#   #     context: .
-#   #     dockerfile: Dockerfile
-#   #   ports:
-#   #     - "8080:8080"
 
 # version: '3'
 
@@ -14,66 +5,88 @@
 # services:
 
 #   #PostgreSQL Database for the application
-#   scrum-postgres:
-#     image: "postgres:9.6-alpine"
-#     container_name: scrum-postgres
+#   postgres:
+#     image: "postgres:latest"
+#     container_name: postgres
 #     #Volume mounted for database for the storage
 #     volumes:
 #       - scrum-data:/var/lib/postgresql/data
 #     ports:
-#       - 5433:5432 # Forward the exposed port 5432 on the container to port 5432 on the host machine
+#       - 5432:5432 # Forward the exposed port 5432 on the container to port 5432 on the host machine
 
 #     #Environment variable for DB name, user and password
 #     environment:
-#       - POSTGRES_DB=scrum
-#       - POSTGRES_USER=scrum
-#       - POSTGRES_PASSWORD=scrum
+#       - POSTGRES_DB=db_julius
+#       - POSTGRES_USER=postgres
+#       - POSTGRES_PASSWORD=root
 #     networks:
-#       - dev-network
+#       - se_ofertas
 
 #   #Back-end Spring Boot Application
-#   scrum-app:
+#   api:
 #     #The docker file in scrum-app build the jar and provides the docker image with the following name.
 #     build: .
-#     container_name: scrum-app
+#     container_name: api-ofertas
 
 #     #Environment variables for Spring Boot Application.
 #     environment:
-#       - DB_SERVER=scrum-postgres
-#       - POSTGRES_DB=scrum
-#       - POSTGRES_USER=scrum
-#       - POSTGRES_PASSWORD=scrum
+#       - DB_SERVER=postgres
+#       - POSTGRES_DB=db_julius
+#       - POSTGRES_USER=postgres
+#       - POSTGRES_PASSWORD=root
 #     ports:
 #       - 8080:8080 # Forward the exposed port 8080 on the container to port 8080 on the host machine
 #     links:
-#       - scrum-postgres
+#       - postgres
 #     networks:
-#       - dev-network
+#       - se_ofertas
 
-  #Fron-end Angular Application
-  # scrum-ui:
-  #   build: ./scrum-ui
-  #   container_name: scrum-ui
-  #   ports:
-  #     - 4200:80
-  #   links:
-  #     - scrum-app
+#   # Fron-end Angular Application
+#   spa:
+#     build: ../../Julius da promo front end
+#     container_name: spa-ofertas
+#     ports:
+#       - 4200:4200
+#     links:
+#       - api
 
-#Volumes for DB data
+# # Volumes for DB data
 # volumes:
 #   scrum-data:
 
 # networks:
 #   dev-network:
-#     driver: bridge
+#     driver: se_ofertas
 
 
+version: '3.8'
 services:
-  postgres:
-    image: "postgres:9.6-alpine"
+  db:
+    image: postgres:latest
+    container_name: postgres-container
     environment:
-      - POSTGRES_DB=scrum
-      - POSTGRES_USER=scrum
-      - POSTGRES_PASSWORD=scrum
+      POSTGRES_DB: db_julius
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
     ports:
-      - 5433:5432
+      - "5432:5432"
+    networks:
+      - my-network
+
+  spring-app:
+    image: my-spring-app
+    container_name: spring-container
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_julius
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
