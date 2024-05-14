@@ -18,6 +18,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.github.dockerjava.api.exception.NotFoundException;
@@ -28,8 +29,11 @@ public class AmazonService {
 
     private static final String HOST = "webservices.amazon.com.br";
     private static final String URI_PATH = "/paapi5/getitems";
-    private static final String ACCESS_KEY = "AKIAJDAWDTAXBGU3PE2A";
-    private static final String SECRET_KEY = "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";
+    @Value("${aws.accessKeyId}")
+    private String ACCESS_KEY;
+
+    @Value("${aws.secretAccessKey}")
+    private String SECRET_KEY;
     private static final String REGION = "us-east-1";
 
     public String getProdutoAmazon(String codigoProduto) {
