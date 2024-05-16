@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LojaService {
 
-    private static final String UPLOAD_DIR = "../uploads/lojas";
+    private static final String UPLOAD_DIR = "uploads/lojas";
 
     private final LojaRepository lojaRepository;
 

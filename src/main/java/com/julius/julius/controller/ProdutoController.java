@@ -144,4 +144,9 @@ public class ProdutoController {
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
 
+    @PostMapping("salvar-story")
+    public void SalvarStory(@RequestParam("file") MultipartFile file) throws FileUploadException{
+        produtoService.salvarStory(file);
+    }
+
 }

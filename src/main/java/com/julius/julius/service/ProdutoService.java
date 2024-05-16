@@ -53,7 +53,7 @@ public class ProdutoService {
 
     private final CategoriaRepository categoriaRepository;
 
-    private static final String UPLOAD_DIR = "../uploads/produtos";
+    private static final String UPLOAD_DIR = "uploads/produtos";
 
     public String salvarImagemProduto(MultipartFile file, Long id) throws FileUploadException {
 
@@ -252,7 +252,7 @@ public class ProdutoService {
 
         try {
             // Carregar a imagem
-            BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/WhatsApp Image 2024-05-07 at 09.16.20.jpeg"));
+            BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/story.jpeg"));
 
             Image foto = ImageIO.read(new File(UPLOAD_DIR + "/" + urlImagem));
 
@@ -316,6 +316,31 @@ public class ProdutoService {
             e.printStackTrace();
             throw new InternalError();
         }
+    }
+
+    public void salvarStory(MultipartFile file) throws FileUploadException {
+        salvarStories(file);
+    }
+
+    private void salvarStories(MultipartFile file) throws FileUploadException {
+
+        try {
+            File uploadsDir = new File(UPLOAD_DIR);
+            if (!uploadsDir.exists()) {
+                uploadsDir.mkdirs();
+            }
+
+            String fileName = file.getOriginalFilename();
+            Path filePath = Path.of(uploadsDir.getAbsolutePath(), fileName);
+
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            String imagemUrl = uploadsDir.getAbsolutePath() + fileName;
+
+        } catch (Exception e) {
+            throw new FileUploadException();
+        }
+
     }
     
 
