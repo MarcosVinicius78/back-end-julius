@@ -53,7 +53,7 @@ public class ProdutoService {
 
     private final CategoriaRepository categoriaRepository;
 
-    private static final String UPLOAD_DIR = "uploads/produtos";
+    private static final String UPLOAD_DIR = "../uploads/produtos";
 
     public String salvarImagemProduto(MultipartFile file, Long id) throws FileUploadException {
 
