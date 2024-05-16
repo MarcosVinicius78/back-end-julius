@@ -5,11 +5,13 @@ public record ProdutoAtualizarDto(
     Long id,
     String titulo,
     String preco,
+    String precoParcelado,
     String descricao,
     String link,
     String cupom,
-    String tituloPequeno,
-    String imagemUrl,
+    String copy,
+    String freteVariacoes,
+    String mensagemAdicional,
     Long  id_categoria,
     Long id_loja
 

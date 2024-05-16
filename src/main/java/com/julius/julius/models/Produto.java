@@ -42,6 +42,9 @@ public class Produto {
 
     @Column(name = "titulo")
     private String titulo;
+    
+    @Column(name = "copy")
+    private String copy;
 
     @Column(name = "preco")
     private String preco;
@@ -64,7 +67,7 @@ public class Produto {
     @Column(name = "mensagem_adicional")
     private String mensagemAdicional;
     
-    @Column(name = "url_imagem")
+    @Column(name = "url_imagem", updatable=false)
     private String urlImagem;
 
     @OneToMany(mappedBy = "produto")

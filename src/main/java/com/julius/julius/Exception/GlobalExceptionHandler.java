@@ -37,5 +37,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> notFoundException(NotFoundException ex) {
         return ResponseEntity.badRequest().body("Erro ao acessar url.");
     }
+    
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> illegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body("Não pode ter parametro null.");
+    }
 
 }

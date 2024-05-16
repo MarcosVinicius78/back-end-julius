@@ -1,6 +1,8 @@
 package com.julius.julius.service.Scraper;
 
 import java.net.ConnectException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
@@ -26,7 +28,7 @@ public class MagazineService {
         try {
             if (url.length() > 12) {
                 response = getConnect(url);
-            }else{
+            } else {
                 codigo = url;
                 url = URL_BUSCA_MAGAZINE + url;
                 response = getConnect(url);
@@ -46,9 +48,20 @@ public class MagazineService {
                     String title = element.select("[data-testid=product-title]").text();
                     String price = element.select("[data-testid=price-value]").text();
                     String precoParcelado = element.select("[data-testid=installment]").text();
+
+                    Pattern pattern = Pattern.compile("\\d+x de R\\$ \\d+,\\d+");
+                    Matcher matcher = pattern.matcher(precoParcelado);
+
+                    if (matcher.find()) {
+                        String resultado = matcher.group();
+                        precoParcelado = "Ou "+resultado;
+                    } else {
+                        System.out.println("Padrão não encontrado na string.");
+                    }
+
                     String imagem = element.select("[data-testid=image]").attr("src");
-                    
-                    return new ProdutoScraperDTO(title, price, imagem ,href, precoParcelado);
+
+                    return new ProdutoScraperDTO(title, price, imagem, href, precoParcelado);
                 }
             }
 
@@ -59,13 +72,13 @@ public class MagazineService {
         return null;
     }
 
-    private Document getConnect(String url) throws ConnectException{
+    private Document getConnect(String url) throws ConnectException {
 
         try {
             Document response = Jsoup.connect(url)
-            .userAgent(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
-            .get();
+                    .userAgent(
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+                    .get();
             return response;
         } catch (Exception e) {
             throw new ConnectException();
@@ -74,18 +87,19 @@ public class MagazineService {
 
     // private Response getConnect(String url) throws ConnectException{
 
-    //     try {
-    //         Response response = Jsoup.connect(url)
-    //         .ignoreContentType(false)
-    //         .userAgent(
-    //                 "Mozilla/5.0 (compatible; 008/0.83; http://www.80legs.com/webcrawler.html) Gecko/2008032620")
-    //         .referrer("https://www.magazineluiza.com.br")
-    //         .timeout(12000)
-    //         .followRedirects(true)
-    //         .execute();
-    //         return response;
-    //     } catch (Exception e) {
-    //         throw new ConnectException();
-    //     }
+    // try {
+    // Response response = Jsoup.connect(url)
+    // .ignoreContentType(false)
+    // .userAgent(
+    // "Mozilla/5.0 (compatible; 008/0.83; http://www.80legs.com/webcrawler.html)
+    // Gecko/2008032620")
+    // .referrer("https://www.magazineluiza.com.br")
+    // .timeout(12000)
+    // .followRedirects(true)
+    // .execute();
+    // return response;
+    // } catch (Exception e) {
+    // throw new ConnectException();
+    // }
     // }
 }

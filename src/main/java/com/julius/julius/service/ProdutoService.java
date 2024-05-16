@@ -195,16 +195,18 @@ public class ProdutoService {
 
         Optional<Categoria> categoria = categoriaRepository.findById(produtoAtualizarDto.id_categoria());
         Optional<Loja> loja = lojaRepository.findById(produtoAtualizarDto.id_loja());
-
+        
         Produto produto = new Produto();
+        
         produto.setId(produtoAtualizarDto.id());
         produto.setTitulo(produtoAtualizarDto.titulo());
         produto.setPreco(produtoAtualizarDto.preco());
+        produto.setPrecoParcelado(produtoAtualizarDto.precoParcelado());
         produto.setDescricao(produtoAtualizarDto.descricao());
         produto.setLink(produtoAtualizarDto.link());
         produto.setCupom(produtoAtualizarDto.cupom());
-        // produto.setTituloPequeno(produtoAtualizarDto.tituloPequeno());
-        produto.setUrlImagem(produtoAtualizarDto.imagemUrl());
+        produto.setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
+        produto.setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
         produto.getLojas().add(loja.get());
 
