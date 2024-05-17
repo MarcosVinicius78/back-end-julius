@@ -66,9 +66,9 @@ public class ProdutoController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("id") Long id)
-            throws FileUploadException {
-        produtoService.salvarImagemProduto(file, id);
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("id") Long id, @RequestParam(name = "urlImagem", required = false) String urlImagem)
+            throws FileUploadException, FileExistsException {
+        produtoService.salvarImagemProduto(file, id, urlImagem);
         return ResponseEntity.ok().build();
     }
 

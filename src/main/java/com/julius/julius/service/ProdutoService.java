@@ -55,27 +55,33 @@ public class ProdutoService {
 
     private static final String UPLOAD_DIR = "uploads/produtos";
 
-    public String salvarImagemProduto(MultipartFile file, Long id) throws FileUploadException {
+    public String salvarImagemProduto(MultipartFile file, Long id, String urlImagem) throws FileUploadException, FileExistsException {
 
         Optional<Produto> produto = produtoRepository.findById(id);
 
+        if (urlImagem != "") {
+            apagarImagem(urlImagem);
+        }
+        
         try {
             File uploadsDir = new File(UPLOAD_DIR);
             if (!uploadsDir.exists()) {
                 uploadsDir.mkdirs();
             }
-
+            
             Date data = new Date();
-
+            
             String fileName = file.getOriginalFilename();
             String nomeImagem = data.getTime() + fileName;
             Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-
+            
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             String imagemUrl = uploadsDir.getAbsolutePath() + fileName;
 
             produto.get().setUrlImagem(nomeImagem);
+            System.out.println(produto.get().getUrlImagem());
+            System.out.println(nomeImagem);
 
             produtoRepository.save(produto.get());
 
@@ -178,6 +184,15 @@ public class ProdutoService {
         String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
         this.produtoRepository.deleteById(id);
         
+        apagarImagem(urlImagem);
+        
+        return true;
+    }
+
+    private void apagarImagem(String urlImagem) throws FileExistsException{
+
+        String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
+
         if (!urlImagem.isEmpty()) {
             System.out.println(urlImagem);
             File arquivoImagem = new File(caminhoImagem);
@@ -188,7 +203,6 @@ public class ProdutoService {
             }
         }
 
-        return true;
     }
 
     public ProdutoResponseDto atualizarProduto(ProdutoAtualizarDto produtoAtualizarDto) {
@@ -196,21 +210,21 @@ public class ProdutoService {
         Optional<Categoria> categoria = categoriaRepository.findById(produtoAtualizarDto.id_categoria());
         Optional<Loja> loja = lojaRepository.findById(produtoAtualizarDto.id_loja());
         
-        Produto produto = new Produto();
+        Optional<Produto> produto = produtoRepository.findById(produtoAtualizarDto.id());
         
-        produto.setId(produtoAtualizarDto.id());
-        produto.setTitulo(produtoAtualizarDto.titulo());
-        produto.setPreco(produtoAtualizarDto.preco());
-        produto.setPrecoParcelado(produtoAtualizarDto.precoParcelado());
-        produto.setDescricao(produtoAtualizarDto.descricao());
-        produto.setLink(produtoAtualizarDto.link());
-        produto.setCupom(produtoAtualizarDto.cupom());
-        produto.setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
-        produto.setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
-        produto.setCategoria(categoria.get());
-        produto.getLojas().add(loja.get());
+        produto.get().setId(produtoAtualizarDto.id());
+        produto.get().setTitulo(produtoAtualizarDto.titulo());
+        produto.get().setPreco(produtoAtualizarDto.preco());
+        produto.get().setPrecoParcelado(produtoAtualizarDto.precoParcelado());
+        produto.get().setDescricao(produtoAtualizarDto.descricao());
+        produto.get().setLink(produtoAtualizarDto.link());
+        produto.get().setCupom(produtoAtualizarDto.cupom());
+        produto.get().setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
+        produto.get().setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
+        produto.get().setCategoria(categoria.get());
+        produto.get().getLojas().add(loja.get());
 
-        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto));
+        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto.get()));
     }
 
     public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long categoriaId, Pageable pageable) {
@@ -263,13 +277,10 @@ public class ProdutoService {
             g.setColor(Color.BLACK);
             g.drawImage(foto, 53, 130, 800, 750, null);
 
-            g.setFont(new Font("Arial", Font.BOLD, 90));
-            g.drawString(preco, 280, 1280);
-
+            
             String titulo1 = "";
             String titulo2 = titulo;
             int cortar = 0;
-            System.out.println(titulo);
             for (int i = 0; i < titulo.length() ; i++) {
                 if (titulo.charAt(i) == ' ') {
                     cortar = i;
@@ -288,23 +299,51 @@ public class ProdutoService {
                     }
                 }
             }
-
-            if (!cupom.isEmpty()) {
-                g.setFont(new Font("Arial", Font.BOLD, 40));
-                g.drawString("Cupom:"+cupom, 395, 1122);
-            }else if (!frete.isEmpty()) {
-                g.setFont(new Font("Arial", Font.BOLD, 40));
-                g.drawString(frete, 500, 1122);
+            
+            g.setFont(new Font("Arial", Font.BOLD, 40));
+            if (!cupom.isEmpty() && cupom.length() <= 6) {
+                // g.setFont(new Font("Arial", Font.BOLD, 40));
+                g.drawString("Cupom:"+cupom, 455, 1122);
+            }else if(!cupom.isEmpty() && cupom.length() <= 16){
+                g.setFont(new Font("Arial", Font.BOLD, 35));
+                g.drawString("Cupom: "+cupom, 355, 1122);
+            }else if(!cupom.isEmpty() && cupom.length() >= 17){
+                g.setFont(new Font("Arial", Font.BOLD, 33));
+                g.drawString("Cupom: "+cupom, 353, 1122);
+            } else if (!frete.isEmpty() && frete.length() == 18) {
+                //frete grátis prime
+                g.drawString(frete, 430, 1122);
+            }else if(!frete.isEmpty() && frete.length() == 12){
+                //frete grátis
+                g.drawString(frete, 490, 1122);
+            }else if(!frete.isEmpty() && frete.length() == 15){
+                g.drawString(frete, 450, 1122);
+                //frete econômico
+            }else if(!frete.isEmpty() && frete.length() == 30){
+                g.setFont(new Font("Arial", Font.BOLD, 35));
+                //frete grátis algumas regioes
+                g.drawString(frete, 350, 1122);
             }
-
             
             g.setFont(new Font("Arial", Font.BOLD, 60));
             g.drawString(titulo1, 90, 970);
             
             g.setFont(new Font("Arial", Font.BOLD, 60));
             g.drawString(titulo2+"...", 80, 1040);
+            
+            g.setFont(new Font("Arial", Font.BOLD, 90));
+            System.out.println(preco.length());
+            if (preco.length() == 8) {
+                g.drawString(preco, 280, 1285);
+            }else if(preco.length() == 9){
+                g.drawString(preco, 250, 1285);
+            }else if(preco.length() == 10){
+                g.drawString(preco, 240, 1285);
+            }else if(preco.length() == 11){
+                g.drawString(preco, 210, 1285);
+            }
+            
             g.dispose();
-
             // Converter a imagem para um array de bytes
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "jpg", baos);

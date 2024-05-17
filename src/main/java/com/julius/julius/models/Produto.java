@@ -67,7 +67,7 @@ public class Produto {
     @Column(name = "mensagem_adicional")
     private String mensagemAdicional;
     
-    @Column(name = "url_imagem", updatable=false)
+    @Column(name = "url_imagem",nullable = false)
     private String urlImagem;
 
     @OneToMany(mappedBy = "produto")
