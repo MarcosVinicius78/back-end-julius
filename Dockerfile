@@ -1,11 +1,12 @@
 # Etapa 1: Build da aplicação usando Maven
 FROM maven:latest AS build
 
-RUN apk add --no-cache \
-    msttcorefonts-installer \
-    fontconfig && \
-    update-ms-fonts && \
-    fc-cache -f
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ttf-mscorefonts-installer fontconfig && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN fc-cache -f -v
 
 WORKDIR /app
 COPY pom.xml .
