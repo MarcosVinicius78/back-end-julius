@@ -31,7 +31,9 @@ public record ProdutoDto(
     String freteVariacoes,
     LojaResponseDto lojaResponseDto,
     CategoriaResponseDto categoriaDto,
-    String imagem
+    String imagem,
+    String imagemSocial,
+    String copy
 
 ) {
      public static ProdutoDto toResonse(Produto produto, LojaResponseDto lojaResponseDto, CategoriaResponseDto categoriaResponseDto){
@@ -48,7 +50,9 @@ public record ProdutoDto(
             produto.getFreteVariacoes(),
             lojaResponseDto,
             categoriaResponseDto,
-            produto.getUrlImagem()
+            produto.getUrlImagem(),
+            produto.getImagemSocial(),
+            produto.getCopy()
         );
     }
 }

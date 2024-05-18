@@ -29,6 +29,7 @@ public record ProdutoSalvarDto(
         Long id_categoria,
 
         @NotNull(message = "O Campo 'id_loja' é obrigatorio")
-        Long id_loja) {
+        Long id_loja,
 
-}
+        String copy
+){}

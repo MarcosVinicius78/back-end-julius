@@ -1,5 +1,7 @@
 package com.julius.julius.Exception;
 
+import javax.imageio.IIOException;
+
 import org.apache.commons.io.FileExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -11,13 +11,17 @@ public record ProdutoResponseDto(
         Long id,
         String titulo,
         String preco,
+        String parcelado,
         String descricao,
         String cupom,
         String link,
         String freteVariacoes,
         Date dataCriacao,
         String imagem,
-        LojaResponseDto loja
+        LojaResponseDto loja,
+        String imagemSocial,
+        String copy,
+        String mensagemAdicional
 
 ) {
 
@@ -35,13 +39,17 @@ public record ProdutoResponseDto(
             produto.getId(),
             produto.getTitulo(),
             produto.getPreco(),
+            produto.getPrecoParcelado(),
             produto.getDescricao(),
             produto.getCupom(),
             produto.getLink(),
             produto.getFreteVariacoes(),
             produto.getDataCriacao(),
             produto.getUrlImagem(),
-            lojaDto
+            lojaDto,
+            produto.getImagemSocial(),
+            produto.getCopy(),
+            produto.getMensagemAdicional()
         );
     }
 

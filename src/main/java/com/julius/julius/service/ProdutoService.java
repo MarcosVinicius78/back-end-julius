@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,33 +58,72 @@ public class ProdutoService {
 
     private static final String UPLOAD_DIR = "uploads/produtos";
 
-    public String salvarImagemProduto(MultipartFile file, Long id, String urlImagem) throws FileUploadException, FileExistsException {
+    private String salvarImagemReal(MultipartFile fileSocial) {
+        File uploadsDir = new File(UPLOAD_DIR + "-real");
+        if (!uploadsDir.exists()) {
+            uploadsDir.mkdirs();
+        }
+
+        Date data = new Date();
+
+        String fileName = fileSocial.getOriginalFilename();
+        String nomeImagem = data.getTime() + fileName;
+        Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
+
+        try {
+            Files.copy(fileSocial.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        }
+
+        return nomeImagem;
+    }
+
+    public String salvarImagemProduto(MultipartFile file, Long id, String urlImagem, MultipartFile fileSocial,
+            String urlImagemReal)
+            throws FileUploadException, FileExistsException {
 
         Optional<Produto> produto = produtoRepository.findById(id);
 
-        if (urlImagem != "") {
-            apagarImagem(urlImagem);
-        }
-        
+        String nomeImagem = "";
+        String imagemUrl = "";
+
         try {
-            File uploadsDir = new File(UPLOAD_DIR);
-            if (!uploadsDir.exists()) {
-                uploadsDir.mkdirs();
+            if (file != null) {
+                if (urlImagem != null) {
+                    apagarImagem(urlImagem);
+                }
+                File uploadsDir = new File(UPLOAD_DIR);
+                if (!uploadsDir.exists()) {
+                    uploadsDir.mkdirs();
+                }
+
+                Date data = new Date();
+
+                String fileName = file.getOriginalFilename();
+                nomeImagem = data.getTime() + fileName;
+                Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
+
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                imagemUrl = uploadsDir.getAbsolutePath() + fileName;
+
+                produto.get().setUrlImagem(nomeImagem);
+
+                if (fileSocial != null) {
+                    nomeImagem = salvarImagemReal(fileSocial);
+                    produto.get().setImagemSocial(nomeImagem);
+                }
             }
-            
-            Date data = new Date();
-            
-            String fileName = file.getOriginalFilename();
-            String nomeImagem = data.getTime() + fileName;
-            Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-            
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            String imagemUrl = uploadsDir.getAbsolutePath() + fileName;
-
-            produto.get().setUrlImagem(nomeImagem);
-            System.out.println(produto.get().getUrlImagem());
-            System.out.println(nomeImagem);
+            if (fileSocial != null) {
+                if (urlImagemReal != null) {
+                    apagarImagemReal(urlImagemReal);
+                }
+                nomeImagem = salvarImagemReal(fileSocial);
+                produto.get().setImagemSocial(nomeImagem);
+            }
 
             produtoRepository.save(produto.get());
 
@@ -128,7 +170,7 @@ public class ProdutoService {
 
         if (!produtoSalvarDto.urlImagem().equals("")) {
             produto.setUrlImagem(salvarImagem(produtoSalvarDto.urlImagem()));
-        }else{
+        } else {
             produto.setUrlImagem("");
         }
 
@@ -142,6 +184,7 @@ public class ProdutoService {
         produto.setCategoria(categoria.get());
         produto.getLojas().add(loja.get());
         produto.setLink(produtoSalvarDto.link());
+        produto.setCopy(produtoSalvarDto.copy());
 
         System.out.println(produto.toString());
         System.out.println(produto.getUrlImagem());
@@ -183,18 +226,32 @@ public class ProdutoService {
 
         String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
         this.produtoRepository.deleteById(id);
-        
+
         apagarImagem(urlImagem);
-        
+
         return true;
     }
 
-    private void apagarImagem(String urlImagem) throws FileExistsException{
+    private void apagarImagem(String urlImagem) throws FileExistsException {
 
         String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
 
         if (!urlImagem.isEmpty()) {
-            System.out.println(urlImagem);
+            File arquivoImagem = new File(caminhoImagem);
+            if (arquivoImagem.exists()) {
+                arquivoImagem.delete();
+            } else {
+                throw new FileExistsException("Imagem não existe");
+            }
+        }
+
+    }
+
+    private void apagarImagemReal(String urlImagem) throws FileExistsException {
+
+        String caminhoImagem = UPLOAD_DIR + "-real" + "/" + urlImagem;
+
+        if (!urlImagem.isEmpty()) {
             File arquivoImagem = new File(caminhoImagem);
             if (arquivoImagem.exists()) {
                 arquivoImagem.delete();
@@ -209,9 +266,9 @@ public class ProdutoService {
 
         Optional<Categoria> categoria = categoriaRepository.findById(produtoAtualizarDto.id_categoria());
         Optional<Loja> loja = lojaRepository.findById(produtoAtualizarDto.id_loja());
-        
+
         Optional<Produto> produto = produtoRepository.findById(produtoAtualizarDto.id());
-        
+
         produto.get().setId(produtoAtualizarDto.id());
         produto.get().setTitulo(produtoAtualizarDto.titulo());
         produto.get().setPreco(produtoAtualizarDto.preco());
@@ -223,6 +280,7 @@ public class ProdutoService {
         produto.get().setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
         produto.get().setCategoria(categoria.get());
         produto.get().getLojas().add(loja.get());
+        produto.get().setCopy(produtoAtualizarDto.copy());
 
         return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto.get()));
     }
@@ -262,13 +320,31 @@ public class ProdutoService {
         return null;
     }
 
-    public byte[] gerarStory(String preco, String titulo, String urlImagem, String frete, String cupom) {
+    public Resource loadImagemAResourceReal(String imagemNome) {
+
+        try {
+            File uploadDir = new File(UPLOAD_DIR + "-real");
+
+            Path imagemPath = Paths.get(uploadDir.getAbsolutePath()).resolve(imagemNome);
+            Resource resource = new UrlResource(imagemPath.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public byte[] gerarStory(String preco, String titulo, String urlImagem, String frete, String cupom)
+            throws FileExistsException {
 
         try {
             // Carregar a imagem
             BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/story.jpeg"));
 
-            Image foto = ImageIO.read(new File(UPLOAD_DIR + "/" + urlImagem));
+            Image foto = ImageIO.read(new File(UPLOAD_DIR + "-real" + "/" + urlImagem));
 
             int x = (image.getWidth() - foto.getWidth(null)) / 15;
 
@@ -277,72 +353,86 @@ public class ProdutoService {
             g.setColor(Color.BLACK);
             g.drawImage(foto, 53, 130, 800, 750, null);
 
-            
-            String titulo1 = "";
-            String titulo2 = titulo;
-            int cortar = 0;
-            for (int i = 0; i < titulo.length() ; i++) {
-                if (titulo.charAt(i) == ' ') {
-                    cortar = i;
+            // Configurar fonte para o título
+            g.setFont(new Font("Arial", Font.BOLD, 45));
+            FontMetrics fm = g.getFontMetrics();
+            int imageWidth = image.getWidth();
+            int titleYPosition = 970;
+
+            // Quebrar o título em múltiplas linhas
+            List<String> lines = new ArrayList<>();
+            StringBuilder line = new StringBuilder();
+            for (String word : titulo.split(" ")) {
+                if (fm.stringWidth(line + word + " ") > imageWidth - 180) {
+                    lines.add(line.toString());
+                    line = new StringBuilder();
                 }
-                
-                if (i == 23) {
-                    titulo1 = titulo.substring(0, cortar);
-                    System.out.println(cortar);
-                    if (titulo.length() >= 47) {
-                        titulo2 = titulo.substring(cortar, 40);
-                        System.out.println(titulo2);
-                        break;
-                    }else{
-                        titulo2 = titulo.substring(cortar, titulo.length());
-                        break;
-                    }
-                }
+                line.append(word).append(" ");
             }
-            
+            if (line.length() > 0) {
+                lines.add(line.toString());
+            }
+
+            // Ajustar e desenhar as linhas do título
+            if (lines.size() > 1) {
+                // Centralizar a primeira linha
+                String titleLine1 = lines.get(0);
+                int titleXPosition1 = (imageWidth - fm.stringWidth(titleLine1)) / 2;
+                g.drawString(titleLine1, titleXPosition1, titleYPosition);
+                titleYPosition += fm.getHeight();
+
+                // Ajustar e desenhar a segunda linha com reticências
+                String titleLine2 = lines.get(1).trim();
+                int maxWidth = (int) (imageWidth * 0.8);
+                while (fm.stringWidth(titleLine2 + "...") > maxWidth && titleLine2.length() > 0) {
+                    titleLine2 = titleLine2.substring(0, titleLine2.length() - 1);
+                }
+                titleLine2 += "...";
+                int titleXPosition2 = (imageWidth - fm.stringWidth(titleLine2)) / 2;
+                g.drawString(titleLine2, titleXPosition2, titleYPosition);
+            } else {
+                // Centralizar e desenhar a única linha
+                String titleLine = lines.get(0);
+                int titleXPosition = (imageWidth - fm.stringWidth(titleLine)) / 2;
+                g.drawString(titleLine, titleXPosition, titleYPosition);
+            }
+
             g.setFont(new Font("Arial", Font.BOLD, 40));
             if (!cupom.isEmpty() && cupom.length() <= 6) {
                 // g.setFont(new Font("Arial", Font.BOLD, 40));
-                g.drawString("Cupom:"+cupom, 455, 1122);
-            }else if(!cupom.isEmpty() && cupom.length() <= 16){
+                g.drawString("Cupom:" + cupom, 455, 1122);
+            } else if (!cupom.isEmpty() && cupom.length() <= 16) {
                 g.setFont(new Font("Arial", Font.BOLD, 35));
-                g.drawString("Cupom: "+cupom, 355, 1122);
-            }else if(!cupom.isEmpty() && cupom.length() >= 17){
+                g.drawString("Cupom: " + cupom, 355, 1122);
+            } else if (!cupom.isEmpty() && cupom.length() >= 17) {
                 g.setFont(new Font("Arial", Font.BOLD, 33));
-                g.drawString("Cupom: "+cupom, 353, 1122);
+                g.drawString("Cupom: " + cupom, 353, 1122);
             } else if (!frete.isEmpty() && frete.length() == 18) {
-                //frete grátis prime
+                // frete grátis prime
                 g.drawString(frete, 430, 1122);
-            }else if(!frete.isEmpty() && frete.length() == 12){
-                //frete grátis
+            } else if (!frete.isEmpty() && frete.length() == 12) {
+                // frete grátis
                 g.drawString(frete, 490, 1122);
-            }else if(!frete.isEmpty() && frete.length() == 15){
+            } else if (!frete.isEmpty() && frete.length() == 15) {
                 g.drawString(frete, 450, 1122);
-                //frete econômico
-            }else if(!frete.isEmpty() && frete.length() == 30){
+                // frete econômico
+            } else if (!frete.isEmpty() && frete.length() == 30) {
                 g.setFont(new Font("Arial", Font.BOLD, 35));
-                //frete grátis algumas regioes
+                // frete grátis algumas regioes
                 g.drawString(frete, 350, 1122);
             }
-            
-            g.setFont(new Font("Arial", Font.BOLD, 60));
-            g.drawString(titulo1, 90, 970);
-            
-            g.setFont(new Font("Arial", Font.BOLD, 60));
-            g.drawString(titulo2+"...", 80, 1040);
-            
+
+            // g.setFont(new Font("Arial", Font.BOLD, 40));
+            // g.drawString(titulo1, 90, 970);
+
+            // g.setFont(new Font("Arial", Font.BOLD, 40));
+            // g.drawString(titulo2 + "...", 80, 1040);
+
             g.setFont(new Font("Arial", Font.BOLD, 90));
-            System.out.println(preco.length());
-            if (preco.length() == 8) {
-                g.drawString(preco, 280, 1285);
-            }else if(preco.length() == 9){
-                g.drawString(preco, 250, 1285);
-            }else if(preco.length() == 10){
-                g.drawString(preco, 240, 1285);
-            }else if(preco.length() == 11){
-                g.drawString(preco, 210, 1285);
-            }
-            
+            FontMetrics priceFm = g.getFontMetrics();
+            int priceXPosition = (imageWidth - priceFm.stringWidth(preco)) / 2;
+            g.drawString(preco, priceXPosition, 1277);
+
             g.dispose();
             // Converter a imagem para um array de bytes
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -353,7 +443,7 @@ public class ProdutoService {
             return bytes;
         } catch (IOException e) {
             e.printStackTrace();
-            throw new InternalError();
+            throw new FileExistsException();
         }
     }
 
@@ -381,25 +471,17 @@ public class ProdutoService {
         }
 
     }
-    
 
-    // public byte[] loadImagemAResource(String imagemNome) throws
-    // FileNotFoundException {
+     @Scheduled(cron = "0 0 0 * * ?") // Executa diariamente à meia-noite
+    public void deletarProdutosAntigos() throws FileExistsException {
+        LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
+        List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
 
-    // try{
-    // File uploadDir = new File(UPLOAD_DIR);
-
-    // Path imagemPath = Paths.get(uploadDir.getAbsolutePath()).resolve(imagemNome);
-
-    // System.out.println(imagemPath.toString());
-
-    // byte[] images;
-
-    // images = Files.readAllBytes(new File(imagemPath.toString()).toPath());
-    // return images;
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
-    // return null;
-    // }
+        for (Produto produto : produtosAntigos) {
+            apagarImagem(produto.getUrlImagem());
+            apagarImagemReal(produto.getImagemSocial());
+        }
+        
+        produtoRepository.deleteAll(produtosAntigos);
+    }
 }

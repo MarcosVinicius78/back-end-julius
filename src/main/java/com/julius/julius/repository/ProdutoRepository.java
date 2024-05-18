@@ -1,5 +1,6 @@
 package com.julius.julius.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -21,5 +22,8 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long>{
     @Query("SELECT p FROM Produto p WHERE p.categoria.id = :categoriaId ORDER BY p.dataCriacao DESC")
     Page<Produto> findByCategoriIdOrderByDataCriacaoDesc(Long categoriaId, Pageable pageable);
 
-    List<Produto> findByTituloContainingIgnoreCase(String termoPesquisa);   
+    List<Produto> findByTituloContainingIgnoreCase(String termoPesquisa);  
+    
+    @Query("SELECT p FROM Produto p WHERE p.dataCriacao <= :dataLimite")
+    List<Produto> findProdutosComMaisDe7Dias(LocalDateTime dataLimite);
 }

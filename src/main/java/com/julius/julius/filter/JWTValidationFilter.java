@@ -79,6 +79,8 @@ public class JWTValidationFilter extends OncePerRequestFilter{
                     return false;
                 }else if(path.contains("/post")){
                     return false;
+                }else if(path.contains("/banners")){
+                    return false;
                 }
             case "DELETE":
                 if (path.contains("/produto")) {

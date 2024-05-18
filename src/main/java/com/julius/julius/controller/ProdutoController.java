@@ -1,5 +1,6 @@
 package com.julius.julius.controller;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.apache.commons.io.FileExistsException;
@@ -40,9 +41,22 @@ public class ProdutoController {
     private final ProdutoService produtoService;
 
     @GetMapping("{id}")
-    public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id) {
-        return ResponseEntity.ok().body(produtoService.pegarProduto(id));
+    public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id, @RequestParam(value = "r", required = false) Integer r) {
+        // return ResponseEntity.ok().body(produtoService.pegarProduto(id));
+        if (r != null && r == 1) {
+            // Lógica para obter a URL do site oficial do produto baseado no ID
+            ProdutoDto officialProductUrl = produtoService.pegarProduto(id);
+            return ResponseEntity.status(302).header("Location", officialProductUrl.link()).build();
+        } else {
+            ProdutoDto produto = produtoService.pegarProduto(id);
+            return ResponseEntity.ok().body(produto);
+        }
     }
+
+    // @GetMapping("{id}")
+    // public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id) {
+    //     return ResponseEntity.ok().body(produtoService.pegarProduto(id));
+    // }
 
     @GetMapping()
     public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosPaginacao(@RequestParam(defaultValue = "0") int page,
@@ -66,9 +80,12 @@ public class ProdutoController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("id") Long id, @RequestParam(name = "urlImagem", required = false) String urlImagem)
+    public ResponseEntity<?> uploadImage(@RequestParam(name = "file", required = false) MultipartFile file,
+            @RequestParam(name = "fileSocial", required = false) MultipartFile fileSocial, @RequestParam("id") Long id,
+            @RequestParam(name = "urlImagem", required = false) String urlImagem,
+            @RequestParam(name = "urlImagemReal", required = false) String urlImagemReal)
             throws FileUploadException, FileExistsException {
-        produtoService.salvarImagemProduto(file, id, urlImagem);
+        produtoService.salvarImagemProduto(file, id, urlImagem, fileSocial, urlImagemReal);
         return ResponseEntity.ok().build();
     }
 
@@ -131,10 +148,27 @@ public class ProdutoController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/download-imagem-real/{imagemSocial}")
+    public ResponseEntity<Resource> downloadImagemReal(@PathVariable String imagemSocial) {
+
+        Resource resource = null;
+        if (imagemSocial != null) {
+            resource = produtoService.loadImagemAResourceReal(imagemSocial);
+        }
+
+        if (resource.exists()) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .contentType(MediaType.valueOf("image/jpg"))
+                    .body(resource);
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/generate-image")
     public ResponseEntity<byte[]> generateImage(@RequestParam(name = "preco", required = false) String preco,
             @RequestParam("titulo") String titulo, @RequestParam("urlImagem") String urlImagem,
-            @RequestParam("frete") String frete, @RequestParam("cupom") String cupom) {
+            @RequestParam("frete") String frete, @RequestParam("cupom") String cupom) throws FileExistsException {
 
         byte[] bytes = produtoService.gerarStory(preco, titulo, urlImagem, frete, cupom);
         HttpHeaders headers = new HttpHeaders();
@@ -145,7 +179,7 @@ public class ProdutoController {
     }
 
     @PostMapping("salvar-story")
-    public void SalvarStory(@RequestParam("file") MultipartFile file) throws FileUploadException{
+    public void SalvarStory(@RequestParam("file") MultipartFile file) throws FileUploadException {
         produtoService.salvarStory(file);
     }
 

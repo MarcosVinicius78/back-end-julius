@@ -69,6 +69,9 @@ public class Produto {
     
     @Column(name = "url_imagem",nullable = false)
     private String urlImagem;
+   
+    @Column(name = "imagem_social",nullable = false)
+    private String imagemSocial;
 
     @OneToMany(mappedBy = "produto")
     private List<Report> reports;
