@@ -1,7 +1,10 @@
 # Etapa 1: Build da aplicação usando Maven
 FROM maven:latest AS build
 
-RUN apt-get install -y ttf-mscorefonts-installer fontconfig && \
+RUN apk add --no-cache \
+    msttcorefonts-installer \
+    fontconfig && \
+    update-ms-fonts && \
     fc-cache -f
 
 WORKDIR /app
