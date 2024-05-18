@@ -67,10 +67,10 @@ public class Produto {
     @Column(name = "mensagem_adicional")
     private String mensagemAdicional;
     
-    @Column(name = "url_imagem",nullable = false)
+    @Column(name = "url_imagem",nullable = true)
     private String urlImagem;
    
-    @Column(name = "imagem_social",nullable = false)
+    @Column(name = "imagem_social",nullable = true)
     private String imagemSocial;
 
     @OneToMany(mappedBy = "produto")
