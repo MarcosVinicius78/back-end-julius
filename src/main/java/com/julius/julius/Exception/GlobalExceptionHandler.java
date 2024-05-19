@@ -3,6 +3,7 @@ package com.julius.julius.Exception;
 import javax.imageio.IIOException;
 
 import org.apache.commons.io.FileExistsException;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -42,6 +43,11 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> illegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body("Não pode ter parametro null.");
+    }
+    
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<String> fileUploadException(FileUploadException ex) {
         return ResponseEntity.badRequest().body("Não pode ter parametro null.");
     }
 

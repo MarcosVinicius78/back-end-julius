@@ -64,6 +64,7 @@ public class ScraperController {
 
     @GetMapping
     public ResponseEntity<ProdutoScraperDTO> getProductDetails(@RequestParam String url) throws Exception {
+        System.out.println("Aquii");
         ProdutoScraperDTO produtoScraperDTO = scraperService.scraperProduto(url);
         if (produtoScraperDTO != null) {
             return ResponseEntity.ok().body(produtoScraperDTO);

@@ -79,13 +79,17 @@ public class Produto {
     @ManyToOne
     @JoinColumn(name = "fk_categoria")
     private Categoria categoria;
+    
+    @ManyToOne
+    @JoinColumn(name = "fk_loja")
+    private Loja loja;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "produtos_loja", 
-                joinColumns = @JoinColumn(name = "fk_produto"),
-                inverseJoinColumns = @JoinColumn(name = "fk_loja")
-                )
-    private List<Loja> lojas = new ArrayList<>(); 
+    // @ManyToMany(fetch = FetchType.EAGER)
+    // @JoinTable(name = "produtos_loja", 
+    //             joinColumns = @JoinColumn(name = "fk_produto"),
+    //             inverseJoinColumns = @JoinColumn(name = "fk_loja")
+    //             )
+    // private List<Loja> lojas = new ArrayList<>(); 
 
     @Column(name =  "data_criacao", updatable=false)
     @CreationTimestamp

@@ -34,7 +34,7 @@ public class BannersService {
 
     private final BannerRepository bannerRepository;
 
-    public String salvarBnners(MultipartFile file, String nome) {
+    public String salvarBnners(MultipartFile file, String link) {
 
         try {
             File uploadsDir = new File(UPLOAD_DIR);
@@ -55,7 +55,7 @@ public class BannersService {
             String imageUrl = uploadsDir.getAbsolutePath() + fileName;
 
             Banner banner = Banner.builder()
-                            .nome(nome)
+                            .link(link)
                             .urlImagem(nomeImagem)
                             .build();
 

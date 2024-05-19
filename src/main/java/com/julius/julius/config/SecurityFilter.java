@@ -78,7 +78,7 @@ public class SecurityFilter {
                 .requestMatchers(HttpMethod.GET,"/banners/**").permitAll()
                 .requestMatchers("/banners/**").authenticated()
                 .requestMatchers("/generate-image").permitAll()
-                .requestMatchers(HttpMethod.GET, "/scraper/**").permitAll()
+                .requestMatchers( HttpMethod.GET,"/scraper/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/post/**").permitAll()
                 .requestMatchers("/post/**").authenticated())
                 .formLogin(Customizer.withDefaults())

@@ -29,10 +29,10 @@ public record ProdutoResponseDto(
         
          LojaResponseDto lojaDto = null;
         
-        List<Loja> lojas = produto.getLojas();
-        if (lojas != null && !lojas.isEmpty()) {
+        Loja loja = produto.getLoja();
+        if (loja != null) {
             // Se houver lojas associadas ao produto, cria o LojaResponseDto
-            lojaDto = LojaResponseDto.toResonse(lojas.get(0));
+            lojaDto = LojaResponseDto.toResonse(loja);
         }
 
         return new ProdutoResponseDto(

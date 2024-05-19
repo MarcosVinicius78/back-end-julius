@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,6 +39,9 @@ public class Loja {
     @Column(name = "url_imagem", nullable = false)
     private String urlImagem;
 
-    @ManyToMany(mappedBy = "lojas", fetch = FetchType.EAGER)
-    private List<Produto> produtos = new ArrayList<>();
+    // @ManyToMany(mappedBy = "lojas", fetch = FetchType.EAGER)
+    // private List<Produto> produtos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "loja", fetch = FetchType.EAGER)
+    private List<Produto> produtos;
 }

@@ -1,4 +1,4 @@
-package com.julius.julius.service.Scraper;
+package com.julius.julius.service.Scraper.magazine;
 
 import java.net.ConnectException;
 import java.util.regex.Matcher;

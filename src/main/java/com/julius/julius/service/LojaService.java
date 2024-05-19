@@ -104,7 +104,7 @@ public class LojaService {
     public Boolean apagarLoja(Long id, String urlImagem) throws FileExistsException {
 
         String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
-        entityManager.createNativeQuery("DELETE FROM produtos_loja WHERE fk_loja = :idLoja")
+        entityManager.createNativeQuery("DELETE FROM produtos WHERE fk_loja = :idLoja")
                 .setParameter("idLoja", id)
                 .executeUpdate();
         this.lojaRepository.deleteById(id);

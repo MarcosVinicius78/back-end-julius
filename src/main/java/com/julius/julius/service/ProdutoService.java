@@ -182,7 +182,7 @@ public class ProdutoService {
         produto.setFreteVariacoes(produtoSalvarDto.freteVariacoes());
         produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
-        produto.getLojas().add(loja.get());
+        produto.setLoja(loja.get());
         produto.setLink(produtoSalvarDto.link());
         produto.setCopy(produtoSalvarDto.copy());
 
@@ -216,7 +216,7 @@ public class ProdutoService {
             return null;
         }
 
-        LojaResponseDto lojaResponseDto = LojaResponseDto.toResonse(produto.get().getLojas().get(0));
+        LojaResponseDto lojaResponseDto = LojaResponseDto.toResonse(produto.get().getLoja());
         CategoriaResponseDto categoriaDto = CategoriaResponseDto.toResonse(produto.get().getCategoria());
 
         return ProdutoDto.toResonse(produto.get(), lojaResponseDto, categoriaDto);
@@ -279,7 +279,7 @@ public class ProdutoService {
         produto.get().setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
         produto.get().setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
         produto.get().setCategoria(categoria.get());
-        produto.get().getLojas().add(loja.get());
+        produto.get().setLoja(loja.get());
         produto.get().setCopy(produtoAtualizarDto.copy());
 
         return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto.get()));

@@ -25,8 +25,8 @@ public class Banner {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nome")
-    private String nome;
+    @Column(name = "link")
+    private String link;
 
     @Column(name = "url_imagem")
     private String urlImagem;
