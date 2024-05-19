@@ -14,13 +14,13 @@ FROM openjdk:latest
 
 WORKDIR /app
 
-# Instalar fontes e dependências necessárias
 RUN apt-get update && apt-get install -y \
     fontconfig \
-    ttf-mscorefonts-installer
+    ttf-mscorefonts-installer && \
+    echo "msttcorefonts msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections && \
+    apt-get install -y ttf-mscorefonts-installer && \
+    fc-cache -f -v
 
-# Atualizar o cache de fontes
-RUN fc-cache -f -v
 
 # Copie o JAR da aplicação da etapa anterior
 COPY --from=build /app/target/julius-0.0.1-SNAPSHOT.jar /app/julius-0.0.1-SNAPSHOT.jar
