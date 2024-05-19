@@ -30,7 +30,7 @@ public class PostService {
     
     private final PostRepository postRepository;
 
-    private static final String UPLOAD_DIR = "uploads/post";
+    private static final String UPLOAD_DIR = "/uploads/post";
 
     public List<PostResponseDTO> listarPosts(){
         return postRepository.findAll().stream().map(PostResponseDTO::toResponse).toList();

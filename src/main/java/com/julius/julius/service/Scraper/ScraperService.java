@@ -54,9 +54,7 @@ public class ScraperService {
         
         if (url.contains("amzn") || url.contains("amazon")) {
             return handleAmazon(url);
-        } else if (url.contains("shopee")) {
-            return handleShopee();
-        } else if (url.contains("mercado")) {
+        }else if (url.contains("mercado")) {
             return mercadoLivre.getDadosProdutos(url);
         }else{
             return magazineService.getProdutoMagazine(url);
