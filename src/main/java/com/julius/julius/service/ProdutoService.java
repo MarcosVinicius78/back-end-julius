@@ -56,7 +56,7 @@ public class ProdutoService {
 
     private final CategoriaRepository categoriaRepository;
 
-    private static final String UPLOAD_DIR = "uploads/produtos";
+    private static final String UPLOAD_DIR = "/uploads/produtos";
 
     private String salvarImagemReal(MultipartFile fileSocial) {
         File uploadsDir = new File(UPLOAD_DIR + "-real");
