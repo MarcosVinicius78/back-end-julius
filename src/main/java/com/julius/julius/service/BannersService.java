@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BannersService {
 
-    private static final String UPLOAD_DIR = "uploads/publicidade";
+    private static final String UPLOAD_DIR = "/uploads/publicidade";
 
     private final LinksRepository linksRepository;
 
