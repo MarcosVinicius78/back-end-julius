@@ -90,9 +90,9 @@ public class ProdutoController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id, @RequestParam("urlImagem") String urlImagem)
+    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id, @RequestParam("urlImagem") String urlImagem, @RequestParam("imagemSocial") String imagemSocial)
             throws FileExistsException {
-        Boolean apagado = this.produtoService.apagarProduto(id, urlImagem);
+        Boolean apagado = this.produtoService.apagarProduto(id, urlImagem, imagemSocial);
         if (apagado) {
             return ResponseEntity.ok().build();
         }

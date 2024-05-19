@@ -222,12 +222,13 @@ public class ProdutoService {
         return ProdutoDto.toResonse(produto.get(), lojaResponseDto, categoriaDto);
     }
 
-    public Boolean apagarProduto(Long id, String urlImagem) throws FileExistsException {
+    public Boolean apagarProduto(Long id, String urlImagem,String imagemSocial) throws FileExistsException {
 
         String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
         this.produtoRepository.deleteById(id);
 
         apagarImagem(urlImagem);
+        apagarImagemReal(imagemSocial);
 
         return true;
     }
@@ -343,16 +344,17 @@ public class ProdutoService {
         try {
             // Carregar a imagem
             BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/story.jpeg"));
-
+            
             Image foto = ImageIO.read(new File(UPLOAD_DIR + "-real" + "/" + urlImagem));
-
+            
             int x = (image.getWidth() - foto.getWidth(null)) / 15;
-
+            
             // Desenhar texto na imagem
             Graphics2D g = image.createGraphics();
             g.setColor(Color.BLACK);
             g.drawImage(foto, 53, 130, 800, 750, null);
-
+            
+            System.out.println(g.getFont());
             // Configurar fonte para o título
             g.setFont(new Font("SansSerif", Font.BOLD, 45));
             FontMetrics fm = g.getFontMetrics();
@@ -396,6 +398,7 @@ public class ProdutoService {
                 int titleXPosition = (imageWidth - fm.stringWidth(titleLine)) / 2;
                 g.drawString(titleLine, titleXPosition, titleYPosition);
             }
+
 
             g.setFont(new Font("SansSerif", Font.BOLD, 40));
             if (!cupom.isEmpty() && cupom.length() <= 6) {
