@@ -359,6 +359,13 @@ public class ProdutoService {
             int imageWidth = image.getWidth();
             int titleYPosition = 970;
 
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            String[] fontFamilies = ge.getAvailableFontFamilyNames();
+
+            System.out.println("Available fonts:");
+            for (String fontFamily : fontFamilies) {
+                System.out.println(fontFamily);
+            }
             // Quebrar o título em múltiplas linhas
             List<String> lines = new ArrayList<>();
             StringBuilder line = new StringBuilder();
@@ -472,7 +479,7 @@ public class ProdutoService {
 
     }
 
-     @Scheduled(cron = "0 0 0 * * ?") // Executa diariamente à meia-noite
+    @Scheduled(cron = "0 0 0 * * ?") // Executa diariamente à meia-noite
     public void deletarProdutosAntigos() throws FileExistsException {
         LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
         List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
@@ -481,7 +488,7 @@ public class ProdutoService {
             apagarImagem(produto.getUrlImagem());
             apagarImagemReal(produto.getImagemSocial());
         }
-        
+
         produtoRepository.deleteAll(produtosAntigos);
     }
 }
