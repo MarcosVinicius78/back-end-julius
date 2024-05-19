@@ -356,7 +356,8 @@ public class ProdutoService {
             
             System.out.println(g.getFont());
             // Configurar fonte para o título
-            g.setFont(new Font("SansSerif", Font.BOLD, 45));
+            Font fonteNegrito = new Font("SansSerif", Font.BOLD, 45);
+            g.setFont(fonteNegrito);
             FontMetrics fm = g.getFontMetrics();
             int imageWidth = image.getWidth();
             int titleYPosition = 970;
@@ -400,15 +401,18 @@ public class ProdutoService {
             }
 
 
-            g.setFont(new Font("SansSerif", Font.BOLD, 40));
+            Font fonte = new Font("SansSerif", Font.BOLD, 40);
+            g.setFont(fonte);
             if (!cupom.isEmpty() && cupom.length() <= 6) {
                 // g.setFont(new Font("Arial", Font.BOLD, 40));
                 g.drawString("Cupom:" + cupom, 455, 1122);
             } else if (!cupom.isEmpty() && cupom.length() <= 16) {
-                g.setFont(new Font("SansSerif", Font.BOLD, 35));
+            fonte = new Font("SansSerif", Font.BOLD, 35);
+                g.setFont(fonte);
                 g.drawString("Cupom: " + cupom, 355, 1122);
             } else if (!cupom.isEmpty() && cupom.length() >= 17) {
-                g.setFont(new Font("SansSerif", Font.BOLD, 33));
+            fonte = new Font("SansSerif", Font.BOLD, 33);
+                g.setFont(fonte);
                 g.drawString("Cupom: " + cupom, 353, 1122);
             } else if (!frete.isEmpty() && frete.length() == 18) {
                 // frete grátis prime
@@ -420,7 +424,8 @@ public class ProdutoService {
                 g.drawString(frete, 450, 1122);
                 // frete econômico
             } else if (!frete.isEmpty() && frete.length() == 30) {
-                g.setFont(new Font("SansSerif", Font.BOLD, 35));
+                fonte = new Font("SansSerif", Font.BOLD, 35);
+                g.setFont(fonte);
                 // frete grátis algumas regioes
                 g.drawString(frete, 350, 1122);
             }
@@ -431,7 +436,8 @@ public class ProdutoService {
             // g.setFont(new Font("Arial", Font.BOLD, 40));
             // g.drawString(titulo2 + "...", 80, 1040);
 
-            g.setFont(new Font("SansSerif", Font.BOLD, 90));
+            Font fonteNegritoPreco = new Font("SansSerif", Font.BOLD, 90);
+            g.setFont(fonteNegritoPreco);
             FontMetrics priceFm = g.getFontMetrics();
             int priceXPosition = (imageWidth - priceFm.stringWidth(preco)) / 2;
             g.drawString(preco, priceXPosition, 1277);
