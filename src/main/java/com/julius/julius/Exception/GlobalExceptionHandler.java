@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import com.github.dockerjava.api.exception.NotFoundException;
+
+import jakarta.validation.UnexpectedTypeException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     
@@ -48,6 +50,11 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(FileUploadException.class)
     public ResponseEntity<String> fileUploadException(FileUploadException ex) {
+        return ResponseEntity.badRequest().body("Não pode ter parametro null.");
+    }
+    
+    @ExceptionHandler(UnexpectedTypeException.class)
+    public ResponseEntity<String> uexpectedTypeException(UnexpectedTypeException ex) {
         return ResponseEntity.badRequest().body("Não pode ter parametro null.");
     }
 
