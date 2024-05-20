@@ -222,7 +222,7 @@ public class ProdutoService {
         return ProdutoDto.toResonse(produto.get(), lojaResponseDto, categoriaDto);
     }
 
-    public Boolean apagarProduto(Long id, String urlImagem,String imagemSocial) throws FileExistsException {
+    public Boolean apagarProduto(Long id, String urlImagem, String imagemSocial) throws FileExistsException {
 
         String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
         this.produtoRepository.deleteById(id);
@@ -344,19 +344,17 @@ public class ProdutoService {
         try {
             // Carregar a imagem
             BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/story.jpeg"));
-            
+
             Image foto = ImageIO.read(new File(UPLOAD_DIR + "-real" + "/" + urlImagem));
-            
-            int x = (image.getWidth() - foto.getWidth(null)) / 15;
-            
+
             // Desenhar texto na imagem
             Graphics2D g = image.createGraphics();
             g.setColor(Color.BLACK);
             g.drawImage(foto, 53, 130, 800, 750, null);
-            
-            System.out.println(g.getFont());
+
+
             // Configurar fonte para o título
-            Font fonteNegrito = new Font("SansSerif", Font.BOLD, 45);
+            Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
             g.setFont(fonteNegrito);
             FontMetrics fm = g.getFontMetrics();
             int imageWidth = image.getWidth();
@@ -400,18 +398,17 @@ public class ProdutoService {
                 g.drawString(titleLine, titleXPosition, titleYPosition);
             }
 
-
-            Font fonte = new Font("SansSerif", Font.BOLD, 40);
+            Font fonte = new Font(Font.SANS_SERIF, Font.BOLD, 40);
             g.setFont(fonte);
             if (!cupom.isEmpty() && cupom.length() <= 6) {
                 // g.setFont(new Font("Arial", Font.BOLD, 40));
                 g.drawString("Cupom:" + cupom, 455, 1122);
             } else if (!cupom.isEmpty() && cupom.length() <= 16) {
-            fonte = new Font("SansSerif", Font.BOLD, 35);
+                fonte = new Font(Font.SANS_SERIF, Font.BOLD, 35);
                 g.setFont(fonte);
                 g.drawString("Cupom: " + cupom, 355, 1122);
             } else if (!cupom.isEmpty() && cupom.length() >= 17) {
-            fonte = new Font("SansSerif", Font.BOLD, 33);
+                fonte = new Font(Font.SANS_SERIF, Font.BOLD, 33);
                 g.setFont(fonte);
                 g.drawString("Cupom: " + cupom, 353, 1122);
             } else if (!frete.isEmpty() && frete.length() == 18) {
@@ -424,7 +421,7 @@ public class ProdutoService {
                 g.drawString(frete, 450, 1122);
                 // frete econômico
             } else if (!frete.isEmpty() && frete.length() == 30) {
-                fonte = new Font("SansSerif", Font.BOLD, 35);
+                fonte = new Font(Font.SANS_SERIF, Font.BOLD, 35);
                 g.setFont(fonte);
                 // frete grátis algumas regioes
                 g.drawString(frete, 350, 1122);
@@ -436,7 +433,7 @@ public class ProdutoService {
             // g.setFont(new Font("Arial", Font.BOLD, 40));
             // g.drawString(titulo2 + "...", 80, 1040);
 
-            Font fonteNegritoPreco = new Font("SansSerif", Font.BOLD, 90);
+            Font fonteNegritoPreco = new Font(Font.SANS_SERIF, Font.BOLD, 90);
             g.setFont(fonteNegritoPreco);
             FontMetrics priceFm = g.getFontMetrics();
             int priceXPosition = (imageWidth - priceFm.stringWidth(preco)) / 2;

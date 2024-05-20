@@ -32,11 +32,15 @@ public class JWTGeneratorFilter extends OncePerRequestFilter {
 
         if (null != authentication) {
             SecretKey key = Keys.hmacShaKeyFor(SecurityConstants.JWT_KEY.getBytes(StandardCharsets.UTF_8));
+
+            // Calcula a expiração para 30 dias
+            long expiraEmUmMes = 30L * 24 * 60 * 60 * 1000;
+
             String jwt = Jwts.builder().setIssuer("comerce").setSubject("JWT Token")
                     .claim("username", authentication.getName())
                     .claim("authorities", populationAuthorities(authentication.getAuthorities()))
                     .setIssuedAt(new Date())
-                    .setExpiration(new Date((new Date().getTime() + 3000000L)))
+                    .setExpiration(new Date((new Date().getTime() + expiraEmUmMes)))
                     .signWith(key).compact();
             response.setHeader(SecurityConstants.JWT_HEADER, jwt);
         }
