@@ -349,10 +349,11 @@ public class ProdutoService {
 
             // Desenhar texto na imagem
             Graphics2D g = image.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setColor(Color.BLACK);
             g.drawImage(foto, 53, 130, 800, 750, null);
 
-            
             // Configurar fonte para o título
             Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
             g.setFont(fonteNegrito);
