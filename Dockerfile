@@ -10,6 +10,14 @@ RUN mvn clean install -DskipTests
 # Etapa 2: Imagem final usando OpenJDK
 FROM openjdk:latest
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    fontconfig \
+    fonts-dejavu-core \
+    fonts-dejavu-extra && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copie o JAR da aplicação da etapa anterior
