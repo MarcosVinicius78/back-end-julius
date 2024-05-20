@@ -352,10 +352,11 @@ public class ProdutoService {
             g.setColor(Color.BLACK);
             g.drawImage(foto, 53, 130, 800, 750, null);
 
-
+            
             // Configurar fonte para o título
             Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
             g.setFont(fonteNegrito);
+            System.out.println(g.getFont());
             FontMetrics fm = g.getFontMetrics();
             int imageWidth = image.getWidth();
             int titleYPosition = 970;
