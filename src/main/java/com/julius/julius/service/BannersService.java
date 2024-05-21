@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -111,8 +112,18 @@ public class BannersService {
 
     public Link salvarLinks(Link link){
 
-        if (link.getId() != null) {    
-            return linksRepository.save(link);
+
+
+        if (link.getId() != null) { 
+            
+            Optional<Link> links2 = linksRepository.findById(link.getId());
+
+            links2.get().setWhatsapp(link.getWhatsapp());
+            links2.get().setTelegram(link.getTelegram());
+            links2.get().setInstagram(link.getInstagram());
+            links2.get().setEmail(link.getEmail());
+            
+            return linksRepository.save(links2.get());
         }
         
         return linksRepository.save(link);
