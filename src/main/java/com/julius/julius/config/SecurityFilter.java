@@ -43,7 +43,8 @@ public class SecurityFilter {
                 public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                     CorsConfiguration config = new CorsConfiguration();
 
-                    config.setAllowedOrigins(Collections.singletonList("http://www.systemdevmv.site"));
+                    // config.setAllowedOrigins(Collections.singletonList("http://www.systemdevmv.site"));
+                    config.setAllowedOrigins(Collections.singletonList("http://www.sergipeofertas.com.br"));
                     // config.setAllowedOrigins(Collections.singletonList("https://www.systemdevmv.site"));
                     // config.setAllowedOrigins(Collections.singletonList("http://62.72.11.56"));
                     // config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
