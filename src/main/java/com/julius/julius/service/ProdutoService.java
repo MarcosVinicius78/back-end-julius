@@ -490,7 +490,7 @@ public class ProdutoService {
 
     @Scheduled(cron = "0 40 22 * * ?") // Executa diariamente à meia-noite
     public void deletarProdutosAntigos() throws FileExistsException {
-        LocalDateTime dataLimite = LocalDateTime.now().minusDays(1);
+        LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
         List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
 
         produtoRepository.deleteAll(produtosAntigos);
