@@ -28,6 +28,7 @@ import com.julius.julius.DTO.ProdutoAtualizarDto;
 import com.julius.julius.DTO.ProdutoSalvarDto;
 import com.julius.julius.DTO.response.ProdutoDto;
 import com.julius.julius.DTO.response.ProdutoResponseDto;
+import com.julius.julius.models.Produto;
 import com.julius.julius.service.ProdutoService;
 
 import jakarta.validation.Valid;
@@ -90,7 +91,7 @@ public class ProdutoController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id, @RequestParam("urlImagem") String urlImagem, @RequestParam("imagemSocial") String imagemSocial)
+    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id, @RequestParam(name = "urlImagem", required = false) String urlImagem, @RequestParam(name = "imagemSocial", required = false) String imagemSocial)
             throws FileExistsException {
         Boolean apagado = this.produtoService.apagarProduto(id, urlImagem, imagemSocial);
         if (apagado) {
@@ -152,17 +153,17 @@ public class ProdutoController {
     public ResponseEntity<Resource> downloadImagemReal(@PathVariable String imagemSocial) {
 
         Resource resource = null;
-        if (imagemSocial != null) {
+        if (!imagemSocial.equals("null")) {
             resource = produtoService.loadImagemAResourceReal(imagemSocial);
         }
 
-        if (resource.exists()) {
+        if (resource != null) {
             return ResponseEntity.status(HttpStatus.OK)
                     .contentType(MediaType.valueOf("image/jpg"))
                     .body(resource);
         }
 
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/generate-image")

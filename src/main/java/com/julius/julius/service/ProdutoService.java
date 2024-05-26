@@ -224,11 +224,16 @@ public class ProdutoService {
 
     public Boolean apagarProduto(Long id, String urlImagem, String imagemSocial) throws FileExistsException {
 
-        String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
         this.produtoRepository.deleteById(id);
 
-        apagarImagem(urlImagem);
-        apagarImagemReal(imagemSocial);
+        if (urlImagem != null || !urlImagem.isEmpty()) {
+            System.out.println(urlImagem);
+            apagarImagem(urlImagem);
+        }
+
+        if (!imagemSocial.equals("null") && !imagemSocial.isEmpty()) {
+            apagarImagemReal(imagemSocial);
+        }
 
         return true;
     }
@@ -322,18 +327,21 @@ public class ProdutoService {
     }
 
     public Resource loadImagemAResourceReal(String imagemNome) {
+        if (!imagemNome.equals("null")) {
+            System.out.println(imagemNome);
+            try {
+                File uploadDir = new File(UPLOAD_DIR + "-real");
 
-        try {
-            File uploadDir = new File(UPLOAD_DIR + "-real");
+                Path imagemPath = Paths.get(uploadDir.getAbsolutePath()).resolve(imagemNome);
+                Resource resource = new UrlResource(imagemPath.toUri());
 
-            Path imagemPath = Paths.get(uploadDir.getAbsolutePath()).resolve(imagemNome);
-            Resource resource = new UrlResource(imagemPath.toUri());
-
-            if (resource.exists() || resource.isReadable()) {
-                return resource;
+                if (resource.exists() || resource.isReadable()) {
+                    return resource;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
         }
         return null;
     }
@@ -480,16 +488,23 @@ public class ProdutoService {
 
     }
 
-    @Scheduled(cron = "0 0 0 * * ?") // Executa diariamente à meia-noite
+    @Scheduled(cron = "0 40 22 * * ?") // Executa diariamente à meia-noite
     public void deletarProdutosAntigos() throws FileExistsException {
-        LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
+        LocalDateTime dataLimite = LocalDateTime.now().minusDays(1);
         List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
 
+        produtoRepository.deleteAll(produtosAntigos);
         for (Produto produto : produtosAntigos) {
-            apagarImagem(produto.getUrlImagem());
-            apagarImagemReal(produto.getImagemSocial());
+            if (produto.getUrlImagem() != null) {
+                System.out.println("passou aqui url");
+                apagarImagem(produto.getUrlImagem());
+            }
+
+            if (produto.getImagemSocial() != null) {
+                System.out.println("passou aqui url real");
+                apagarImagemReal(produto.getImagemSocial());
+            }
         }
 
-        produtoRepository.deleteAll(produtosAntigos);
     }
 }

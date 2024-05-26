@@ -57,5 +57,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> uexpectedTypeException(UnexpectedTypeException ex) {
         return ResponseEntity.badRequest().body("Não pode ter parametro null.");
     }
+    
+    @ExceptionHandler(IndexOutOfBoundsException.class)
+    public ResponseEntity<String> indexOutOfBoundsException(IndexOutOfBoundsException ex) {
+        return ResponseEntity.badRequest().body("Não pode ter parametro null.");
+    }
 
 }

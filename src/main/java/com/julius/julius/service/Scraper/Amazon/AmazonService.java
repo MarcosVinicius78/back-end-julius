@@ -36,6 +36,8 @@ public class AmazonService {
     private String SECRET_KEY;
     private static final String REGION = "us-east-1";
 
+    private static final Pattern ASIN_PATTERN = Pattern.compile("/([A-Z0-9]{10})(?:[/?]|$)");
+
     public String getProdutoAmazon(String codigoProduto) {
 
         try {
@@ -119,17 +121,27 @@ public class AmazonService {
             }
         }
 
-        String regex = "/dp/(\\w+)";
-        Pattern pattern = Pattern.compile(regex);
+        String regexDp = "/dp/(\\w+)";
+        Pattern pattern = Pattern.compile(regexDp);
         Matcher matcher = pattern.matcher(expandedUrl);
-
+        
         String codigoProduto = null;
-
+        
         if (matcher.find()) {
             codigoProduto = matcher.group(1);
+        }else{
+            String regexGp = "\"/([A-Z0-9]{10})(?:[/?]|$)\"";
+            codigoProduto = extractAsin(expandedUrl);
         }
+        return codigoProduto;   
+    }
 
-        return codigoProduto;
+    public String extractAsin(String url) {
+        Matcher matcher = ASIN_PATTERN.matcher(url);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        throw new IllegalStateException("No ASIN found in the provided URL");
     }
 
     public ProdutoScraperDTO montarProdutoAmazon(String jsonResponse,String url) {
