@@ -10,6 +10,19 @@ RUN mvn clean install -DskipTests
 # Etapa 2: Imagem final usando OpenJDK
 FROM openjdk:latest
 
+# Instale as dependências necessárias para adicionar fontes
+RUN apt-get update && apt-get install -y \
+    fontconfig \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Adicione a fonte desejada
+RUN mkdir -p /usr/share/fonts/truetype/custom && \
+    wget -O /usr/share/fonts/truetype/custom/CustomFont.ttf https://example.com/path/to/CustomFont.ttf
+
+# Atualize o cache de fontes
+RUN fc-cache -f -v
+
 WORKDIR /app
 
 # Copie o JAR da aplicação da etapa anterior

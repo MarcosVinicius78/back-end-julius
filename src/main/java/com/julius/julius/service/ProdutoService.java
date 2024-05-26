@@ -488,7 +488,7 @@ public class ProdutoService {
 
     }
 
-    @Scheduled(cron = "0 40 22 * * ?") // Executa diariamente à meia-noite
+    @Scheduled(cron = "0 0 23 * * ?")
     public void deletarProdutosAntigos() throws FileExistsException {
         LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
         List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
@@ -496,12 +496,10 @@ public class ProdutoService {
         produtoRepository.deleteAll(produtosAntigos);
         for (Produto produto : produtosAntigos) {
             if (produto.getUrlImagem() != null) {
-                System.out.println("passou aqui url");
                 apagarImagem(produto.getUrlImagem());
             }
 
             if (produto.getImagemSocial() != null) {
-                System.out.println("passou aqui url real");
                 apagarImagemReal(produto.getImagemSocial());
             }
         }
