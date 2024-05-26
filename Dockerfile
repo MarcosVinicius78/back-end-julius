@@ -13,15 +13,12 @@ FROM openjdk:latest
 # Instale as dependências necessárias para adicionar fontes
 RUN apt-get update && apt-get install -y \
     fontconfig \
-    wget \
+    cabextract \
     && rm -rf /var/lib/apt/lists/*
 
-# Adicione a fonte desejada
-RUN mkdir -p /usr/share/fonts/truetype/custom && \
-    wget -O /usr/share/fonts/truetype/custom/CustomFont.ttf https://example.com/path/to/CustomFont.ttf
-
-# Atualize o cache de fontes
-RUN fc-cache -f -v
+# Instale as fontes Microsoft TrueType, incluindo Arial
+RUN apt-get update && apt-get install -y ttf-mscorefonts-installer && \
+    fc-cache -f -v
 
 WORKDIR /app
 
