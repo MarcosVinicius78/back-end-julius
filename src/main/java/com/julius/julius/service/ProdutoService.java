@@ -427,17 +427,17 @@ public class ProdutoService {
             FontMetrics couponFm = g.getFontMetrics();
             int couponXPosition = rectX + (rectWidth - couponFm.stringWidth("Cupom: " + cupom)) / 3;
             int couponYPosition = rectY + (rectHeight + couponFm.getAscent()) / 2 - 3;
-            if (!cupom.isEmpty() && cupom.length() <= 6) {
+            if (!cupom.isEmpty() && cupom.length() <= 6 && cupom != null) {
                 // g.setFont(new Font("Arial", Font.BOLD, 40));
                 // g.drawString("Cupom:" + cupom, 451, 1122);
                 g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
-            } else if (!cupom.isEmpty() && cupom.length() <= 16) {
+            } else if (!cupom.isEmpty() && cupom.length() <= 16 && cupom != null) {
                 font = customFont.deriveFont(Font.BOLD, 32);
                 g.setFont(font);
 
                 // g.drawString("Cupom: " + cupom, 394, 1122);
                 g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
-            } else if (!cupom.isEmpty() && cupom.length() >= 17) {
+            } else if (!cupom.isEmpty() && cupom.length() >= 17 && cupom != null) {
                 font = customFont.deriveFont(Font.BOLD, 31);
                 g.setFont(font);
                 // g.drawString("Cupom: " + cupom, 353, 1122);
