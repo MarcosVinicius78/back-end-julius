@@ -10,16 +10,6 @@ RUN mvn clean install -DskipTests
 # Etapa 2: Imagem final usando OpenJDK
 FROM openjdk:latest
 
-# # Instale as dependências necessárias para adicionar fontes
-# RUN apt-get update && apt-get install -y \
-#     fontconfig \
-#     cabextract \
-#     && rm -rf /var/lib/apt/lists/*
-
-# # Instale as fontes Microsoft TrueType, incluindo Arial
-# RUN apt-get update && apt-get install -y ttf-mscorefonts-installer && \
-#     fc-cache -f -v
-
 WORKDIR /app
 
 # Copie o JAR da aplicação da etapa anterior

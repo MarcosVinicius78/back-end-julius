@@ -1,5 +1,7 @@
 package com.julius.julius.Exception;
 
+import java.awt.FontFormatException;
+
 import javax.imageio.IIOException;
 
 import org.apache.commons.io.FileExistsException;
@@ -61,6 +63,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IndexOutOfBoundsException.class)
     public ResponseEntity<String> indexOutOfBoundsException(IndexOutOfBoundsException ex) {
         return ResponseEntity.badRequest().body("Não pode ter parametro null.");
+    }
+    
+    @ExceptionHandler(FontFormatException.class)
+    public ResponseEntity<String> fontFormatException(FontFormatException ex) {
+        return ResponseEntity.badRequest().body("Font não encontrada.");
     }
 
 }

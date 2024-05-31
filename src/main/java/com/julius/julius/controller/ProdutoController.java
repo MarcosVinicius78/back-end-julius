@@ -1,5 +1,6 @@
 package com.julius.julius.controller;
 
+import java.awt.FontFormatException;
 import java.io.FileNotFoundException;
 import java.util.List;
 
@@ -169,7 +170,7 @@ public class ProdutoController {
     @GetMapping("/generate-image")
     public ResponseEntity<byte[]> generateImage(@RequestParam(name = "preco", required = false) String preco,
             @RequestParam("titulo") String titulo, @RequestParam("urlImagem") String urlImagem,
-            @RequestParam("frete") String frete, @RequestParam("cupom") String cupom) throws FileExistsException {
+            @RequestParam("frete") String frete, @RequestParam("cupom") String cupom) throws FileExistsException, FontFormatException {
 
         byte[] bytes = produtoService.gerarStory(preco, titulo, urlImagem, frete, cupom);
         HttpHeaders headers = new HttpHeaders();

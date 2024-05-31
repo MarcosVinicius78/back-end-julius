@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -347,13 +348,20 @@ public class ProdutoService {
     }
 
     public byte[] gerarStory(String preco, String titulo, String urlImagem, String frete, String cupom)
-            throws FileExistsException {
+            throws FileExistsException, FontFormatException {
 
         try {
             // Carregar a imagem
             BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/story.jpeg"));
 
             Image foto = ImageIO.read(new File(UPLOAD_DIR + "-real" + "/" + urlImagem));
+
+            // Carregar a fonte personalizada
+            // Carregar a fonte personalizada usando class loader
+            InputStream is = getClass().getClassLoader().getResourceAsStream("fonts/Chonky_Cat.ttf");
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, is);
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(customFont);
 
             // Desenhar texto na imagem
             Graphics2D g = image.createGraphics();
@@ -363,9 +371,9 @@ public class ProdutoService {
             g.drawImage(foto, 53, 130, 800, 750, null);
 
             // Configurar fonte para o título
-            Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
+            // Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
+            Font fonteNegrito = customFont.deriveFont(Font.BOLD, 45);
             g.setFont(fonteNegrito);
-            System.out.println(g.getFont());
             FontMetrics fm = g.getFontMetrics();
             int imageWidth = image.getWidth();
             int titleYPosition = 970;
@@ -408,33 +416,53 @@ public class ProdutoService {
                 g.drawString(titleLine, titleXPosition, titleYPosition);
             }
 
-            Font fonte = new Font(Font.SANS_SERIF, Font.BOLD, 40);
-            g.setFont(fonte);
+            // Definir as coordenadas e dimensões do retângulo do cupom
+            int rectX = 450; // exemplo de coordenada X do retângulo
+            int rectY = 1077; // exemplo de coordenada Y do retângulo
+            int rectWidth = 350; // exemplo de largura do retângulo
+            int rectHeight = 50; // exemplo de altura do retângulo
+
+            Font font = customFont.deriveFont(Font.BOLD, 40);
+            g.setFont(font);
+            FontMetrics couponFm = g.getFontMetrics();
+            int couponXPosition = rectX + (rectWidth - couponFm.stringWidth("Cupom: " + cupom)) / 3;
+            int couponYPosition = rectY + (rectHeight + couponFm.getAscent()) / 2 - 3;
             if (!cupom.isEmpty() && cupom.length() <= 6) {
                 // g.setFont(new Font("Arial", Font.BOLD, 40));
-                g.drawString("Cupom:" + cupom, 455, 1122);
+                // g.drawString("Cupom:" + cupom, 451, 1122);
+                g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
             } else if (!cupom.isEmpty() && cupom.length() <= 16) {
-                fonte = new Font(Font.SANS_SERIF, Font.BOLD, 35);
-                g.setFont(fonte);
-                g.drawString("Cupom: " + cupom, 355, 1122);
+                font = customFont.deriveFont(Font.BOLD, 32);
+                g.setFont(font);
+
+                // g.drawString("Cupom: " + cupom, 394, 1122);
+                g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
             } else if (!cupom.isEmpty() && cupom.length() >= 17) {
-                fonte = new Font(Font.SANS_SERIF, Font.BOLD, 33);
-                g.setFont(fonte);
-                g.drawString("Cupom: " + cupom, 353, 1122);
+                font = customFont.deriveFont(Font.BOLD, 31);
+                g.setFont(font);
+                // g.drawString("Cupom: " + cupom, 353, 1122);
+                g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
             } else if (!frete.isEmpty() && frete.length() == 18) {
                 // frete grátis prime
-                g.drawString(frete, 430, 1122);
+                g.drawString(frete, 425, 1122);
+                // g.drawString(frete, couponXPosition, couponYPosition);
             } else if (!frete.isEmpty() && frete.length() == 12) {
                 // frete grátis
-                g.drawString(frete, 490, 1122);
-            } else if (!frete.isEmpty() && frete.length() == 15) {
-                g.drawString(frete, 450, 1122);
+                g.drawString(frete, 46, 1122);
+            } else if (!frete.isEmpty() && frete.length() == 15 || frete.length() > 40) {
+                g.drawString("Frete Econômico", 445, 1122);
                 // frete econômico
-            } else if (!frete.isEmpty() && frete.length() == 30) {
-                fonte = new Font(Font.SANS_SERIF, Font.BOLD, 35);
-                g.setFont(fonte);
+            } else if (!frete.isEmpty() && frete.length() == 28) {
+                font = customFont.deriveFont(Font.BOLD, 33);
+                g.setFont(font);
                 // frete grátis algumas regioes
                 g.drawString(frete, 350, 1122);
+            } else if (!frete.isEmpty() && frete.length() == 24) {
+                // gratis retirando na loja
+                font = customFont.deriveFont(Font.BOLD, 38);
+                g.setFont(font);
+                // g.setFont(font);
+                g.drawString(frete, 355, 1122);
             }
 
             // g.setFont(new Font("Arial", Font.BOLD, 40));
@@ -443,7 +471,7 @@ public class ProdutoService {
             // g.setFont(new Font("Arial", Font.BOLD, 40));
             // g.drawString(titulo2 + "...", 80, 1040);
 
-            Font fonteNegritoPreco = new Font(Font.SANS_SERIF, Font.BOLD, 90);
+            Font fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 90);
             g.setFont(fonteNegritoPreco);
             FontMetrics priceFm = g.getFontMetrics();
             int priceXPosition = (imageWidth - priceFm.stringWidth(preco)) / 2;
