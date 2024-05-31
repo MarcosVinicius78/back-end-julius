@@ -448,7 +448,7 @@ public class ProdutoService {
                 // g.drawString(frete, couponXPosition, couponYPosition);
             } else if (!frete.isEmpty() && frete.length() == 12) {
                 // frete grátis
-                g.drawString(frete, 46, 1122);
+                g.drawString(frete, 485, 1122);
             } else if (!frete.isEmpty() && frete.length() == 15 || frete.length() > 40) {
                 g.drawString("Frete Econômico", 445, 1122);
                 // frete econômico
