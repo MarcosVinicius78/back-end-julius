@@ -12,23 +12,39 @@ import com.julius.julius.DTO.response.ProdutoResponseDto;
 import com.julius.julius.DTO.response.ProdutoScraperDTO;
 import com.julius.julius.service.Scraper.ScraperService;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class ScraperLojasAwin {
 
     private static final Logger logger = Logger.getLogger(ScraperService.class.getName());
+
+    private final BoticarioScrapper boticarioScrapper;
 
     public ProdutoScraperDTO pegarDadosDoProdutoAwin(String urlShort, String nomeLoja) {
         
         try {
             Document response = getConnect(urlShort);
             
+            System.out.println(nomeLoja);
             if (response == null) {
                 return new ProdutoScraperDTO("", "", "", urlShort, "");
             }
+
+            switch (nomeLoja) {
+                case "boti":
+                    return boticarioScrapper.pegarInformacoes(response, urlShort);
+                case "teste":
+                    infoProdutoFerreiraCosta(response, urlShort);
+                    break;
+                default:
+                    break;
+            }
+            
             
             return new ProdutoScraperDTO("", "", "", urlShort, "");
         } catch (ConnectException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return new ProdutoScraperDTO("", "", "", urlShort, "");
         }
@@ -39,10 +55,11 @@ public class ScraperLojasAwin {
         try {
             logger.info("Trying to connect to URL: " + url);
             Document response = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-                    .referrer("https://www.google.com/")
-                    .timeout(5000)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+                    .referrer("https://www.google.com.br")
+                    .timeout(10000)
                     .cookie("PIM-SESSION-ID", "xtNeQ1oT77boxl64")
+                    .followRedirects(true)
                     .get();
             logger.info("Successfully connected to URL: " + url);
             return response;
@@ -54,9 +71,6 @@ public class ScraperLojasAwin {
 
     private ProdutoScraperDTO infoProdutoFerreiraCosta(Document doc, String url){
 
-        String cssXPath = "//*[@id=\"__next\"]/main/div[1]/div/section[1]/section[2]";
-
-        Elements elements = doc.selectXpath(cssXPath);
         System.out.println(doc.title());
 
         // String titulo = elements.select("data-testid=\"box-product-title\"").text();

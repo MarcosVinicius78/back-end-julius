@@ -18,30 +18,27 @@ public class MercadoLivre {
     private static final Logger logger = Logger.getLogger(ScraperService.class.getName());
 
     public ProdutoScraperDTO getDadosProdutos(String url) {
-         try {
+        try {
             Document doc = getConnect(url);
 
             Elements titulo = doc.getElementsByClass("poly-component__title");
 
-            Element precoElement =doc.select("span.andes-money-amount__fraction").first();
-            
+            Element precoElement = doc.select(".poly-price__current").first();
             String preco = "";
             if (precoElement != null) {
-                preco = precoElement.text();
+                preco = precoElement.getElementsByClass("andes-money-amount__fraction").text();
                 preco = "R$ " + formatPrice(preco);
             } else {
                 System.out.println("Preço não encontrado.");
             }
 
             Element urlImagem = doc.select("div.poly-card__portada img").first();
-            System.out.println(urlImagem);
             String img = "";
             if (urlImagem != null) {
                 img = urlImagem.attr("data-src");
             }
 
-            Element precoParceladoElement = doc.getElementById("pricing_price_subtitle");
-
+            Elements precoParceladoElement = doc.getElementsByClass("poly-price__installments");
             String precoParcelado = "";
             if (precoParceladoElement != null) {
                 precoParcelado = precoParceladoElement.text();
@@ -49,7 +46,6 @@ public class MercadoLivre {
 
             return new ProdutoScraperDTO(titulo.text(), preco, img, url, precoParcelado);
         } catch (ConnectException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -58,10 +54,10 @@ public class MercadoLivre {
 
     private static String formatPrice(String price) {
         // Verifica se o preço tem duas casas decimais, caso contrário, adiciona "00"
-        if (!price.contains(".")) {
-            price += ".00";
+        if (!price.contains(",")) {
+            price += ",00";
         } else {
-            int index = price.indexOf(".");
+            int index = price.indexOf(",");
             if (price.substring(index + 1).length() == 1) {
                 price += "0";
             }
@@ -73,7 +69,8 @@ public class MercadoLivre {
         try {
             logger.info("Trying to connect to URL: " + url);
             Document response = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+                    .userAgent(
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
                     .referrer("https://www.google.com/")
                     .timeout(5000)
                     .cookie("PIM-SESSION-ID", "xtNeQ1oT77boxl64")

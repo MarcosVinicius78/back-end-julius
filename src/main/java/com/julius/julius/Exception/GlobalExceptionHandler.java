@@ -69,5 +69,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> fontFormatException(FontFormatException ex) {
         return ResponseEntity.badRequest().body("Font não encontrada.");
     }
+    
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<String> NullPointerException(NullPointerException ex) {
+        return ResponseEntity.badRequest().body("ERRO.");
+    }
 
 }

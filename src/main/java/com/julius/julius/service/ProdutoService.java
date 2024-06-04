@@ -472,6 +472,13 @@ public class ProdutoService {
             // g.drawString(titulo2 + "...", 80, 1040);
 
             Font fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 90);
+            if (preco.length() > 19) {
+                fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 55);
+                g.setFont(fonteNegritoPreco);
+            }else  if(preco.length() > 14){
+                fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 70);
+                g.setFont(fonteNegritoPreco);
+            }
             g.setFont(fonteNegritoPreco);
             FontMetrics priceFm = g.getFontMetrics();
             int priceXPosition = (imageWidth - priceFm.stringWidth(preco)) / 2;
