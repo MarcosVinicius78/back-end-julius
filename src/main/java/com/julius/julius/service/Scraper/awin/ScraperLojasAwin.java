@@ -1,6 +1,8 @@
 package com.julius.julius.service.Scraper.awin;
 
 import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.logging.Logger;
 
 import org.jsoup.Jsoup;
@@ -35,7 +37,7 @@ public class ScraperLojasAwin {
             switch (nomeLoja) {
                 case "boti":
                     return boticarioScrapper.pegarInformacoes(response, urlShort);
-                case "teste":
+                case "extra":
                     infoProdutoFerreiraCosta(response, urlShort);
                     break;
                 default:
@@ -52,6 +54,7 @@ public class ScraperLojasAwin {
     }
     
     private Document getConnect(String url) throws ConnectException {
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("https://www.geosurf.com", 8080));
         try {
             logger.info("Trying to connect to URL: " + url);
             Document response = Jsoup.connect(url)

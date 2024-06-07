@@ -46,11 +46,11 @@ public class SecurityFilter {
                     // config.setAllowedOrigins(Collections.singletonList("http://www.systemdevmv.site"));
 
 
-                    config.setAllowedOrigins(Collections.singletonList("https://sergipeofertas.com.br"));
+                    // config.setAllowedOrigins(Collections.singletonList("https://sergipeofertas.com.br"));
                     
                     
                     // config.setAllowedOrigins(Collections.singletonList("http://www.sergipeofertas.com.br"));
-                    // config.setAllowedOrigins(Collections.singletonList("https://www.systemdevmv.site"));
+                    config.setAllowedOrigins(Collections.singletonList("https://www.systemdevmv.site"));
                     // config.setAllowedOrigins(Collections.singletonList("http://62.72.11.56"));
                     // config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
                     config.setAllowedMethods(Collections.singletonList("*"));
