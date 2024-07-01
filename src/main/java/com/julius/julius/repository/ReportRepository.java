@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.julius.julius.models.Produto;
 import com.julius.julius.models.Report;
@@ -25,4 +26,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     Page<Produto> findFirstByOrderByDataCadastroDesc(Pageable pageable);
 
     Boolean deleteByIdIn(List<Long> reports);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Report r WHERE r.produto.id = :idProduto")
+    void deleteByProdutoReport(@Param("idProduto") Long idProduto);
 }

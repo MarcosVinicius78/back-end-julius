@@ -42,6 +42,7 @@ import com.julius.julius.models.Produto;
 import com.julius.julius.repository.CategoriaRepository;
 import com.julius.julius.repository.LojaRepository;
 import com.julius.julius.repository.ProdutoRepository;
+import com.julius.julius.repository.ReportRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,8 @@ public class ProdutoService {
     private final ProdutoRepository produtoRepository;
 
     private final LojaRepository lojaRepository;
+
+    private final ReportRepository reportRepository;
 
     private final CategoriaRepository categoriaRepository;
 
@@ -224,9 +227,12 @@ public class ProdutoService {
     }
 
     public Boolean apagarProduto(Long id, String urlImagem, String imagemSocial) throws FileExistsException {
+        
+        reportRepository.deleteByProdutoReport(id);
 
         this.produtoRepository.deleteById(id);
-
+        
+        
         if (urlImagem != null || !urlImagem.isEmpty()) {
             System.out.println(urlImagem);
             apagarImagem(urlImagem);
@@ -527,6 +533,10 @@ public class ProdutoService {
     public void deletarProdutosAntigos() throws FileExistsException {
         LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
         List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
+
+        produtosAntigos.stream().forEach(item -> {
+            reportRepository.deleteByProdutoReport(item.getId());
+        });
 
         produtoRepository.deleteAll(produtosAntigos);
         for (Produto produto : produtosAntigos) {
