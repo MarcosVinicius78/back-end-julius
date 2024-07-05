@@ -22,7 +22,8 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long>{
     @Query("SELECT p FROM Produto p WHERE p.categoria.id = :categoriaId ORDER BY p.dataCriacao DESC")
     Page<Produto> findByCategoriIdOrderByDataCriacaoDesc(Long categoriaId, Pageable pageable);
 
-    List<Produto> findByTituloContainingIgnoreCase(String termoPesquisa);  
+    Page<Produto> findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(String termoPesquisa, Pageable pageable);
+    // List<Produto> findByTituloContainingIgnoreCase(String termoPesquisa);  
     
     @Query("SELECT p FROM Produto p WHERE p.dataCriacao <= :dataLimite")
     List<Produto> findProdutosComMaisDe7Dias(LocalDateTime dataLimite);

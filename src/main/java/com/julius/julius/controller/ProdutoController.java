@@ -43,7 +43,8 @@ public class ProdutoController {
     private final ProdutoService produtoService;
 
     @GetMapping("{id}")
-    public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id, @RequestParam(value = "r", required = false) Integer r) {
+    public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id,
+            @RequestParam(value = "r", required = false) Integer r) {
         // return ResponseEntity.ok().body(produtoService.pegarProduto(id));
         if (r != null && r == 1) {
             // Lógica para obter a URL do site oficial do produto baseado no ID
@@ -57,12 +58,12 @@ public class ProdutoController {
 
     // @GetMapping("{id}")
     // public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id) {
-    //     return ResponseEntity.ok().body(produtoService.pegarProduto(id));
+    // return ResponseEntity.ok().body(produtoService.pegarProduto(id));
     // }
 
     @GetMapping()
     public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosPaginacao(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "12") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
@@ -92,7 +93,9 @@ public class ProdutoController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id, @RequestParam(name = "urlImagem", required = false) String urlImagem, @RequestParam(name = "imagemSocial", required = false) String imagemSocial)
+    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id,
+            @RequestParam(name = "urlImagem", required = false) String urlImagem,
+            @RequestParam(name = "imagemSocial", required = false) String imagemSocial)
             throws FileExistsException {
         Boolean apagado = this.produtoService.apagarProduto(id, urlImagem, imagemSocial);
         if (apagado) {
@@ -128,8 +131,10 @@ public class ProdutoController {
     }
 
     @GetMapping("/pesquisar")
-    public ResponseEntity<List<ProdutoResponseDto>> pesquisarProdutos(@RequestParam String termoPesquisa) {
-        List<ProdutoResponseDto> resultados = produtoService.pesquisarProdutos(termoPesquisa);
+    public ResponseEntity<Page<ProdutoResponseDto>> pesquisarProdutos(@RequestParam String termoPesquisa,
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "12", required = false) int size) {
+        Page<ProdutoResponseDto> resultados = produtoService.pesquisarProdutos(termoPesquisa, page, size);
         return ResponseEntity.ok().body(resultados);
     }
 
@@ -170,7 +175,8 @@ public class ProdutoController {
     @GetMapping("/generate-image")
     public ResponseEntity<byte[]> generateImage(@RequestParam(name = "preco", required = false) String preco,
             @RequestParam("titulo") String titulo, @RequestParam("urlImagem") String urlImagem,
-            @RequestParam("frete") String frete, @RequestParam("cupom") String cupom) throws FileExistsException, FontFormatException {
+            @RequestParam("frete") String frete, @RequestParam("cupom") String cupom)
+            throws FileExistsException, FontFormatException {
 
         byte[] bytes = produtoService.gerarStory(preco, titulo, urlImagem, frete, cupom);
         HttpHeaders headers = new HttpHeaders();

@@ -24,6 +24,7 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -310,10 +311,13 @@ public class ProdutoService {
         produtoRepository.deleteByIdIn(ids);
     }
 
-    public List<ProdutoResponseDto> pesquisarProdutos(String termoPesquisa) {
+    public Page<ProdutoResponseDto> pesquisarProdutos(String termoPesquisa, int pagina,int tamanho) {
+
+        Pageable pageable = PageRequest.of(pagina, tamanho);
+
         // Implemente a lógica de pesquisa no repositório
-        return produtoRepository.findByTituloContainingIgnoreCase(termoPesquisa).stream()
-                .map(ProdutoResponseDto::toResonse).toList();
+        return produtoRepository.findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(termoPesquisa, pageable)
+                .map(ProdutoResponseDto::toResonse);
     }
 
     public Resource loadImagemAResource(String imagemNome) {
