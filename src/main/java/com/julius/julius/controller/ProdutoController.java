@@ -61,6 +61,16 @@ public class ProdutoController {
     // return ResponseEntity.ok().body(produtoService.pegarProduto(id));
     // }
 
+    @GetMapping("/encerrar-promocao")
+    public ResponseEntity<?> encerrarPromocao(@RequestParam Boolean status, @RequestParam Long id){
+
+        if (produtoService.encerrarPromocao(status, id)) {
+            return ResponseEntity.ok().build();
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping()
     public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosPaginacao(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
@@ -113,7 +123,7 @@ public class ProdutoController {
     public ResponseEntity<List<ProdutoResponseDto>> obterProdutosPorCategoria(
             @RequestParam("categoriaId") Long categoriaId,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "size", defaultValue = "12") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 

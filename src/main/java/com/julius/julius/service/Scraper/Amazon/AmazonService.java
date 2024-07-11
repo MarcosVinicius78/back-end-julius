@@ -46,7 +46,7 @@ public class AmazonService {
                     + "  \"" + codigoProduto + "\""
                     + " ],"
                     + " \"Resources\": ["
-                    + "  \"Images.Primary.Medium\","
+                    + "  \"Images.Primary.Large\","
                     + "  \"ItemInfo.Title\","
                     + "  \"Offers.Listings.Price\""
                     + " ],"
@@ -167,7 +167,7 @@ public class AmazonService {
 
         JSONObject prymaryResult = imagesResult.getJSONObject("Primary");
 
-        JSONObject mediumResult = prymaryResult.getJSONObject("Medium");
+        JSONObject mediumResult = prymaryResult.getJSONObject("Large");
 
         String urlImagem = mediumResult.getString("URL");
 

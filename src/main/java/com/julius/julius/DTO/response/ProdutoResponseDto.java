@@ -21,7 +21,8 @@ public record ProdutoResponseDto(
         LojaResponseDto loja,
         String imagemSocial,
         String copy,
-        String mensagemAdicional
+        String mensagemAdicional,
+        Boolean promocaoEncerrada
 
 ) {
 
@@ -49,7 +50,8 @@ public record ProdutoResponseDto(
             lojaDto,
             produto.getImagemSocial(),
             produto.getCopy(),
-            produto.getMensagemAdicional()
+            produto.getMensagemAdicional(),
+            produto.getPromocaoEncerrada()
         );
     }
 

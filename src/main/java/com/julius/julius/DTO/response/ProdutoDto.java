@@ -33,7 +33,8 @@ public record ProdutoDto(
     CategoriaResponseDto categoriaDto,
     String imagem,
     String imagemSocial,
-    String copy
+    String copy,
+    Boolean promocaoEncerrada
 
 ) {
      public static ProdutoDto toResonse(Produto produto, LojaResponseDto lojaResponseDto, CategoriaResponseDto categoriaResponseDto){
@@ -52,7 +53,8 @@ public record ProdutoDto(
             categoriaResponseDto,
             produto.getUrlImagem(),
             produto.getImagemSocial(),
-            produto.getCopy()
+            produto.getCopy(),
+            produto.getPromocaoEncerrada()
         );
     }
 }

@@ -276,6 +276,19 @@ public class ProdutoService {
 
     }
 
+    public Boolean encerrarPromocao(Boolean status, Long id){
+
+        Optional<Produto> produto = produtoRepository.findById(id);
+
+        produto.get().setPromocaoEncerrada(status);
+
+        if (produtoRepository.save(produto.get()) != null) {
+            return true;
+        }
+
+        return false;
+    }
+
     public ProdutoResponseDto atualizarProduto(ProdutoAtualizarDto produtoAtualizarDto) {
 
         Optional<Categoria> categoria = categoriaRepository.findById(produtoAtualizarDto.id_categoria());
