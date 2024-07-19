@@ -390,11 +390,11 @@ public class ProdutoService {
 
     public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long categoriaId, Pageable pageable) {
         if (site == 1) {
-            return produtoRepository.findProdutosSe(2L,pageable)
+            return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
             .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
         }
 
-        return produtoRepository.findProdutosSe(2L,pageable)
+        return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
         .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
     }
 
