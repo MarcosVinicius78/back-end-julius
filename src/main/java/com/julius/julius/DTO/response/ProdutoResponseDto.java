@@ -16,6 +16,7 @@ public record ProdutoResponseDto(
         String descricao,
         String cupom,
         String link,
+        String linkOfm,
         String freteVariacoes,
         Date dataCriacao,
         String imagem,
@@ -28,9 +29,10 @@ public record ProdutoResponseDto(
 
 ) {
 
-    public static ProdutoResponseDto toResonse(Produto produto) {
+    public static ProdutoResponseDto toResonse(Produto produto, String url) {
         
          LojaResponseDto lojaDto = null;
+         
         
         Loja loja = produto.getLoja();
         if (loja != null) {
@@ -46,6 +48,7 @@ public record ProdutoResponseDto(
             produto.getDescricao(),
             produto.getCupom(),
             produto.getLink(),
+            url,
             produto.getFreteVariacoes(),
             produto.getDataCriacao(),
             produto.getUrlImagem(),

@@ -223,7 +223,7 @@ public class ProdutoService {
 
         loja.get().getProdutos().add(produto);
 
-        return ProdutoResponseDto.toResonse(produtoRepository.save(produto));
+        return ProdutoResponseDto.toResonse(produtoRepository.save(produto),"");
     }
 
     public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable pageable) {
@@ -231,12 +231,11 @@ public class ProdutoService {
         Page<ProdutoResponseDto> produtoTeste = null;
 
         if (site == 1) {
-            produtoTeste = produtoRepository.findAllIncludingSiteOneAndExcludingSiteTwo(2L,pageable)
-                    .map(ProdutoResponseDto::toResonse);
+            produtoTeste = produtoRepository.findProdutosSe(2L,pageable)
+                    .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
         } else {
-            
-            produtoTeste = produtoRepository.dsfindFirstByOrderByDataCadastroDes(site, pageable)
-                    .map(ProdutoResponseDto::toResonse);
+            produtoTeste = produtoRepository.findProdutosOfm(site, pageable)
+                    .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
         }
 
         if (produtoTeste.isEmpty()) {
@@ -386,17 +385,17 @@ public class ProdutoService {
         produto.setLoja(loja);
         produto.setCopy(produtoAtualizarDto.copy());
 
-        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto));
+        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto),"");
     }
 
     public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long categoriaId, Pageable pageable) {
         if (site == 1) {
-            return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
-                    .map(ProdutoResponseDto::toResonse);
+            return produtoRepository.findProdutosSe(2L,pageable)
+            .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
         }
 
-        return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
-                    .map(ProdutoResponseDto::toResonse);
+        return produtoRepository.findProdutosSe(2L,pageable)
+        .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
     }
 
     @Transactional
@@ -411,8 +410,8 @@ public class ProdutoService {
         Pageable pageable = PageRequest.of(pagina, tamanho);
 
         // Implemente a lógica de pesquisa no repositório
-        return produtoRepository.findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(termoPesquisa, pageable)
-                .map(ProdutoResponseDto::toResonse);
+        return produtoRepository.findByTituloAndSiteContainingIgnoreCaseOrderByDataCriacaoDesc(termoPesquisa,1L,pageable)
+        .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
     }
 
     public Resource loadImagemAResource(String imagemNome) {
@@ -628,9 +627,10 @@ public class ProdutoService {
 
     }
 
-    @Scheduled(cron = "0 0 23 * * ?")
+    @Transactional
+    @Scheduled(cron = "0 07 22 * * ?")
     public void deletarProdutosAntigos() throws FileExistsException {
-        LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
+        LocalDateTime dataLimite = LocalDateTime.now().minusDays(1);
         List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
 
         produtosAntigos.stream().forEach(item -> {
@@ -638,7 +638,13 @@ public class ProdutoService {
         });
 
         produtoRepository.deleteAll(produtosAntigos);
+        
         for (Produto produto : produtosAntigos) {
+            
+            produto.getLinksProdutos().stream().forEach(item -> {
+                linkProdutoRepository.deleteById(item.getId());
+            });
+
             if (produto.getUrlImagem() != null) {
                 apagarImagem(produto.getUrlImagem());
             }
