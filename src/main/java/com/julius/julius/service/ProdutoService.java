@@ -410,7 +410,7 @@ public class ProdutoService {
         Pageable pageable = PageRequest.of(pagina, tamanho);
 
         // Implemente a lógica de pesquisa no repositório
-        return produtoRepository.findByTituloAndSiteContainingIgnoreCaseOrderByDataCriacaoDesc(termoPesquisa,1L,pageable)
+        return produtoRepository.findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(termoPesquisa, pageable)
         .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
     }
 

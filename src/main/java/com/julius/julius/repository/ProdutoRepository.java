@@ -60,18 +60,19 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
                         "ORDER BY p.data_criacao DESC", nativeQuery = true)
         Page<Produto> findCategoriIdOrderByDataCriacaoDesc(Long categoriaId, Pageable pageable);
 
-        @Query(value = "SELECT p.* FROM produtos p " +
-                        "JOIN produto_link pl ON p.produto_id = pl.produto_id " +
-                        "JOIN links_produtos lp ON pl.link_produto_id = lp.id " +
-                        "WHERE LOWER(p.titulo) LIKE LOWER(CONCAT('%', :termoPesquisa, '%')) " +
-                        "AND lp.site = :site " +
-                        "ORDER BY p.data_criacao DESC", countQuery = "SELECT COUNT(*) FROM produtos p " +
-                                        "JOIN produto_link pl ON p.produto_id = pl.produto_id " +
-                                        "JOIN links_produtos lp ON pl.link_produto_id = lp.id " +
-                                        "WHERE LOWER(p.titulo) LIKE LOWER(CONCAT('%', :termoPesquisa, '%')) " +
-                                        "AND lp.site = :site", nativeQuery = true)
-        Page<Produto> findByTituloAndSiteContainingIgnoreCaseOrderByDataCriacaoDesc(
-                        @Param("termoPesquisa") String termoPesquisa, @Param("site") Long site, Pageable pageable);
+        // @Query(value = "SELECT p.* FROM produtos p " +
+        //                 "JOIN produto_link pl ON p.produto_id = pl.produto_id " +
+        //                 "JOIN links_produtos lp ON pl.link_produto_id = lp.id " +
+        //                 "WHERE LOWER(p.titulo) LIKE LOWER(CONCAT('%', :termoPesquisa, '%')) " +
+        //                 "AND lp.site = :site " +
+        //                 "ORDER BY p.data_criacao DESC", countQuery = "SELECT COUNT(*) FROM produtos p " +
+        //                                 "JOIN produto_link pl ON p.produto_id = pl.produto_id " +
+        //                                 "JOIN links_produtos lp ON pl.link_produto_id = lp.id " +
+        //                                 "WHERE LOWER(p.titulo) LIKE LOWER(CONCAT('%', :termoPesquisa, '%')) " +
+        //                                 "AND lp.site = :site", nativeQuery = true)
+        // Page<Produto> findByTituloAndSiteContainingIgnoreCaseOrderByDataCriacaoDesc(
+        //                 @Param("termoPesquisa") String termoPesquisa, @Param("site") Long site, Pageable pageable);
+        Page<Produto> findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(String termoPesquisa, Pageable pageable);
 
         @Query("SELECT p FROM Produto p WHERE p.dataCriacao <= :dataLimite")
         List<Produto> findProdutosComMaisDe7Dias(LocalDateTime dataLimite);
