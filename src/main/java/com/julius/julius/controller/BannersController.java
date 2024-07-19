@@ -47,9 +47,9 @@ public class BannersController {
         return ResponseEntity.ok().body(bannersService.salvarLinks(link));
     }
 
-    @GetMapping
-    public LinksBannersDto listarLinksEBanners(){
-        return bannersService.listarLinksEbanners();
+    @GetMapping("links-site/{siteId}")
+    public LinksBannersDto listarLinksEBanners(@PathVariable Long siteId){
+        return bannersService.listarLinksEbanners(siteId);
     }
 
     @DeleteMapping("{id}")

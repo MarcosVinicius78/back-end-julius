@@ -14,8 +14,8 @@ public record ProdutoSalvarDto(
         String precoParcelado,
         String descricao,
 
-        @NotBlank(message = "O campo 'Link' é obrigatório")
-        String link,
+        String link_se,
+        String link_ofm,
         
         String cupom,
         String mensagemAdicional,

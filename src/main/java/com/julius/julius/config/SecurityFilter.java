@@ -1,7 +1,9 @@
 package com.julius.julius.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,41 +33,49 @@ public class SecurityFilter {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
+        
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
+        
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        
+        // .cors(cors -> {
+        //     cors.configurationSource(new CorsConfigurationSource() {
+                
+        //         @Override
+        //         @Nullable
+        //         public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+        //             CorsConfiguration config = new CorsConfiguration();
+        //             List<String> or = new ArrayList<>();
 
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).cors(cors -> {
-            cors.configurationSource(new CorsConfigurationSource() {
-
-                @Override
-                @Nullable
-                public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                    CorsConfiguration config = new CorsConfiguration();
-
-                    // config.setAllowedOrigins(Collections.singletonList("http://www.systemdevmv.site"));
+        //             or.add("http://localhost:4200");
+        //             or.add("http://localhost:4201");
 
 
-                    config.setAllowedOrigins(Collections.singletonList("https://sergipeofertas.com.br"));
+        //             // config.setAllowedOrigins(Collections.singletonList("http://www.systemdevmv.site"));
+
+
+        //             config.setAllowedOrigins(Collections.singletonList("https://sergipeofertas.com.br"));
                     
                     
-                    // config.setAllowedOrigins(Collections.singletonList("http://www.sergipeofertas.com.br"));
-                    // config.setAllowedOrigins(Collections.singletonList("https://www.systemdevmv.site"));
-                    // config.setAllowedOrigins(Collections.singletonList("http://62.72.11.56"));
-                    // config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
-                    config.setAllowedMethods(Collections.singletonList("*"));
-                    config.setAllowCredentials(true);
-                    config.setAllowedHeaders(Collections.singletonList("*"));
-                    config.setExposedHeaders(Arrays.asList("Authorization"));
-                    config.setMaxAge(3600L);
+        //             // config.setAllowedOrigins(Collections.singletonList("http://www.sergipeofertas.com.br"));
+        //             // config.setAllowedOrigins(Collections.singletonList("https://www.systemdevmv.site"));
+        //             // config.setAllowedOrigins(Collections.singletonList("http://62.72.11.56"));
+        //             // config.setAllowedOrigins(Collections.singletonList("http://62.72.11.56"));
+        //             // config.setAllowedOrigins(Collections.singletonList(or));
+        //             config.setAllowedMethods(Collections.singletonList("*"));
+        //             config.setAllowCredentials(true);
+        //             config.setAllowedHeaders(Collections.singletonList("*"));
+        //             config.setExposedHeaders(Arrays.asList("Authorization"));
+        //             config.setMaxAge(3600L);
 
-                    return config;
-                }
+        //             return config;
+        //         }
 
-            });
-        });
+        //     });
+        // });
 
-        http.csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**","/banners/**", "/generate-image","/report/**","/post/**")
+        .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**","/banners/**", "/generate-image","/report/**","/post/**")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 // .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTGeneratorFilter(), BasicAuthenticationFilter.class)

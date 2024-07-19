@@ -1,9 +1,16 @@
 package com.julius.julius.service;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -14,6 +21,7 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,16 +46,18 @@ import com.julius.julius.DTO.response.LojaResponseDto;
 import com.julius.julius.DTO.response.ProdutoDto;
 import com.julius.julius.DTO.response.ProdutoResponseDto;
 import com.julius.julius.models.Categoria;
+import com.julius.julius.models.LinksProdutos;
 import com.julius.julius.models.Loja;
 import com.julius.julius.models.Produto;
 import com.julius.julius.repository.CategoriaRepository;
+import com.julius.julius.repository.LinkProdutoRepository;
 import com.julius.julius.repository.LojaRepository;
 import com.julius.julius.repository.ProdutoRepository;
 import com.julius.julius.repository.ReportRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import java.awt.*;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +70,8 @@ public class ProdutoService {
     private final ReportRepository reportRepository;
 
     private final CategoriaRepository categoriaRepository;
+
+    private final LinkProdutoRepository linkProdutoRepository;
 
     private static final String UPLOAD_DIR = "/uploads/produtos";
 
@@ -166,6 +178,16 @@ public class ProdutoService {
         }
     }
 
+    private LinksProdutos salvarLinkProduto(String url, Long site) {
+
+        LinksProdutos linkProduto = LinksProdutos.builder()
+                .url(url)
+                .site(site)
+                .build();
+
+        return this.linkProdutoRepository.save(linkProduto);
+    }
+
     public ProdutoResponseDto salvarProduto(ProdutoSalvarDto produtoSalvarDto) {
 
         Optional<Categoria> categoria = categoriaRepository.findById(produtoSalvarDto.id_categoria());
@@ -188,21 +210,34 @@ public class ProdutoService {
         produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
         produto.setLoja(loja.get());
-        produto.setLink(produtoSalvarDto.link());
+        if (!produtoSalvarDto.link_se().isEmpty()) {
+            LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link_se(), 1L);
+            produto.getLinksProdutos().add(linksProdutosSe);
+        }
+        if (produtoSalvarDto.link_ofm() != null) {
+            LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.link_ofm(), 2L);
+            produto.getLinksProdutos().add(linksProdutosOfm);
+        }
+        produto.setLink(produtoSalvarDto.link_se());
         produto.setCopy(produtoSalvarDto.copy());
-
-        System.out.println(produto.toString());
-        System.out.println(produto.getUrlImagem());
 
         loja.get().getProdutos().add(produto);
 
         return ProdutoResponseDto.toResonse(produtoRepository.save(produto));
     }
 
-    public Page<ProdutoResponseDto> getProdutosPaginados(Pageable pageable) {
+    public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable pageable) {
 
-        Page<ProdutoResponseDto> produtoTeste = produtoRepository.findFirstByOrderByDataCadastroDesc(pageable)
-                .map(ProdutoResponseDto::toResonse);
+        Page<ProdutoResponseDto> produtoTeste = null;
+
+        if (site == 1) {
+            produtoTeste = produtoRepository.findAllIncludingSiteOneAndExcludingSiteTwo(2L,pageable)
+                    .map(ProdutoResponseDto::toResonse);
+        } else {
+            
+            produtoTeste = produtoRepository.dsfindFirstByOrderByDataCadastroDes(site, pageable)
+                    .map(ProdutoResponseDto::toResonse);
+        }
 
         if (produtoTeste.isEmpty()) {
             return Page.empty();
@@ -211,31 +246,35 @@ public class ProdutoService {
         return produtoTeste;
     }
 
-    // return
-    // produtoRepository.findAll(pageable).map(ProdutoResponseDto::toResonse);
     public ProdutoDto pegarProduto(Long id) {
 
+        // Optional<Produto> produto = produtoRepository.findById(id);
         Optional<Produto> produto = produtoRepository.findById(id);
+        String urlSe = produtoRepository.sfindByProdutoBySite(id, 1L);
+        String urlOfm = produtoRepository.sfindByProdutoBySite(id, 2L);
 
-        if (!produto.isPresent()) {
+        if (produto == null) {
             return null;
         }
 
         LojaResponseDto lojaResponseDto = LojaResponseDto.toResonse(produto.get().getLoja());
         CategoriaResponseDto categoriaDto = CategoriaResponseDto.toResonse(produto.get().getCategoria());
 
-        return ProdutoDto.toResonse(produto.get(), lojaResponseDto, categoriaDto);
+        return ProdutoDto.toResonse(produto.get(), lojaResponseDto, categoriaDto, urlSe, urlOfm);
     }
 
+    @Transactional
     public Boolean apagarProduto(Long id, String urlImagem, String imagemSocial) throws FileExistsException {
-        
-        reportRepository.deleteByProdutoReport(id);
 
+        Optional<Produto> produto = produtoRepository.findById(id);
+        reportRepository.deleteByProdutoReport(id);
         this.produtoRepository.deleteById(id);
-        
-        
+
+        for (LinksProdutos i : produto.get().getLinksProdutos()) {
+            linkProdutoRepository.deleteById(i.getId());
+        }
+
         if (urlImagem != null || !urlImagem.isEmpty()) {
-            System.out.println(urlImagem);
             apagarImagem(urlImagem);
         }
 
@@ -276,7 +315,7 @@ public class ProdutoService {
 
     }
 
-    public Boolean encerrarPromocao(Boolean status, Long id){
+    public Boolean encerrarPromocao(Boolean status, Long id) {
 
         Optional<Produto> produto = produtoRepository.findById(id);
 
@@ -289,32 +328,75 @@ public class ProdutoService {
         return false;
     }
 
+    @Transactional
     public ProdutoResponseDto atualizarProduto(ProdutoAtualizarDto produtoAtualizarDto) {
 
-        Optional<Categoria> categoria = categoriaRepository.findById(produtoAtualizarDto.id_categoria());
-        Optional<Loja> loja = lojaRepository.findById(produtoAtualizarDto.id_loja());
+        Categoria categoria = categoriaRepository.findById(produtoAtualizarDto.id_categoria())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Categoria not found with id " + produtoAtualizarDto.id_categoria()));
+        Loja loja = lojaRepository.findById(produtoAtualizarDto.id_loja())
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Loja not found with id " + produtoAtualizarDto.id_loja()));
+        Produto produto = produtoRepository.findById(produtoAtualizarDto.id())
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Produto not found with id " + produtoAtualizarDto.id()));
 
-        Optional<Produto> produto = produtoRepository.findById(produtoAtualizarDto.id());
+        List<LinksProdutos> linksProdutos = produto.getLinksProdutos();
 
-        produto.get().setId(produtoAtualizarDto.id());
-        produto.get().setTitulo(produtoAtualizarDto.titulo());
-        produto.get().setPreco(produtoAtualizarDto.preco());
-        produto.get().setPrecoParcelado(produtoAtualizarDto.precoParcelado());
-        produto.get().setDescricao(produtoAtualizarDto.descricao());
-        produto.get().setLink(produtoAtualizarDto.link());
-        produto.get().setCupom(produtoAtualizarDto.cupom());
-        produto.get().setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
-        produto.get().setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
-        produto.get().setCategoria(categoria.get());
-        produto.get().setLoja(loja.get());
-        produto.get().setCopy(produtoAtualizarDto.copy());
+        // Atualização ou remoção de links existentes
+        Iterator<LinksProdutos> iterator = linksProdutos.iterator();
+        while (iterator.hasNext()) {
+            LinksProdutos linkProduto = iterator.next();
+            if (linkProduto.getSite() == 1 && produtoAtualizarDto.link_se() != null
+                    && !produtoAtualizarDto.link_se().isEmpty()) {
+                linkProdutoRepository.atualizarUrlSe(produtoAtualizarDto.link_se(), 1L, linkProduto.getId());
+            } else if (linkProduto.getSite() == 2 && produtoAtualizarDto.link_ofm() != null
+                    && !produtoAtualizarDto.link_ofm().isEmpty()) {
+                linkProdutoRepository.atualizarUrlSe(produtoAtualizarDto.link_ofm(), 2L, linkProduto.getId());
+            } else {
+                iterator.remove();
+                linkProdutoRepository.deletarChaveEstrangeiraLink(linkProduto.getId());
+                linkProdutoRepository.deleteById(linkProduto.getId());
+            }
+        }
 
-        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto.get()));
+        // Adicionando novos links, se necessário
+        if (produtoAtualizarDto.link_se() != null && !produtoAtualizarDto.link_se().isEmpty()
+                && linksProdutos.stream().noneMatch(lp -> lp.getSite() == 1)) {
+            LinksProdutos novoLinkSe = salvarLinkProduto(produtoAtualizarDto.link_se(), 1L);
+            produto.getLinksProdutos().add(novoLinkSe);
+        }
+        if (produtoAtualizarDto.link_ofm() != null && !produtoAtualizarDto.link_ofm().isEmpty()
+                && linksProdutos.stream().noneMatch(lp -> lp.getSite() == 2)) {
+            LinksProdutos novoLinkOfm = salvarLinkProduto(produtoAtualizarDto.link_ofm(), 2L);
+            produto.getLinksProdutos().add(novoLinkOfm);
+        }   
+
+        produto.setId(produtoAtualizarDto.id());
+        produto.setTitulo(produtoAtualizarDto.titulo());
+        produto.setPreco(produtoAtualizarDto.preco());
+        produto.setPrecoParcelado(produtoAtualizarDto.precoParcelado());
+        produto.setDescricao(produtoAtualizarDto.descricao());
+        produto.setLink(produtoAtualizarDto.link_se());
+        // linkProdutoRepository.atualizarUrlsPorProduto(produtoAtualizarDto.id(),
+        produto.setCupom(produtoAtualizarDto.cupom());
+        produto.setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
+        produto.setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
+        produto.setCategoria(categoria);
+        produto.setLoja(loja);
+        produto.setCopy(produtoAtualizarDto.copy());
+
+        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto));
     }
 
-    public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long categoriaId, Pageable pageable) {
-        return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
-                .map(ProdutoResponseDto::toResonse);
+    public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long categoriaId, Pageable pageable) {
+        if (site == 1) {
+            return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
+                    .map(ProdutoResponseDto::toResonse);
+        }
+
+        return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
+                    .map(ProdutoResponseDto::toResonse);
     }
 
     @Transactional
@@ -324,7 +406,7 @@ public class ProdutoService {
         produtoRepository.deleteByIdIn(ids);
     }
 
-    public Page<ProdutoResponseDto> pesquisarProdutos(String termoPesquisa, int pagina,int tamanho) {
+    public Page<ProdutoResponseDto> pesquisarProdutos(String termoPesquisa, int pagina, int tamanho) {
 
         Pageable pageable = PageRequest.of(pagina, tamanho);
 
@@ -498,7 +580,7 @@ public class ProdutoService {
             if (preco.length() > 19) {
                 fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 55);
                 g.setFont(fonteNegritoPreco);
-            }else  if(preco.length() > 14){
+            } else if (preco.length() > 14) {
                 fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 70);
                 g.setFont(fonteNegritoPreco);
             }

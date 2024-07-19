@@ -1,10 +1,17 @@
 package com.julius.julius.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,31 +19,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Table(name = "links")
 @Entity
+@Table(name = "links_produtos")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Getter
 @Setter
-@Builder
-public class Link {
+public class LinksProdutos {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "whatsapp")
-    private String whatsapp;
+    @Column(name = "url")
+    private String url;
 
-    @Column(name = "telegram")
-    private String telegram;
+    @Column(name = "site")
+    private Long site;;
 
-    @Column(name = "instagram")
-    private String instagram;
-
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "site_id")
-    private Long siteId;
+    @JsonBackReference
+    @ManyToMany(mappedBy = "linksProdutos")
+    private List<Produto> produtos = new ArrayList<>();
 }

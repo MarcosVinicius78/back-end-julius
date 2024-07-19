@@ -24,7 +24,8 @@ public record ProdutoDto(
     String preco,
     String parcelado,
     String descricao,
-    String link,
+    String link_se,
+    String link_ofm,
     Date dataCriacao,
     String cupom,
     String mensagemAdicional,
@@ -37,7 +38,7 @@ public record ProdutoDto(
     Boolean promocaoEncerrada
 
 ) {
-     public static ProdutoDto toResonse(Produto produto, LojaResponseDto lojaResponseDto, CategoriaResponseDto categoriaResponseDto){
+     public static ProdutoDto toResonse(Produto produto, LojaResponseDto lojaResponseDto, CategoriaResponseDto categoriaResponseDto, String urlSe, String urlOfm){
         return new ProdutoDto(
             produto.getId(),
             produto.getTitulo(),
@@ -45,6 +46,7 @@ public record ProdutoDto(
             produto.getPrecoParcelado(),
             produto.getDescricao(),
             produto.getLink(),
+            urlOfm,
             produto.getDataCriacao(),
             produto.getCupom(),
             produto.getMensagemAdicional(),

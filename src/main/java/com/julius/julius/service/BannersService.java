@@ -122,6 +122,7 @@ public class BannersService {
             links2.get().setTelegram(link.getTelegram());
             links2.get().setInstagram(link.getInstagram());
             links2.get().setEmail(link.getEmail());
+            links2.get().setSiteId(link.getSiteId());
             
             return linksRepository.save(links2.get());
         }
@@ -129,9 +130,9 @@ public class BannersService {
         return linksRepository.save(link);
     }
 
-    public LinksBannersDto listarLinksEbanners(){
+    public LinksBannersDto listarLinksEbanners(Long siteId){
 
-        List<Link> links = linksRepository.findAll();
+        Link links = linksRepository.pegarLinkeBannersSiteId(siteId);
         
         List<Banner> banners = bannerRepository.findAll();
 

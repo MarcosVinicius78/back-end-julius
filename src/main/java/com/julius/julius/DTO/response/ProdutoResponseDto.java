@@ -3,6 +3,7 @@ package com.julius.julius.DTO.response;
 import java.util.Date;
 import java.util.List;
 
+import com.julius.julius.models.LinksProdutos;
 import com.julius.julius.models.Loja;
 import com.julius.julius.models.Produto;
 
@@ -22,7 +23,8 @@ public record ProdutoResponseDto(
         String imagemSocial,
         String copy,
         String mensagemAdicional,
-        Boolean promocaoEncerrada
+        Boolean promocaoEncerrada,
+        List<LinksProdutos> linksProdutos
 
 ) {
 
@@ -51,7 +53,8 @@ public record ProdutoResponseDto(
             produto.getImagemSocial(),
             produto.getCopy(),
             produto.getMensagemAdicional(),
-            produto.getPromocaoEncerrada()
+            produto.getPromocaoEncerrada(),
+            produto.getLinksProdutos()
         );
     }
 

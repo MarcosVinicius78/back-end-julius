@@ -5,7 +5,7 @@ public record ProdutoScraperDTO(
     String nomeProduto,
     String precoProduto,
     String urlImagem,
-    String urlProduto,
+    String urlProdutoSe,
     String precoParcelado
 
 ) {

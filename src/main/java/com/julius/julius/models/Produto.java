@@ -8,6 +8,8 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,7 +37,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class Produto {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "produto_id")
@@ -43,7 +45,7 @@ public class Produto {
 
     @Column(name = "titulo")
     private String titulo;
-    
+
     @Column(name = "copy")
     private String copy;
 
@@ -58,7 +60,7 @@ public class Produto {
 
     @Column(name = "cupom")
     private String cupom;
-    
+
     @Column(name = "frete_variacoes")
     private String freteVariacoes;
 
@@ -67,11 +69,11 @@ public class Produto {
 
     @Column(name = "mensagem_adicional")
     private String mensagemAdicional;
-    
-    @Column(name = "url_imagem",nullable = true)
+
+    @Column(name = "url_imagem", nullable = true)
     private String urlImagem;
-   
-    @Column(name = "imagem_social",nullable = true)
+
+    @Column(name = "imagem_social", nullable = true)
     private String imagemSocial;
 
     @OneToMany(mappedBy = "produto")
@@ -80,7 +82,7 @@ public class Produto {
     @ManyToOne
     @JoinColumn(name = "fk_categoria")
     private Categoria categoria;
-    
+
     @ManyToOne
     @JoinColumn(name = "fk_loja")
     private Loja loja;
@@ -88,7 +90,12 @@ public class Produto {
     @Column(name = "promocao_encerrada")
     private Boolean promocaoEncerrada;
 
-    @Column(name =  "data_criacao", updatable=false)
+    @JsonManagedReference
+    @ManyToMany
+    @JoinTable(name = "produto_link", joinColumns = @JoinColumn(name = "produto_id"), inverseJoinColumns = @JoinColumn(name = "link_produto_id"))
+    private List<LinksProdutos> linksProdutos = new ArrayList<>();
+
+    @Column(name = "data_criacao", updatable = false)
     @CreationTimestamp
     private Date dataCriacao;
 
@@ -97,7 +104,7 @@ public class Produto {
     private Date dataAtualizacao;
 
     @PrePersist
-    public void prePersiste(){
+    public void prePersiste() {
         if (promocaoEncerrada == null) {
             promocaoEncerrada = false;
         }

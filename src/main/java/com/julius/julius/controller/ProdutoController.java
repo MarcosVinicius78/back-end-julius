@@ -49,7 +49,7 @@ public class ProdutoController {
         if (r != null && r == 1) {
             // Lógica para obter a URL do site oficial do produto baseado no ID
             ProdutoDto officialProductUrl = produtoService.pegarProduto(id);
-            return ResponseEntity.status(302).header("Location", officialProductUrl.link()).build();
+            return ResponseEntity.status(302).header("Location", officialProductUrl.link_se()).build();
         } else {
             ProdutoDto produto = produtoService.pegarProduto(id);
             return ResponseEntity.ok().body(produto);
@@ -73,18 +73,19 @@ public class ProdutoController {
 
     @GetMapping()
     public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosPaginacao(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "12") int size, @RequestParam(defaultValue = "1" ,required = false) Long site) {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ProdutoResponseDto> produtos = produtoService.getProdutosPaginados(pageable);
+        Page<ProdutoResponseDto> produtos = produtoService.getProdutosPaginados(site, pageable);
 
         return new ResponseEntity<>(produtos, HttpStatus.OK);
     }
 
     @PostMapping("/salvar")
     public ResponseEntity<ProdutoResponseDto> salvarProduto(@RequestBody @Valid ProdutoSalvarDto produtoSalvarDto) {
-        System.out.println(produtoSalvarDto);
+        System.out.println(produtoSalvarDto.link_ofm());
+        System.out.println(produtoSalvarDto.link_se());
         if (produtoSalvarDto != null) {
             return ResponseEntity.ok().body(produtoService.salvarProduto(produtoSalvarDto));
         }
@@ -122,12 +123,13 @@ public class ProdutoController {
     @GetMapping("/por-categoria")
     public ResponseEntity<List<ProdutoResponseDto>> obterProdutosPorCategoria(
             @RequestParam("categoriaId") Long categoriaId,
+            @RequestParam("site") Long site,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "12") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ProdutoResponseDto> produtos = produtoService.obterProdutosPorCategoria(categoriaId, pageable);
+        Page<ProdutoResponseDto> produtos = produtoService.obterProdutosPorCategoria(site, categoriaId, pageable);
 
         return new ResponseEntity<>(produtos.getContent(), HttpStatus.OK);
     }
