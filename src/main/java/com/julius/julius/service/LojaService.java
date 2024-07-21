@@ -36,7 +36,7 @@ public class LojaService {
     private EntityManager entityManager;
 
     public List<LojaResponseDto> listarLojas() {
-        return lojaRepository.findAll().stream().map(LojaResponseDto::toResonse).toList();
+        return lojaRepository.findAllByOrderByNomeLojaAsc().stream().map(LojaResponseDto::toResonse).toList();
     }
 
     public Resource loadImagemAResource(String imagemNome) {

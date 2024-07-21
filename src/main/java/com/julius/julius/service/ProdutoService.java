@@ -628,9 +628,9 @@ public class ProdutoService {
     }
 
     @Transactional
-    @Scheduled(cron = "0 07 22 * * ?")
+    @Scheduled(cron = "0 0 23 * * ?")
     public void deletarProdutosAntigos() throws FileExistsException {
-        LocalDateTime dataLimite = LocalDateTime.now().minusDays(1);
+        LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
         List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
 
         produtosAntigos.stream().forEach(item -> {
