@@ -405,12 +405,12 @@ public class ProdutoService {
         produtoRepository.deleteByIdIn(ids);
     }
 
-    public Page<ProdutoResponseDto> pesquisarProdutos(String termoPesquisa, int pagina, int tamanho) {
+    public Page<ProdutoResponseDto> pesquisarProdutos(Long site, String termoPesquisa, int pagina, int tamanho) {
 
         Pageable pageable = PageRequest.of(pagina, tamanho);
 
         // Implemente a lógica de pesquisa no repositório
-        return produtoRepository.findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(termoPesquisa, pageable)
+        return produtoRepository.findByTituloAndSiteContainingIgnoreCaseOrderByDataCriacaoDesc(termoPesquisa, site, pageable)
         .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
     }
 
