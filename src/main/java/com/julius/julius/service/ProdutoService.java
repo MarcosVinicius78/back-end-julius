@@ -252,7 +252,7 @@ public class ProdutoService {
         String urlSe = produtoRepository.sfindByProdutoBySite(id, 1L);
         String urlOfm = produtoRepository.sfindByProdutoBySite(id, 2L);
 
-        if (produto == null) {
+        if (!produto.isPresent()) {
             return null;
         }
 
