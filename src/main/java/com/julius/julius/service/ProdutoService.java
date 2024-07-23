@@ -472,15 +472,15 @@ public class ProdutoService {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setColor(Color.BLACK);
-            g.drawImage(foto, 53, 130, 800, 750, null);
+            g.drawImage(foto, 69, 130, 950, 880, null);
 
             // Configurar fonte para o título
             // Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
-            Font fonteNegrito = customFont.deriveFont(Font.BOLD, 45);
+            Font fonteNegrito = customFont.deriveFont(Font.BOLD, 55);
             g.setFont(fonteNegrito);
             FontMetrics fm = g.getFontMetrics();
             int imageWidth = image.getWidth();
-            int titleYPosition = 970;
+            int titleYPosition = 1080;
 
             // Quebrar o título em múltiplas linhas
             List<String> lines = new ArrayList<>();
@@ -521,52 +521,57 @@ public class ProdutoService {
             }
 
             // Definir as coordenadas e dimensões do retângulo do cupom
-            int rectX = 450; // exemplo de coordenada X do retângulo
-            int rectY = 1077; // exemplo de coordenada Y do retângulo
+            int rectX = 520; // exemplo de coordenada X do retângulo
+            int rectY = 1212; // exemplo de coordenada Y do retângulo
             int rectWidth = 350; // exemplo de largura do retângulo
             int rectHeight = 50; // exemplo de altura do retângulo
 
-            Font font = customFont.deriveFont(Font.BOLD, 40);
+            Font font = customFont.deriveFont(Font.BOLD, 55);
             g.setFont(font);
             FontMetrics couponFm = g.getFontMetrics();
             int couponXPosition = rectX + (rectWidth - couponFm.stringWidth("Cupom: " + cupom)) / 3;
             int couponYPosition = rectY + (rectHeight + couponFm.getAscent()) / 2 - 3;
+            System.out.println(frete.length());
             if (!cupom.isEmpty() && cupom.length() <= 6 && !cupom.equals("null")) {
                 // g.setFont(new Font("Arial", Font.BOLD, 40));
                 // g.drawString("Cupom:" + cupom, 451, 1122);
                 g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
             } else if (!cupom.isEmpty() && cupom.length() <= 16 && !cupom.equals("null")) {
-                font = customFont.deriveFont(Font.BOLD, 32);
+                font = customFont.deriveFont(Font.BOLD, 42);
                 g.setFont(font);
-
                 // g.drawString("Cupom: " + cupom, 394, 1122);
                 g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
             } else if (!cupom.isEmpty() && cupom.length() >= 17 && !cupom.equals("null")) {
-                font = customFont.deriveFont(Font.BOLD, 31);
+                font = customFont.deriveFont(Font.BOLD, 38);
                 g.setFont(font);
+                System.out.println(couponXPosition);
+                System.out.println(couponYPosition);
                 // g.drawString("Cupom: " + cupom, 353, 1122);
-                g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
+                g.drawString("Cupom: " + cupom, 392, couponYPosition);
             } else if (!frete.isEmpty() && frete.length() == 18) {
                 // frete grátis prime
-                g.drawString(frete, 425, 1122);
+                g.drawString(frete, 420, 1262);
                 // g.drawString(frete, couponXPosition, couponYPosition);
             } else if (!frete.isEmpty() && frete.length() == 12) {
                 // frete grátis
-                g.drawString(frete, 485, 1122);
+                g.drawString(frete, 492, 1262);
             } else if (!frete.isEmpty() && frete.length() == 15 || frete.length() > 40) {
-                g.drawString("Frete Econômico", 445, 1122);
+                g.drawString("Frete Econômico", 440, 1262);
                 // frete econômico
-            } else if (!frete.isEmpty() && frete.length() == 28) {
-                font = customFont.deriveFont(Font.BOLD, 33);
+            } else if (!frete.isEmpty() && frete.length() == 30) {
+                font = customFont.deriveFont(Font.BOLD, 45);
                 g.setFont(font);
+                
                 // frete grátis algumas regioes
-                g.drawString(frete, 350, 1122);
+                g.drawString("Frete Grátis", 540, 1232);
+                g.drawString("Algumas Regiões", 460, 1282);
             } else if (!frete.isEmpty() && frete.length() == 24) {
                 // gratis retirando na loja
-                font = customFont.deriveFont(Font.BOLD, 38);
+                font = customFont.deriveFont(Font.BOLD, 45);
                 g.setFont(font);
                 // g.setFont(font);
-                g.drawString(frete, 355, 1122);
+                g.drawString("Grátis Retirando", 477, 1232);
+                g.drawString("Na Loja", 590, 1282);
             }
 
             // g.setFont(new Font("Arial", Font.BOLD, 40));
@@ -575,9 +580,10 @@ public class ProdutoService {
             // g.setFont(new Font("Arial", Font.BOLD, 40));
             // g.drawString(titulo2 + "...", 80, 1040);
 
-            Font fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 90);
+            //estilização do preço nos stories
+            Font fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 99);
             if (preco.length() > 19) {
-                fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 55);
+                fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 85);
                 g.setFont(fonteNegritoPreco);
             } else if (preco.length() > 14) {
                 fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 70);
@@ -586,7 +592,7 @@ public class ProdutoService {
             g.setFont(fonteNegritoPreco);
             FontMetrics priceFm = g.getFontMetrics();
             int priceXPosition = (imageWidth - priceFm.stringWidth(preco)) / 2;
-            g.drawString(preco, priceXPosition, 1277);
+            g.drawString(preco, priceXPosition, 1531);
 
             g.dispose();
             // Converter a imagem para um array de bytes
