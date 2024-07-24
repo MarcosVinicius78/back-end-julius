@@ -72,11 +72,15 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
                                         "AND lp.site = :site", nativeQuery = true)
         Page<Produto> findByTituloAndSiteContainingIgnoreCaseOrderByDataCriacaoDesc(
                         @Param("termoPesquisa") String termoPesquisa, @Param("site") Long site, Pageable pageable);
-        // Page<Produto> findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(String termoPesquisa, Pageable pageable);
+        // Page<Produto> findByTituloContainingIgnoreCaseOrderByDataCriacaoDesc(String
+        // termoPesquisa, Pageable pageable);
 
         @Query("SELECT p FROM Produto p WHERE p.dataCriacao <= :dataLimite")
         List<Produto> findProdutosComMaisDe7Dias(LocalDateTime dataLimite);
 
         @Query(value = "SELECT l.url FROM produtos p JOIN produto_link pl ON p.produto_id = pl.produto_id JOIN links_Produtos l ON pl.link_produto_id = l.id WHERE p.produto_id = :produtoId AND l.site = :site", nativeQuery = true)
         String sfindByProdutoBySite(@Param("produtoId") Long produtoId, @Param("site") Long site);
+
+        @Query(value = "SELECT * FROM produtos WHERE fk_categoria = :categoriaId", nativeQuery = true)
+        List<Produto> findByProdutoPorCategoriaId(@Param("categoriaId") Long categoriaId);
 }

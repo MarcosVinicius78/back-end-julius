@@ -31,7 +31,7 @@ public class Categoria {
     private Long categoria_id;
 
     @Column(name = "nome_categoria")
-    private String nome_categoria;
+    private String nomeCategoria;
 
     @OneToMany(mappedBy = "categoria", fetch = FetchType.EAGER)
     private List<Produto> produtos;
