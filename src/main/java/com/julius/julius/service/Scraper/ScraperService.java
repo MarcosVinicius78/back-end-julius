@@ -56,6 +56,8 @@ public class ScraperService {
             return handleAmazon(url);
         }else if (url.contains("mercado")) {
             return mercadoLivre.getDadosProdutos(url);
+        }else if(url.contains("shopee")){
+            return handleShopee(url);
         }else{
             return magazineService.getProdutoMagazine(url);
         }
@@ -74,8 +76,9 @@ public class ScraperService {
         return scraperLojasAwin.pegarDadosDoProdutoAwin(urlShort, nomeLoja);
     }
 
-    private ProdutoScraperDTO handleShopee() {
-        shopeeService.getAuthShopee();
-        return null; // Adjust as necessary
+    private ProdutoScraperDTO handleShopee(String url) {
+        String response = shopeeService.fetchProductOffers(url);
+        
+        return shopeeService.pegarInfoProdutosShopee(response, url);
     }
 }

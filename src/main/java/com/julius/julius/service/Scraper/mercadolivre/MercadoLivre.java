@@ -44,7 +44,7 @@ public class MercadoLivre {
                 precoParcelado = precoParceladoElement.text();
             }
 
-            return new ProdutoScraperDTO(titulo.text(), preco, img, url, precoParcelado);
+            return new ProdutoScraperDTO(titulo.text(), preco, img, url,"", precoParcelado);
         } catch (ConnectException e) {
             e.printStackTrace();
         }

@@ -6,10 +6,11 @@ public record ProdutoScraperDTO(
     String precoProduto,
     String urlImagem,
     String urlProdutoSe,
+    String urlProdutoOmc,
     String precoParcelado
 
 ) {
-    static ProdutoScraperDTO toResponse(String nome, String preco,String urlImagem, String urlProduto, String precoParcelado){
-        return new ProdutoScraperDTO(nome, preco,urlImagem, urlProduto, precoParcelado);
+    static ProdutoScraperDTO toResponse(String nome, String preco,String urlImagem, String urlProdutoSe,String urlProdutoOmc, String precoParcelado){
+        return new ProdutoScraperDTO(nome, preco,urlImagem, urlProdutoSe,urlProdutoOmc, precoParcelado);
     }
 }

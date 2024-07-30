@@ -38,7 +38,7 @@ public class BoticarioScrapper {
             precoParcelado = "Ou "+ elements.text();
         }
 
-        return new ProdutoScraperDTO(titulo, preco, imagem, urlProduto, precoParcelado);
+        return new ProdutoScraperDTO(titulo, preco, imagem, urlProduto,"", precoParcelado);
     }
 
 }

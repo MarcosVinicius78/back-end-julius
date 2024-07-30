@@ -31,7 +31,7 @@ public class ScraperLojasAwin {
             
             System.out.println(nomeLoja);
             if (response == null) {
-                return new ProdutoScraperDTO("", "", "", urlShort, "");
+                return new ProdutoScraperDTO("", "", "","", urlShort, "");
             }
 
             switch (nomeLoja) {
@@ -45,10 +45,10 @@ public class ScraperLojasAwin {
             }
             
             
-            return new ProdutoScraperDTO("", "", "", urlShort, "");
+            return new ProdutoScraperDTO("", "", "","", urlShort, "");
         } catch (ConnectException e) {
             e.printStackTrace();
-            return new ProdutoScraperDTO("", "", "", urlShort, "");
+            return new ProdutoScraperDTO("", "", "","", urlShort, "");
         }
         // return null;
     }
@@ -78,6 +78,6 @@ public class ScraperLojasAwin {
 
         // String titulo = elements.select("data-testid=\"box-product-title\"").text();
 
-        return new ProdutoScraperDTO("titulo", "", "", url, "");
+        return new ProdutoScraperDTO("titulo", "", "","", url, "");
     }
 }

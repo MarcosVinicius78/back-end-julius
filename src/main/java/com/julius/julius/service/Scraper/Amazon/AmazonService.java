@@ -183,7 +183,7 @@ public class AmazonService {
 
         String amount = priceResult.getString("DisplayAmount");
 
-        return new ProdutoScraperDTO(displayValue, amount, urlImagem,url,"");
+        return new ProdutoScraperDTO(displayValue, amount, urlImagem,url,"","");
     }
     
 }

@@ -53,7 +53,7 @@ public class ScraperController {
             Element imgElement = doc.select("div#imgTagWrapperId img[src]").first();
             String urlImagem = imgElement.attr("src");
 
-            return ResponseEntity.ok().body(new ProdutoScraperDTO(titulo, precoSalvo, urlImagem,url, ""));
+            return ResponseEntity.ok().body(new ProdutoScraperDTO(titulo, precoSalvo, urlImagem,url,"", ""));
 
         } catch (Exception e) {
             e.printStackTrace();

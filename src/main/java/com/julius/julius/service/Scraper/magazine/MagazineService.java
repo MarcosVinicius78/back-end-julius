@@ -61,7 +61,7 @@ public class MagazineService {
 
                     String imagem = element.select("[data-testid=image]").attr("src");
 
-                    return new ProdutoScraperDTO(title, price, imagem, href, precoParcelado);
+                    return new ProdutoScraperDTO(title, price, imagem, href,"", precoParcelado);
                 }
             }
 

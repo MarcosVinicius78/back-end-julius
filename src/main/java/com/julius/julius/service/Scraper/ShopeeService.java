@@ -1,62 +1,158 @@
 package com.julius.julius.service.Scraper;
 
-import java.math.BigInteger;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.time.Instant;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
-// import org.apache.http.HttpResponse;
-
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import com.mashape.unirest.http.HttpResponse;
+import com.github.dockerjava.api.exception.NotFoundException;
+import com.julius.julius.DTO.response.ProdutoScraperDTO;
 
 @Service
 public class ShopeeService {
 
-    public void getAuthShopee() {
+    private static final String appID = "18199430003"; // Substitua pelo seu appID real
+    private static final String secret = "HB6T6RCEXPLBYXMT4ZGDD2PMUZE5DGII"; // Substitua pelo seu secret real
+    private String url = "https://open-api.affiliate.shopee.com.br/graphql"; // Substitua pela sua URL
+                                                                                          // real7
 
+    public String fetchProductOffers(String url) {
         try {
+            String codigoProduto;
+            codigoProduto = extractCodeFromUrl(getFinalUrl(url));
 
-            long timest = System.currentTimeMillis() / 1000L;
-            String host = "https://partner.shopeemobile.com";
-            String path = "/api/v2/shop/auth_partner";
-            String redirect_url = "https://www.baidu.com/";
-            long partner_id = 18199430003L;
-            String tmp_partner_key = "...";
-            String tmp_base_string = String.format("%s%s%s", partner_id, path, timest);
-            byte[] partner_key;
-            byte[] base_string;
-            String sign = "";
-            try {
-                base_string = tmp_base_string.getBytes("UTF-8");
-                partner_key = tmp_partner_key.getBytes("UTF-8");
-                Mac mac = Mac.getInstance("HmacSHA256");
-                SecretKeySpec secret_key = new SecretKeySpec(partner_key, "HmacSHA256");
-                mac.init(secret_key);
-                sign = String.format("%064x", new BigInteger(1, mac.doFinal(base_string)));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            String url = host + path
-                    + String.format("?partner_id=%s&timestamp=%s&sign=%s&redirect=%s", partner_id, timest,
-                            sign, redirect_url);
-            System.out.println(url);
+            // Payload da requisição
+            String payload = String.format("{\"query\":\"{productOfferV2(itemId: %s){nodes{productName price imageUrl productLink offerLink}}}\"}", codigoProduto);
 
-            String access_token = "HB6T6RCEXPLBYXMT4ZGDD2PMUZE5DGII";
+            // Obtenha o timestamp atual
+            long timestamp = Instant.now().getEpochSecond();
 
-            Unirest.setTimeouts(0, 0);
-            HttpResponse<String> response = Unirest.get(
-            "https://partner.shopeemobile.com/api/v2/product/get_item_base_info?"+"timestamp="+timest+"&"+"sign="+sign+"&"+"shop_id="+"818390117"+"&"+"need_tax_info="+"true"+"&"+"item_id_list="+"18424274024"+"&"+"partner_id=18199430003"+"&"+"need_complaint_policy="+"true"+"&"+"access_token="+access_token)
-            .asString();
+            // Construa o fator de assinatura
+            String factor = appID + timestamp + payload + secret;
 
-            System.out.println(response.getBody());
+            // Calcule a assinatura
+            String signature = sha256(factor);
 
+            // Construa o cabeçalho de autorização
+            String authorizationHeader = String.format("SHA256 Credential=%s, Timestamp=%d, Signature=%s", appID,
+                    timestamp, signature);
+            System.out.println(authorizationHeader);
+            // Envie a requisição
+            String response = sendPostRequest(this.url, payload, authorizationHeader);
+            System.out.println(response);
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        return "";
     }
+
+    public ProdutoScraperDTO pegarInfoProdutosShopee(String response, String url){
+        JSONObject jsonObject = new JSONObject(response);
+        JSONObject dataObject = jsonObject.getJSONObject("data");
+        JSONObject productOfferV2 = dataObject.getJSONObject("productOfferV2");
+        JSONArray nodesArray = productOfferV2.getJSONArray("nodes");
+
+        String produtoNome = "";
+        String preco = "";
+        String imagemUrl = "";
+        // Loop through nodes and extract values
+        for (int i = 0; i < nodesArray.length(); i++) {
+            JSONObject node = nodesArray.getJSONObject(i);
+            produtoNome = node.getString("productName");
+            preco = "R$ "+node.getString("price");
+            imagemUrl = node.getString("imageUrl");
+        }
+        return new ProdutoScraperDTO(produtoNome, preco.replace(".", ","), imagemUrl, url,"", "");
+    }
+
+    // Método para obter a URL final após redirecionamentos
+    private String getFinalUrl(String urlString) throws IOException {
+        String expandedUrl;
+        try {
+            URL urlGet = new URL(urlString);
+            URLConnection connection = urlGet.openConnection();
+            InputStream is = connection.getInputStream();
+            expandedUrl = connection.getURL().toString();
+            return expandedUrl;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // Método para extrair o código da URL final
+    private String extractCodeFromUrl(String urlString) throws URISyntaxException {
+        URI uri = new URI(urlString);
+        String path = uri.getPath();
+        String[] segments = path.split("/");
+
+        // Código é o segundo segmento na URL de exemplo
+        if (segments.length > 2) {
+            return segments[3];
+        }
+
+        // Retornar uma string vazia se o código não for encontrado
+        return "";
+    }
+
+    private static String sendPostRequest(String urlString, String payload, String authorizationHeader)
+            throws Exception {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Authorization", authorizationHeader);
+        connection.setDoOutput(true);
+
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = payload.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            throw new RuntimeException("Failed : HTTP error code : " + responseCode);
+        }
+
+        StringBuilder response = new StringBuilder();
+        try (var in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                response.append(line);
+            }
+        }
+
+        return response.toString();
+    }
+
+    private static String sha256(String base) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(base.getBytes(StandardCharsets.UTF_8));
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (byte b : hash) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+
 }
