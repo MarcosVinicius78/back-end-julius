@@ -49,7 +49,7 @@ public class ShopeeService {
             // Construa o cabeçalho de autorização
             String authorizationHeader = String.format("SHA256 Credential=%s, Timestamp=%d, Signature=%s", appID,
                     timestamp, signature);
-            System.out.println(authorizationHeader);
+
             // Envie a requisição
             String response = sendPostRequest(this.url, payload, authorizationHeader);
             System.out.println(response);

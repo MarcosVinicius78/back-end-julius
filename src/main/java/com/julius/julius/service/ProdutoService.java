@@ -544,18 +544,16 @@ public class ProdutoService {
             } else if (!cupom.isEmpty() && cupom.length() >= 17 && !cupom.equals("null")) {
                 font = customFont.deriveFont(Font.BOLD, 38);
                 g.setFont(font);
-                System.out.println(couponXPosition);
-                System.out.println(couponYPosition);
                 // g.drawString("Cupom: " + cupom, 353, 1122);
                 g.drawString("Cupom: " + cupom, 392, couponYPosition);
             } else if (!frete.isEmpty() && frete.length() == 18) {
                 // frete grátis prime
                 g.drawString(frete, 420, 1262);
                 // g.drawString(frete, couponXPosition, couponYPosition);
-            } else if (!frete.isEmpty() && frete.length() == 12) {
+            } else if (!frete.isEmpty() && frete.length() == 12 || frete.length() > 45) {
                 // frete grátis
-                g.drawString(frete, 492, 1262);
-            } else if (!frete.isEmpty() && frete.length() == 15 || frete.length() > 40) {
+                g.drawString("Frete Grátis", 492, 1262);
+            } else if (!frete.isEmpty() && frete.length() == 15) {
                 g.drawString("Frete Econômico", 440, 1262);
                 // frete econômico
             } else if (!frete.isEmpty() && frete.length() == 30) {

@@ -4,12 +4,10 @@ import java.net.ConnectException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jsoup.Connection.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.julius.julius.DTO.response.ProdutoScraperDTO;
@@ -17,7 +15,8 @@ import com.julius.julius.DTO.response.ProdutoScraperDTO;
 @Service
 public class MagazineService {
 
-    private final String URL_BASE_MAGAZINE = "https://www.magazinevoce.com.br";
+    private final String URL_BASE_MAGAZINE_SE = "https://www.magazinevoce.com.br";
+    private final String URL_BASE_MAGAZINE_OMC = "https://www.magazinevoce.com.br/magazineofertasmaiscupom";
 
     private final String URL_BUSCA_MAGAZINE = "https://www.magazinevoce.com.br/sergipeeofertas/busca/";
 
@@ -44,7 +43,11 @@ public class MagazineService {
             for (Element element : secondAnchor.select("a")) {
                 if (element.attr("href").contains(codigo)) {
 
-                    String href = this.URL_BASE_MAGAZINE + element.attr("href");
+                    String path = element.attr("href"); 
+                    String hrefSe = this.URL_BASE_MAGAZINE_SE + path;
+                    String hrefOmc = this.URL_BASE_MAGAZINE_OMC + path.replace("/sergipeeofertas", "");
+                    System.out.println(hrefOmc);
+                    System.out.println(element.attr("href"));
                     String title = element.select("[data-testid=product-title]").text();
                     String price = element.select("[data-testid=price-value]").text();
                     String precoParcelado = element.select("[data-testid=installment]").text();
@@ -61,7 +64,7 @@ public class MagazineService {
 
                     String imagem = element.select("[data-testid=image]").attr("src");
 
-                    return new ProdutoScraperDTO(title, price, imagem, href,"", precoParcelado);
+                    return new ProdutoScraperDTO(title, price, imagem, hrefSe, hrefOmc, precoParcelado);
                 }
             }
 
