@@ -114,7 +114,7 @@ public class BannersService {
 
 
 
-        if (link.getId() != null) { 
+        if (link.getId() == null) { 
             
             Optional<Link> links2 = linksRepository.findById(link.getId());
 

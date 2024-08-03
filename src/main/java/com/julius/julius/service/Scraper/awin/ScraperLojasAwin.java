@@ -78,6 +78,6 @@ public class ScraperLojasAwin {
 
         // String titulo = elements.select("data-testid=\"box-product-title\"").text();
 
-        return new ProdutoScraperDTO("titulo", "", "","", url, "");
+        return new ProdutoScraperDTO("titulo", "", "",url,"", "");
     }
 }

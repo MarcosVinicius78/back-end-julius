@@ -210,11 +210,13 @@ public class ProdutoService {
         produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
         produto.setLoja(loja.get());
+        System.out.println(produtoSalvarDto.link_se());
+        System.out.println(produtoSalvarDto.link_ofm().isEmpty());
         if (!produtoSalvarDto.link_se().isEmpty()) {
             LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link_se(), 1L);
             produto.getLinksProdutos().add(linksProdutosSe);
         }
-        if (produtoSalvarDto.link_ofm() != null) {
+        if (!produtoSalvarDto.link_ofm().isEmpty() && produtoSalvarDto.link_ofm() != null) {
             LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.link_ofm(), 2L);
             produto.getLinksProdutos().add(linksProdutosOfm);
         }
