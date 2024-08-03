@@ -45,10 +45,10 @@ public class ScraperLojasAwin {
             }
             
             
-            return new ProdutoScraperDTO("", "", "","", urlShort, "");
+            return new ProdutoScraperDTO("", "", "",urlShort, "", "");
         } catch (ConnectException e) {
             e.printStackTrace();
-            return new ProdutoScraperDTO("", "", "","", urlShort, "");
+            return new ProdutoScraperDTO("", "", "",urlShort, "", "");
         }
         // return null;
     }
