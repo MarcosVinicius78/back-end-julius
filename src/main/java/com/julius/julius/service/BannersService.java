@@ -114,7 +114,7 @@ public class BannersService {
 
 
 
-        if (link.getId() == null) { 
+        if (link.getSiteId() == null) { 
             
             Optional<Link> links2 = linksRepository.findById(link.getId());
 
@@ -122,7 +122,7 @@ public class BannersService {
             links2.get().setTelegram(link.getTelegram());
             links2.get().setInstagram(link.getInstagram());
             links2.get().setEmail(link.getEmail());
-            links2.get().setSiteId(link.getSiteId());
+            links2.get().setSiteId(1L);
             
             return linksRepository.save(links2.get());
         }

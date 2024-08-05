@@ -1,7 +1,6 @@
 package com.julius.julius.controller;
 
 import java.awt.FontFormatException;
-import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.apache.commons.io.FileExistsException;
@@ -29,7 +28,6 @@ import com.julius.julius.DTO.ProdutoAtualizarDto;
 import com.julius.julius.DTO.ProdutoSalvarDto;
 import com.julius.julius.DTO.response.ProdutoDto;
 import com.julius.julius.DTO.response.ProdutoResponseDto;
-import com.julius.julius.models.Produto;
 import com.julius.julius.service.ProdutoService;
 
 import jakarta.validation.Valid;
@@ -49,7 +47,8 @@ public class ProdutoController {
         if (r != null && r == 1) {
             // Lógica para obter a URL do site oficial do produto baseado no ID
             ProdutoDto officialProductUrl = produtoService.pegarProduto(id);
-            return ResponseEntity.status(302).header("Location", officialProductUrl.link_se()).build();
+            // return ResponseEntity.status(302).header("Location", officialProductUrl.link_se()).build();
+            return ResponseEntity.status(200).body(officialProductUrl);
         } else {
             ProdutoDto produto = produtoService.pegarProduto(id);
             return ResponseEntity.ok().body(produto);
