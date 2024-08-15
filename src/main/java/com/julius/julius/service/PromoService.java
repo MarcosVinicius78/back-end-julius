@@ -39,7 +39,7 @@ public class PromoService {
 
     public List<PromoResponseDTO> listarPromos() {
 
-        List<Promo> promo = promoRepository.findAll();
+        List<Promo> promo = promoRepository.lsitarPromos();
 
         return promo.stream().map(PromoResponseDTO::toResponse).toList();
     }

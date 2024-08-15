@@ -210,8 +210,7 @@ public class ProdutoService {
         produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
         produto.setLoja(loja.get());
-        System.out.println(produtoSalvarDto.link_se());
-        System.out.println(produtoSalvarDto.link_ofm().isEmpty());
+        
         if (!produtoSalvarDto.link_se().isEmpty()) {
             LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link_se(), 1L);
             produto.getLinksProdutos().add(linksProdutosSe);
@@ -642,6 +641,7 @@ public class ProdutoService {
 
         produtosAntigos.stream().forEach(item -> {
             reportRepository.deleteByProdutoReport(item.getId());
+            produtoRepository.deleteByProdutoPromos(item.getId());
         });
 
         produtoRepository.deleteAll(produtosAntigos);

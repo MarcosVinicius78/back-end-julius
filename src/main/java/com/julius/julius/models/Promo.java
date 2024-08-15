@@ -1,6 +1,10 @@
 package com.julius.julius.models;
 
+import java.util.Date;
 import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,6 +40,14 @@ public class Promo {
 
     @Column(name = "url_imagem")
     private String urlImagem;
+
+    @Column(name = "data_criacao", updatable = false)
+    @CreationTimestamp
+    private Date dataCriacao;
+
+    @Column(name = "data_atualizacao")
+    @UpdateTimestamp
+    private Date dataAtualizacao;
 
     @ManyToMany
     @JoinTable(name = "produtos_promo", joinColumns = @JoinColumn(name = "promo_id"), inverseJoinColumns = @JoinColumn(name = "produto_id"))
