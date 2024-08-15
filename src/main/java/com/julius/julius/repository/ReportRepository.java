@@ -31,4 +31,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Transactional
     @Query("DELETE FROM Report r WHERE r.produto.id = :idProduto")
     void deleteByProdutoReport(@Param("idProduto") Long idProduto);
+    
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM  r WHERE r.produto.id = :idProduto", nativeQuery = true)
+    void deleteByProdutoPromos(@Param("idProduto") Long idProduto);
+
+
 }

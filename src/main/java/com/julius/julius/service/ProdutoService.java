@@ -269,6 +269,7 @@ public class ProdutoService {
 
         Optional<Produto> produto = produtoRepository.findById(id);
         reportRepository.deleteByProdutoReport(id);
+        produtoRepository.deleteByProdutoPromos(id);
         this.produtoRepository.deleteById(id);
 
         for (LinksProdutos i : produto.get().getLinksProdutos()) {

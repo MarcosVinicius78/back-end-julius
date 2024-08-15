@@ -7,9 +7,11 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.julius.julius.models.Produto;
 
@@ -83,4 +85,9 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
         @Query(value = "SELECT * FROM produtos WHERE fk_categoria = :categoriaId", nativeQuery = true)
         List<Produto> findByProdutoPorCategoriaId(@Param("categoriaId") Long categoriaId);
+
+        @Modifying
+        @Transactional
+        @Query(value = "DELETE FROM produtos_promo WHERE produto_id = :idProduto", nativeQuery = true)
+        void deleteByProdutoPromos(@Param("idProduto") Long idProduto);
 }
