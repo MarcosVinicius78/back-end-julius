@@ -95,6 +95,9 @@ public class Produto {
     @JoinTable(name = "produto_link", joinColumns = @JoinColumn(name = "produto_id"), inverseJoinColumns = @JoinColumn(name = "link_produto_id"))
     private List<LinksProdutos> linksProdutos = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "produtos")
+    private List<Promo> promos;
+
     @Column(name = "data_criacao", updatable = false)
     @CreationTimestamp
     private Date dataCriacao;
