@@ -411,9 +411,16 @@ public class ProdutoService {
 
         Pageable pageable = PageRequest.of(pagina, tamanho);
 
-        // Implemente a lógica de pesquisa no repositório
+        produtoRepository.procurarProdutos(termoPesquisa, site, pageable).forEach(item -> {
+           
+        });
+        
+        // return produtoRepository.procurarProdutos(termoPesquisa, site, pageable);
+        
+        
         return produtoRepository.procurarProdutos(termoPesquisa, site, pageable)
         .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
+        
     }
 
     public Resource loadImagemAResource(String imagemNome) {
@@ -451,6 +458,16 @@ public class ProdutoService {
 
         }
         return null;
+    }
+
+    public Page<ProdutoResponseDto> listarProdutosDestaque(int page, int size){
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ProdutoResponseDto> produtosPage = produtoRepository.listarProdutosDestaque(pageable)
+        .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+        System.out.println(produtosPage.getNumber());
+        return produtosPage;
     }
 
     public byte[] gerarStory(String preco, String titulo, String urlImagem, String frete, String cupom)

@@ -32,6 +32,8 @@ public record ProdutoResponseDto(
     public static ProdutoResponseDto toResonse(Produto produto, String url) {
         
          LojaResponseDto lojaDto = null;
+
+         System.out.println(produto.getTitulo());
          
         
         Loja loja = produto.getLoja();

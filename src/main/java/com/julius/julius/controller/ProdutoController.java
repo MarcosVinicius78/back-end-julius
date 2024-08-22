@@ -203,4 +203,9 @@ public class ProdutoController {
         produtoService.salvarStory(file);
     }
 
+    @GetMapping("destaque")
+    public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosDestaque(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size){
+        return ResponseEntity.ok().body(produtoService.listarProdutosDestaque(page, size));
+    }
+
 }
