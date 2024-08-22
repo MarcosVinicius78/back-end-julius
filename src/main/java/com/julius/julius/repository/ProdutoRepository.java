@@ -14,7 +14,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.julius.julius.DTO.response.ProdutoPesquisa;
 import com.julius.julius.DTO.response.ProdutoResponseDto;
 import com.julius.julius.models.Produto;
 
