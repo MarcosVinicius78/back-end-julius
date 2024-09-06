@@ -1,8 +1,7 @@
 package com.julius.julius.service.Scraper.Amazon;
 
-import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.TreeMap;
@@ -14,6 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -24,8 +24,13 @@ import org.springframework.stereotype.Service;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.julius.julius.DTO.response.ProdutoScraperDTO;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AmazonService {
+
+    private final CloseableHttpClient httpClient;
 
     private static final String HOST = "webservices.amazon.com.br";
     private static final String URI_PATH = "/paapi5/getitems";
@@ -110,30 +115,43 @@ public class AmazonService {
 
         String expandedUrl = url;
 
-        if (url.contains("amz")) {
-            try {
-                URL urlGet = new URL(url);
-                URLConnection connection = urlGet.openConnection();
-                InputStream is = connection.getInputStream();
-                expandedUrl = connection.getURL().toString();
-            } catch (Exception e) {
-                throw new NotFoundException("Não Foi Possivel acessar o Link");
-            }
+        try {
+            URL urlGet = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) urlGet.openConnection();
+
+            // Faz a requisição e obtém o código de resposta
+            connection.getResponseCode();
+
+            // Captura o URL final, mesmo em caso de erro
+            expandedUrl = connection.getURL().toString();
+        } catch (Exception e) {
+            throw new NotFoundException("Não Foi Possivel acessar o Link");
         }
+
+        // if (url.contains("amz")) {
+        // try {
+        // URL urlGet = new URL(url);
+        // URLConnection connection = urlGet.openConnection();
+        // InputStream is = connection.getInputStream();
+        // expandedUrl = connection.getURL().toString();
+        // } catch (Exception e) {
+        // throw new NotFoundException("Não Foi Possivel acessar o Link");
+        // }
+        // }
 
         String regexDp = "/dp/(\\w+)";
         Pattern pattern = Pattern.compile(regexDp);
         Matcher matcher = pattern.matcher(expandedUrl);
-        
+
         String codigoProduto = null;
-        
+
         if (matcher.find()) {
             codigoProduto = matcher.group(1);
-        }else{
-            String regexGp = "\"/([A-Z0-9]{10})(?:[/?]|$)\"";
+        } else {
+            System.out.println("logoqui");
             codigoProduto = extractAsin(expandedUrl);
         }
-        return codigoProduto;   
+        return codigoProduto;
     }
 
     public String extractAsin(String url) {
@@ -144,7 +162,7 @@ public class AmazonService {
         throw new IllegalStateException("No ASIN found in the provided URL");
     }
 
-    public ProdutoScraperDTO montarProdutoAmazon(String jsonResponse,String url) {
+    public ProdutoScraperDTO montarProdutoAmazon(String jsonResponse, String url) {
 
         JSONObject jsonObject = new JSONObject(jsonResponse);
 
@@ -183,7 +201,7 @@ public class AmazonService {
 
         String amount = priceResult.getString("DisplayAmount");
 
-        return new ProdutoScraperDTO(displayValue, amount, urlImagem,url,"","");
+        return new ProdutoScraperDTO(displayValue, amount, urlImagem, url, "", "");
     }
-    
+
 }

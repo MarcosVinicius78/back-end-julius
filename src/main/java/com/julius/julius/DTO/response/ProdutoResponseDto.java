@@ -24,17 +24,14 @@ public record ProdutoResponseDto(
         String imagemSocial,
         String copy,
         String mensagemAdicional,
-        Boolean promocaoEncerrada,
-        List<LinksProdutos> linksProdutos
+        Boolean promocaoEncerrada
+        // List<LinksProdutos> linksProdutos
 
 ) {
 
     public static ProdutoResponseDto toResonse(Produto produto, String url) {
         
-         LojaResponseDto lojaDto = null;
-
-         System.out.println(produto.getTitulo());
-         
+         LojaResponseDto lojaDto = null;     
         
         Loja loja = produto.getLoja();
         if (loja != null) {
@@ -58,8 +55,8 @@ public record ProdutoResponseDto(
             produto.getImagemSocial(),
             produto.getCopy(),
             produto.getMensagemAdicional(),
-            produto.getPromocaoEncerrada(),
-            produto.getLinksProdutos()
+            produto.getPromocaoEncerrada()
+            // produto.getLinksProdutos()
         );
     }
 

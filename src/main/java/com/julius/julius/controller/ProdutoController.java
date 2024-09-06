@@ -147,6 +147,7 @@ public class ProdutoController {
             @RequestParam(value = "size", defaultValue = "12", required = false) int size,
             @RequestParam(value = "site", required = false) Long site) {
         Page<ProdutoResponseDto> resultados = produtoService.pesquisarProdutos(site,termoPesquisa, page, size);
+        
         return ResponseEntity.ok().body(resultados);
     }
 

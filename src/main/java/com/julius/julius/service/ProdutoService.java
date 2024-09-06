@@ -44,6 +44,7 @@ import com.julius.julius.DTO.ProdutoSalvarDto;
 import com.julius.julius.DTO.response.CategoriaResponseDto;
 import com.julius.julius.DTO.response.LojaResponseDto;
 import com.julius.julius.DTO.response.ProdutoDto;
+import com.julius.julius.DTO.response.ProdutoPesquisa;
 import com.julius.julius.DTO.response.ProdutoResponseDto;
 import com.julius.julius.models.Categoria;
 import com.julius.julius.models.LinksProdutos;
@@ -72,6 +73,8 @@ public class ProdutoService {
     private final CategoriaRepository categoriaRepository;
 
     private final LinkProdutoRepository linkProdutoRepository;
+
+    private final PromoService promoService;
 
     private static final String UPLOAD_DIR = "/uploads/produtos";
 
@@ -210,7 +213,7 @@ public class ProdutoService {
         produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
         produto.setLoja(loja.get());
-        
+
         if (!produtoSalvarDto.link_se().isEmpty()) {
             LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link_se(), 1L);
             produto.getLinksProdutos().add(linksProdutosSe);
@@ -224,20 +227,27 @@ public class ProdutoService {
 
         loja.get().getProdutos().add(produto);
 
-        return ProdutoResponseDto.toResonse(produtoRepository.save(produto),"");
+        return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "");
     }
 
     public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable pageable) {
 
         Page<ProdutoResponseDto> produtoTeste = null;
 
-        if (site == 1) {
-            produtoTeste = produtoRepository.findProdutosSe(2L,pageable)
-                    .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
-        } else {
-            produtoTeste = produtoRepository.findProdutosOfm(site, pageable)
-                    .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
-        }
+        produtoTeste = produtoRepository.listarProdutos(site, pageable)
+                .map(produto -> {
+                    Loja loja = new Loja();
+                    loja.setUrlImagem(produto.imagemLoja());
+                    loja.setNomeLoja(produto.nomeLoja());
+                    ProdutoResponseDto produtoResponseDto = new ProdutoResponseDto(
+                            produto.id(),
+                            produto.titulo(),
+                            produto.preco(), produto.parcelado(), null, produto.cupom(), produto.link(),
+                            null, produto.freteVariacoes(), produto.dataCriacao(),
+                            produto.imagem(), LojaResponseDto.toResonse(loja), produto.imagemSocial(), produto.copy(), 
+                            produto.mensagemAdicional(), produto.promocaoEncerrada());
+                    return produtoResponseDto;
+                });
 
         if (produtoTeste.isEmpty()) {
             return Page.empty();
@@ -245,6 +255,25 @@ public class ProdutoService {
 
         return produtoTeste;
     }
+
+    // public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable pageable) {
+
+    //     Page<ProdutoResponseDto> produtoTeste = null;
+
+    //     if (site == 1) {
+    //         produtoTeste = produtoRepository.findProdutosSe(2L,pageable)
+    //                 .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+    //     } else {
+    //         produtoTeste = produtoRepository.findProdutosOfm(site, pageable)
+    //                 .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
+    //     }
+
+    //     if (produtoTeste.isEmpty()) {
+    //         return Page.empty();
+    //     }
+
+    //     return produtoTeste;
+    // }
 
     public ProdutoDto pegarProduto(Long id) {
 
@@ -371,7 +400,7 @@ public class ProdutoService {
                 && linksProdutos.stream().noneMatch(lp -> lp.getSite() == 2)) {
             LinksProdutos novoLinkOfm = salvarLinkProduto(produtoAtualizarDto.link_ofm(), 2L);
             produto.getLinksProdutos().add(novoLinkOfm);
-        }   
+        }
 
         produto.setId(produtoAtualizarDto.id());
         produto.setTitulo(produtoAtualizarDto.titulo());
@@ -387,18 +416,30 @@ public class ProdutoService {
         produto.setLoja(loja);
         produto.setCopy(produtoAtualizarDto.copy());
 
-        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto),"");
+        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto), "");
     }
 
-    public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long categoriaId, Pageable pageable) {
+    public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site, Long categoriaId, Pageable pageable) {
         if (site == 1) {
-            return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
-            .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+            return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
+                    .map(produto -> ProdutoResponseDto.toResonse(produto,
+                            produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
         }
 
-        return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
-        .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
+        return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
+                .map(produto -> ProdutoResponseDto.toResonse(produto,
+                        produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
     }
+
+    // public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long categoriaId, Pageable pageable) {
+    //     if (site == 1) {
+    //         return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
+    //         .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+    //     }
+
+    //     return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
+    //     .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
+    // }
 
     @Transactional
     public void apagarVariosProdutos(List<ProdutoDto> produtosSelecionados) {
@@ -411,17 +452,46 @@ public class ProdutoService {
 
         Pageable pageable = PageRequest.of(pagina, tamanho);
 
-        produtoRepository.procurarProdutos(termoPesquisa, site, pageable).forEach(item -> {
-           
-        });
-        
-        // return produtoRepository.procurarProdutos(termoPesquisa, site, pageable);
-        
-        
-        return produtoRepository.procurarProdutos(termoPesquisa, site, pageable)
-        .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
-        
+        Page<ProdutoResponseDto> produtosResponse = produtoRepository.procurarProdutos(termoPesquisa, site, pageable)
+                .map(produtoPesquisa -> {
+                    Loja loja = new Loja();
+                    loja.setUrlImagem(produtoPesquisa.imagemLoja());
+                    ProdutoResponseDto produtoResponseDto = new ProdutoResponseDto(
+                            produtoPesquisa.id(),
+                            produtoPesquisa.titulo(),
+                            produtoPesquisa.preco(), produtoPesquisa.parcelado(),
+                            "", produtoPesquisa.cupom(), 
+                            produtoPesquisa.link(), "",
+                            produtoPesquisa.freteVariacoes(), produtoPesquisa.dataCriacao(),
+                            produtoPesquisa.imagem(), 
+                            LojaResponseDto.toResonse(loja), 
+                            produtoPesquisa.imagemSocial(),"", 
+                            "", false);
+                    return produtoResponseDto;
+                });
+
+        return produtosResponse;
+
+        // return produtoRepository.procurarProdutos(termoPesquisa, site, pageable)
+        // .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
+
     }
+
+    // public Page<ProdutoResponseDto> pesquisarProdutos(Long site, String termoPesquisa, int pagina, int tamanho) {
+
+    //     Pageable pageable = PageRequest.of(pagina, tamanho);
+
+    //     produtoRepository.procurarProdutos(termoPesquisa, site, pageable).forEach(item -> {
+           
+    //     });
+        
+    //     // return produtoRepository.procurarProdutos(termoPesquisa, site, pageable);
+        
+        
+    //     return produtoRepository.procurarProdutos(termoPesquisa, site, pageable)
+    //     .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
+        
+    // }
 
     public Resource loadImagemAResource(String imagemNome) {
 
@@ -460,12 +530,13 @@ public class ProdutoService {
         return null;
     }
 
-    public Page<ProdutoResponseDto> listarProdutosDestaque(int page, int size){
+    public Page<ProdutoResponseDto> listarProdutosDestaque(int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
         Page<ProdutoResponseDto> produtosPage = produtoRepository.listarProdutosDestaque(pageable)
-        .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+                .map(produto -> ProdutoResponseDto.toResonse(produto,
+                        produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
         System.out.println(produtosPage.getNumber());
         return produtosPage;
     }
@@ -540,64 +611,200 @@ public class ProdutoService {
             }
 
             // Definir as coordenadas e dimensões do retângulo do cupom
-            int rectX = 520; // exemplo de coordenada X do retângulo
-            int rectY = 1212; // exemplo de coordenada Y do retângulo
-            int rectWidth = 350; // exemplo de largura do retângulo
-            int rectHeight = 50; // exemplo de altura do retângulo
+            int rectX = 380; // exemplo de coordenada X do retângulo
+            int rectY = 1180; // exemplo de coordenada Y do retângulo
+            int rectWidth = 580; // exemplo de largura do retângulo
+            int rectHeight = 120; // exemplo de altura do retângulo
 
-            Font font = customFont.deriveFont(Font.BOLD, 55);
-            g.setFont(font);
+            // g.fillRect(rectX, rectY, rectWidth, rectHeight);
+
+            // Fontes baseadas no tamanho do texto
+            Font smallFont = customFont.deriveFont(Font.BOLD, 38);
+            Font mediumFont = customFont.deriveFont(Font.BOLD, 42);
+            Font largeFont = customFont.deriveFont(Font.BOLD, 55);
+
+            // Font font = customFont.deriveFont(Font.BOLD, 55);
+            // g.setFont(font);
             FontMetrics couponFm = g.getFontMetrics();
-            int couponXPosition = rectX + (rectWidth - couponFm.stringWidth("Cupom: " + cupom)) / 3;
-            int couponYPosition = rectY + (rectHeight + couponFm.getAscent()) / 2 - 3;
-            System.out.println(frete.length());
-            if (!cupom.isEmpty() && cupom.length() <= 6 && !cupom.equals("null")) {
-                // g.setFont(new Font("Arial", Font.BOLD, 40));
-                // g.drawString("Cupom:" + cupom, 451, 1122);
-                g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
-            } else if (!cupom.isEmpty() && cupom.length() <= 16 && !cupom.equals("null")) {
-                font = customFont.deriveFont(Font.BOLD, 42);
-                g.setFont(font);
-                // g.drawString("Cupom: " + cupom, 394, 1122);
-                g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
-            } else if (!cupom.isEmpty() && cupom.length() >= 17 && !cupom.equals("null")) {
-                font = customFont.deriveFont(Font.BOLD, 38);
-                g.setFont(font);
-                // g.drawString("Cupom: " + cupom, 353, 1122);
-                g.drawString("Cupom: " + cupom, 392, couponYPosition);
+            // int couponXPosition = rectX + (rectWidth - couponFm.stringWidth("Cupom: " +
+            // cupom)) / 3;
+            int xPosition;
+            FontMetrics metrics = g.getFontMetrics();
+            int yPosition = rectY + (rectHeight + couponFm.getAscent()) / 2 - 3;
+
+            if (!cupom.isEmpty() && !cupom.equals("null")) {
+                if (cupom.length() <= 6) {
+                    g.setFont(largeFont);
+                    // g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
+                } else if (cupom.length() <= 16) {
+                    g.setFont(mediumFont);
+                    // g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
+                } else if (cupom.length() == 17) {
+                    g.setFont(smallFont);
+                } else {
+
+                    int fontSize = 120;
+                    Font font = customFont.deriveFont(Font.BOLD, fontSize);
+
+                    List<String> textoQuebrado = wrapTextToRectangle(cupom, metrics, rectWidth);
+
+                    while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
+                        fontSize--;
+                        font = customFont.deriveFont(Font.BOLD, fontSize);
+                        g.setFont(font);
+                        metrics = g.getFontMetrics();
+                        textoQuebrado = wrapTextToRectangle(cupom, metrics, rectWidth);
+                    }
+
+                    // Calcular a posição Y inicial para centralizar verticalmente o bloco de texto
+                    int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
+                    int startY = rectY + (rectHeight - totalTextHeight) / 2 + fm.getAscent();
+
+                    // Desenhar cada linha de text
+                    int lineY = startY;
+                    for (String i : textoQuebrado) {
+
+                        xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
+                        g.drawString(i, xPosition, lineY);
+                        lineY += metrics.getHeight();
+                    }
+
+                }
+
+                if (cupom.length() <= 17) {
+                    metrics = g.getFontMetrics();
+                    xPosition = rectX + (rectWidth - metrics.stringWidth("Cupom: " + cupom)) / 2;
+
+                    g.drawString("Cupom: " + cupom, xPosition, yPosition);
+                } else {
+
+                }
             } else if (!frete.isEmpty() && frete.length() == 18) {
+                g.setFont(mediumFont);
+                metrics = g.getFontMetrics();
+                xPosition = rectX + (rectWidth - metrics.stringWidth(frete)) / 2;
                 // frete grátis prime
-                g.drawString(frete, 420, 1262);
+                g.drawString(frete, xPosition, yPosition);
                 // g.drawString(frete, couponXPosition, couponYPosition);
             } else if (!frete.isEmpty() && frete.length() == 12 || frete.length() > 45) {
+                g.setFont(largeFont);
+                metrics = g.getFontMetrics();
+                xPosition = rectX + (rectWidth - metrics.stringWidth(frete)) / 2;
                 // frete grátis
-                g.drawString("Frete Grátis", 492, 1262);
+                g.drawString("Frete Grátis", xPosition, yPosition);
             } else if (!frete.isEmpty() && frete.length() == 15) {
-                g.drawString("Frete Econômico", 440, 1262);
                 // frete econômico
+                g.setFont(largeFont);
+                metrics = g.getFontMetrics();
+                xPosition = rectX + (rectWidth - metrics.stringWidth(frete)) / 2;
+                g.drawString(frete, xPosition, yPosition);
             } else if (!frete.isEmpty() && frete.length() == 30) {
-                font = customFont.deriveFont(Font.BOLD, 45);
-                g.setFont(font);
-                
+                // Font font = customFont.deriveFont(Font.BOLD, 45);
+                // g.setFont(font);
+
+                // g.setFont(mediumFont);
+                // metrics = g.getFontMetrics();
+                int fontSize = 120;
+                Font font = customFont.deriveFont(Font.BOLD, fontSize);
+
+                frete = frete.replace("*", "");
+
+                List<String> textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
+
+                while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
+                    fontSize--;
+                    font = customFont.deriveFont(Font.BOLD, fontSize);
+                    g.setFont(font);
+                    metrics = g.getFontMetrics();
+                    textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
+                }
+
+                // Calcular a posição Y inicial para centralizar verticalmente o bloco de texto
+                int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
+                int startY = rectY + (rectHeight - totalTextHeight) / 2 + fm.getAscent();
+
+                // Desenhar cada linha de texto
+                int lineY = startY;
+                for (String i : textoQuebrado) {
+
+                    // g.setFont(mediumFont);
+                    // metrics = g.getFontMetrics();
+                    xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
+                    g.drawString(i, xPosition, lineY);
+                    lineY += metrics.getHeight();
+
+                }
+
                 // frete grátis algumas regioes
-                g.drawString("Frete Grátis", 540, 1232);
-                g.drawString("Algumas Regiões", 460, 1282);
+                // g.drawString("Frete Grátis", 540, 1232);
+                // g.drawString("Algumas Regiões", 460, 1282);
             } else if (!frete.isEmpty() && frete.length() == 24) {
                 // gratis retirando na loja
-                font = customFont.deriveFont(Font.BOLD, 45);
-                g.setFont(font);
+                // Font font = customFont.deriveFont(Font.BOLD, 45);
                 // g.setFont(font);
-                g.drawString("Grátis Retirando", 477, 1232);
-                g.drawString("Na Loja", 590, 1282);
+                // // g.setFont(font);
+                // g.drawString("Grátis Retirando", 477, 1232);
+                // g.drawString("Na Loja", 590, 1282);
+
+                int fontSize = 120;
+                Font font = customFont.deriveFont(Font.BOLD, fontSize);
+
+                List<String> textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
+
+                while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
+                    fontSize--;
+                    font = customFont.deriveFont(Font.BOLD, fontSize);
+                    g.setFont(font);
+                    metrics = g.getFontMetrics();
+                    textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
+                }
+
+                int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
+                int startY = rectY + (rectHeight - totalTextHeight) / 2 + fm.getAscent();
+
+                // Desenhar cada linha de texto
+                int lineY = startY;
+                for (String i : textoQuebrado) {
+
+                    // g.setFont(mediumFont);
+                    // metrics = g.getFontMetrics();
+                    xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
+                    g.drawString(i, xPosition, lineY);
+                    lineY += metrics.getHeight();
+
+                }
+
+            }else if(!frete.isEmpty() && frete.length() > 31){
+                int fontSize = 60;
+                Font font = customFont.deriveFont(Font.BOLD, fontSize);
+
+                List<String> textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
+
+                while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
+                    fontSize--;
+                    font = customFont.deriveFont(Font.BOLD, fontSize);
+                    g.setFont(font);
+                    metrics = g.getFontMetrics();
+                    textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
+                }
+
+                int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
+                int startY = rectY + (rectHeight - totalTextHeight) / 2 + fm.getAscent();
+
+                // Desenhar cada linha de texto
+                int lineY = startY;
+                for (String i : textoQuebrado) {
+
+                    // g.setFont(mediumFont);
+                    // metrics = g.getFontMetrics();
+                    xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
+                    g.drawString(i, xPosition, lineY);
+                    lineY += metrics.getHeight();
+
+                }
             }
 
-            // g.setFont(new Font("Arial", Font.BOLD, 40));
-            // g.drawString(titulo1, 90, 970);
-
-            // g.setFont(new Font("Arial", Font.BOLD, 40));
-            // g.drawString(titulo2 + "...", 80, 1040);
-
-            //estilização do preço nos stories
+            // estilização do preço nos stories
             Font fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 99);
             if (preco.length() > 19) {
                 fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 85);
@@ -623,6 +830,25 @@ public class ProdutoService {
             e.printStackTrace();
             throw new FileExistsException();
         }
+    }
+
+    private List<String> wrapTextToRectangle(String text, FontMetrics fm, int maxWidth) {
+        List<String> lines = new ArrayList<>();
+        String[] words = text.split(" ");
+        StringBuilder currentLine = new StringBuilder();
+
+        for (String word : words) {
+            String lineWithWord = currentLine + (currentLine.length() > 0 ? " " : "") + word;
+            if (fm.stringWidth(lineWithWord) > maxWidth) {
+                lines.add(currentLine.toString());
+                currentLine = new StringBuilder(word);
+            } else {
+                currentLine.append(currentLine.length() > 0 ? " " : "").append(word);
+            }
+        }
+        lines.add(currentLine.toString()); // Adicionar a última linha
+
+        return lines;
     }
 
     public void salvarStory(MultipartFile file) throws FileUploadException {
@@ -659,12 +885,13 @@ public class ProdutoService {
         produtosAntigos.stream().forEach(item -> {
             reportRepository.deleteByProdutoReport(item.getId());
             produtoRepository.deleteByProdutoPromos(item.getId());
+            
         });
 
         produtoRepository.deleteAll(produtosAntigos);
-        
+
         for (Produto produto : produtosAntigos) {
-            
+
             produto.getLinksProdutos().stream().forEach(item -> {
                 linkProdutoRepository.deleteById(item.getId());
             });
