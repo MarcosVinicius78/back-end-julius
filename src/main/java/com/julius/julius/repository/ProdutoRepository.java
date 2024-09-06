@@ -79,9 +79,9 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
         Page<Produto> findCategoriIdOrderByDataCriacaoDesc(Long categoriaId, Pageable pageable);
 
         @Query("SELECT new com.julius.julius.DTO.response.ProdutoPesquisa(" +
-                        "p.id, p.titulo, p.preco, p.precoParcelado, " +
-                        "p.cupom, pl.url, p.freteVariacoes, " +
-                        "p.dataCriacao, p.urlImagem, p.imagemSocial ,l.urlImagem) " +
+                        "p.id, p.titulo, p.copy, p.preco, p.precoParcelado, " +
+                        "p.cupom, pl.url, p.freteVariacoes, p.mensagemAdicional, p.promocaoEncerrada, " +
+                        "p.dataCriacao, p.urlImagem, p.imagemSocial ,l.urlImagem, l.nomeLoja) " +
                         "FROM Produto p " +
                         "JOIN linksProdutos pl " +
                         "JOIN p.loja l " +
