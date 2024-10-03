@@ -13,6 +13,8 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -27,7 +29,7 @@ public class ShopeeService {
     private static final String appID = "18199430003"; // Substitua pelo seu appID real
     private static final String secret = "HB6T6RCEXPLBYXMT4ZGDD2PMUZE5DGII"; // Substitua pelo seu secret real
     private String url = "https://open-api.affiliate.shopee.com.br/graphql"; // Substitua pela sua URL
-                                                                                          // real7
+                                                                             // real7
 
     public String fetchProductOffers(String url) {
         try {
@@ -35,7 +37,9 @@ public class ShopeeService {
             codigoProduto = extractCodeFromUrl(getFinalUrl(url));
 
             // Payload da requisição
-            String payload = String.format("{\"query\":\"{productOfferV2(itemId: %s){nodes{productName price imageUrl productLink offerLink}}}\"}", codigoProduto);
+            String payload = String.format(
+                    "{\"query\":\"{productOfferV2(itemId: %s){nodes{productName price imageUrl productLink offerLink}}}\"}",
+                    codigoProduto);
 
             // Obtenha o timestamp atual
             long timestamp = Instant.now().getEpochSecond();
@@ -61,7 +65,7 @@ public class ShopeeService {
         return "";
     }
 
-    public ProdutoScraperDTO pegarInfoProdutosShopee(String response, String url){
+    public ProdutoScraperDTO pegarInfoProdutosShopee(String response, String url) {
         JSONObject jsonObject = new JSONObject(response);
         JSONObject dataObject = jsonObject.getJSONObject("data");
         JSONObject productOfferV2 = dataObject.getJSONObject("productOfferV2");
@@ -74,10 +78,10 @@ public class ShopeeService {
         for (int i = 0; i < nodesArray.length(); i++) {
             JSONObject node = nodesArray.getJSONObject(i);
             produtoNome = node.getString("productName");
-            preco = "R$ "+node.getString("price");
+            preco = "R$ " + node.getString("price");
             imagemUrl = node.getString("imageUrl");
         }
-        return new ProdutoScraperDTO(produtoNome, preco.replace(".", ","), imagemUrl, url,"", "");
+        return new ProdutoScraperDTO(produtoNome, preco.replace(".", ","), imagemUrl, url, "", "");
     }
 
     // Método para obter a URL final após redirecionamentos
@@ -100,14 +104,33 @@ public class ShopeeService {
     private String extractCodeFromUrl(String urlString) throws URISyntaxException {
         URI uri = new URI(urlString);
         String path = uri.getPath();
-        String[] segments = path.split("/");
-
-        // Código é o segundo segmento na URL de exemplo
-        if (segments.length > 2) {
-            return segments[3];
+        // Procura pelo padrão "-i.{storeId}.{productId}" no final da URL
+        Pattern pattern = Pattern.compile("-i\\.(\\d+)\\.(\\d+)");
+        Matcher matcher = pattern.matcher(path);
+        
+        if (matcher.find()) {
+            // Captura o código do produto (productId)
+            return matcher.group(2); // O segundo grupo é o productId
+        }else{
+            Pattern pattern2 = Pattern.compile("/product/(\\d+)/(\\d+)");
+            Matcher matcher2 = pattern2.matcher(path);
+            
+            if (matcher2.find()) {
+                // Captura o código do produto (productId)
+                return matcher2.group(2); // O segundo grupo é o productId
+            }
         }
 
-        // Retornar uma string vazia se o código não for encontrado
+        // // Verifica se a URL segue o formato "/{productName}-i.{storeId}.{productId}"
+        // if (segments.length > 1 && segments[segments.length - 1].contains("-i.")) {
+        //     String lastSegment = segments[segments.length - 1];
+        //     String[] parts = lastSegment.split("-i\\.|\\.");
+        //     if (parts.length >= 3) {
+        //         return parts[parts.length]; // Retorna o productId
+        //     }
+        // }
+
+        // Retorna uma string vazia se o código não for encontrado
         return "";
     }
 
