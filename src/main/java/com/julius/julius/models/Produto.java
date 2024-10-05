@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -93,7 +94,7 @@ public class Produto {
     @JoinTable(name = "produto_link", joinColumns = @JoinColumn(name = "produto_id"), inverseJoinColumns = @JoinColumn(name = "link_produto_id"))
     private List<LinksProdutos> linksProdutos = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "produtos")
+    @ManyToMany(mappedBy = "produtos", fetch = FetchType.EAGER)
     private List<Promo> promos;
 
     @Column(name = "data_criacao", updatable = false)

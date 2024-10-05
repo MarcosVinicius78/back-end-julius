@@ -5,6 +5,9 @@ import java.util.List;
 import org.apache.commons.io.FileExistsException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +36,12 @@ public class PromoController {
     private final PromoService promoService;
 
     @GetMapping
-    public ResponseEntity<List<PromoResponseDTO>> pegarPromos(){
+    public ResponseEntity<Page<PromoResponseDTO>> pegarPromos(@RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "12") int size){
 
-        return ResponseEntity.ok().body(promoService.listarPromos());
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.ok().body(promoService.listarPromos(pageable));
     }
 
     @GetMapping("{id}")

@@ -50,6 +50,7 @@ import com.julius.julius.models.Categoria;
 import com.julius.julius.models.LinksProdutos;
 import com.julius.julius.models.Loja;
 import com.julius.julius.models.Produto;
+import com.julius.julius.models.Promo;
 import com.julius.julius.repository.CategoriaRepository;
 import com.julius.julius.repository.LinkProdutoRepository;
 import com.julius.julius.repository.LojaRepository;
@@ -244,7 +245,7 @@ public class ProdutoService {
                             produto.titulo(),
                             produto.preco(), produto.parcelado(), null, produto.cupom(), produto.link(),
                             null, produto.freteVariacoes(), produto.dataCriacao(),
-                            produto.imagem(), LojaResponseDto.toResonse(loja), produto.imagemSocial(), produto.copy(), 
+                            produto.imagem(), LojaResponseDto.toResonse(loja), produto.imagemSocial(), produto.copy(),
                             produto.mensagemAdicional(), produto.promocaoEncerrada());
                     return produtoResponseDto;
                 });
@@ -256,23 +257,26 @@ public class ProdutoService {
         return produtoTeste;
     }
 
-    // public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable pageable) {
+    // public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable
+    // pageable) {
 
-    //     Page<ProdutoResponseDto> produtoTeste = null;
+    // Page<ProdutoResponseDto> produtoTeste = null;
 
-    //     if (site == 1) {
-    //         produtoTeste = produtoRepository.findProdutosSe(2L,pageable)
-    //                 .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
-    //     } else {
-    //         produtoTeste = produtoRepository.findProdutosOfm(site, pageable)
-    //                 .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
-    //     }
+    // if (site == 1) {
+    // produtoTeste = produtoRepository.findProdutosSe(2L,pageable)
+    // .map(produto -> ProdutoResponseDto.toResonse(produto,
+    // produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+    // } else {
+    // produtoTeste = produtoRepository.findProdutosOfm(site, pageable)
+    // .map(produto -> ProdutoResponseDto.toResonse(produto,
+    // produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
+    // }
 
-    //     if (produtoTeste.isEmpty()) {
-    //         return Page.empty();
-    //     }
+    // if (produtoTeste.isEmpty()) {
+    // return Page.empty();
+    // }
 
-    //     return produtoTeste;
+    // return produtoTeste;
     // }
 
     public ProdutoDto pegarProduto(Long id) {
@@ -295,24 +299,65 @@ public class ProdutoService {
     @Transactional
     public Boolean apagarProduto(Long id, String urlImagem, String imagemSocial) throws FileExistsException {
 
-        Optional<Produto> produto = produtoRepository.findById(id);
-        reportRepository.deleteByProdutoReport(id);
-        produtoRepository.deleteByProdutoPromos(id);
-        this.produtoRepository.deleteById(id);
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com ID: " + id));
 
-        for (LinksProdutos i : produto.get().getLinksProdutos()) {
-            linkProdutoRepository.deleteById(i.getId());
+        // Excluir todos os relatórios relacionados ao produto
+        reportRepository.deleteByProdutoReport(id);
+
+        // Excluir relacionamentos do produto com promoções
+        produtoRepository.deleteByProdutoPromos(id);
+
+        // Apagar links de produtos associados
+        apagarLinksProduto(produto);
+
+        produtoRepository.deleteById(id);
+        // Verificar e apagar promoções associadas ao produto
+        apagarPromocoesSemProdutos(produto);
+
+        // Apagar imagens associadas ao produto
+        apagarImagensProduto(urlImagem, imagemSocial);
+
+        // Por fim, excluir o próprio produto
+
+        return true;
+    }
+
+    private void apagarLinksProduto(Produto produto) {
+        produto.getLinksProdutos().forEach(link -> {
+            linkProdutoRepository.deleteById(link.getId());
+        });
+    }
+
+    private void apagarPromocoesSemProdutos(Produto produto) {
+        System.out.println("Número de promoções associadas: " + produto.getPromos().size());
+
+        for (Promo promo : produto.getPromos()) {
+            // Verifique se a promoção está sem produtos
+            long produtosCount = produtoRepository.countByPromosId(promo.getId());
+            System.out.println("Promo ID " + promo.getId() + " tem produtos? " + (produtosCount > 0));
+
+            if (produtosCount == 0) {
+                try {
+                    System.out.println("Chamando apagarPromo para promo ID: " + promo.getId());
+                    promoService.apagarPromo(promo.getId(), promo.getUrlImagem());
+                } catch (Exception e) {
+                    System.err.println("Erro ao tentar apagar promo ID " + promo.getId() + ": " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
         }
 
-        if (urlImagem != null || !urlImagem.isEmpty()) {
+    }
+
+    private void apagarImagensProduto(String urlImagem, String imagemSocial) throws FileExistsException {
+        if (urlImagem != null && !urlImagem.isEmpty()) {
             apagarImagem(urlImagem);
         }
 
-        if (!imagemSocial.equals("null") && !imagemSocial.isEmpty()) {
+        if (imagemSocial != null && !imagemSocial.equals("null") && !imagemSocial.isEmpty()) {
             apagarImagemReal(imagemSocial);
         }
-
-        return true;
     }
 
     private void apagarImagem(String urlImagem) throws FileExistsException {
@@ -431,14 +476,19 @@ public class ProdutoService {
                         produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
     }
 
-    // public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long categoriaId, Pageable pageable) {
-    //     if (site == 1) {
-    //         return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
-    //         .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
-    //     }
+    // public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long
+    // categoriaId, Pageable pageable) {
+    // if (site == 1) {
+    // return
+    // produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
+    // .map(produto -> ProdutoResponseDto.toResonse(produto,
+    // produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+    // }
 
-    //     return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
-    //     .map(produto -> ProdutoResponseDto.toResonse(produto, produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
+    // return
+    // produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
+    // .map(produto -> ProdutoResponseDto.toResonse(produto,
+    // produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
     // }
 
     @Transactional
@@ -460,12 +510,12 @@ public class ProdutoService {
                             produtoPesquisa.id(),
                             produtoPesquisa.titulo(),
                             produtoPesquisa.preco(), produtoPesquisa.parcelado(),
-                            "", produtoPesquisa.cupom(), 
+                            "", produtoPesquisa.cupom(),
                             produtoPesquisa.link(), "",
                             produtoPesquisa.freteVariacoes(), produtoPesquisa.dataCriacao(),
-                            produtoPesquisa.imagem(), 
-                            LojaResponseDto.toResonse(loja), 
-                            produtoPesquisa.imagemSocial(),"", 
+                            produtoPesquisa.imagem(),
+                            LojaResponseDto.toResonse(loja),
+                            produtoPesquisa.imagemSocial(), "",
                             "", false);
                     return produtoResponseDto;
                 });
@@ -476,22 +526,6 @@ public class ProdutoService {
         // .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
 
     }
-
-    // public Page<ProdutoResponseDto> pesquisarProdutos(Long site, String termoPesquisa, int pagina, int tamanho) {
-
-    //     Pageable pageable = PageRequest.of(pagina, tamanho);
-
-    //     produtoRepository.procurarProdutos(termoPesquisa, site, pageable).forEach(item -> {
-           
-    //     });
-        
-    //     // return produtoRepository.procurarProdutos(termoPesquisa, site, pageable);
-        
-        
-    //     return produtoRepository.procurarProdutos(termoPesquisa, site, pageable)
-    //     .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
-        
-    // }
 
     public Resource loadImagemAResource(String imagemNome) {
 
@@ -774,7 +808,7 @@ public class ProdutoService {
 
                 }
 
-            }else if(!frete.isEmpty() && frete.length() > 31){
+            } else if (!frete.isEmpty() && frete.length() > 31) {
                 int fontSize = 60;
                 Font font = customFont.deriveFont(Font.BOLD, fontSize);
 
@@ -885,12 +919,13 @@ public class ProdutoService {
         produtosAntigos.stream().forEach(item -> {
             reportRepository.deleteByProdutoReport(item.getId());
             produtoRepository.deleteByProdutoPromos(item.getId());
-            
         });
 
         produtoRepository.deleteAll(produtosAntigos);
 
         for (Produto produto : produtosAntigos) {
+
+            apagarPromocoesSemProdutos(produto);
 
             produto.getLinksProdutos().stream().forEach(item -> {
                 linkProdutoRepository.deleteById(item.getId());

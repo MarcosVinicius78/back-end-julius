@@ -13,6 +13,8 @@ import org.apache.commons.io.FileExistsException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,11 +39,11 @@ public class PromoService {
 
     private static final String UPLOAD_DIR = "/uploads/promos";
 
-    public List<PromoResponseDTO> listarPromos() {
+    public Page<PromoResponseDTO> listarPromos(Pageable pageable) {
 
-        List<Promo> promo = promoRepository.lsitarPromos();
+        Page<Promo> promo = promoRepository.lsitarPromos(pageable);
 
-        return promo.stream().map(PromoResponseDTO::toResponse).toList();
+        return promo.map(promos -> PromoResponseDTO.toResponse(promos));
     }
 
     public PromoResponseDTO salvarPromo(PromosSalvarDTO promosSalvarDTO) {
@@ -58,7 +60,7 @@ public class PromoService {
 
     public Resource loadImagemAResourceReal(String imagemNome) {
         if (!imagemNome.equals("null")) {
-            
+
             try {
                 File uploadDir = new File(UPLOAD_DIR);
 
@@ -85,20 +87,23 @@ public class PromoService {
             if (arquivoImagem.exists()) {
                 arquivoImagem.delete();
             } else {
-                throw new FileExistsException("Imagem não existe");
+                // throw new FileExistsException("Imagem não existe");
             }
         }
 
     }
 
-    public void apagarPromo(Long id,String urlImagem) {
+    public void apagarPromo(Long id, String urlImagem) {
+        System.out.println("Tentando apagar promo com ID: " + id);
+        promoRepository.deleteById(id);
         try {
-            apagarImagemReal(urlImagem);
+            if (!urlImagem.equals("") && !urlImagem.isEmpty()) {
+                apagarImagemReal(urlImagem);
+            }
         } catch (FileExistsException e) {
-            
             e.printStackTrace();
         }
-        promoRepository.deleteById(id);
+        System.out.println("Promo com ID " + id + " apagada com sucesso.");
     }
 
     @Transactional
@@ -122,7 +127,7 @@ public class PromoService {
         promoRepository.save(promo);
     }
 
-    public PromoResponseDTO pegarPromo(Long id){
+    public PromoResponseDTO pegarPromo(Long id) {
 
         return PromoResponseDTO.toResponse(promoRepository.findById(id).get());
     }
@@ -135,7 +140,7 @@ public class PromoService {
 
         try {
             if (file != null) {
-                
+
                 File uploadsDir = new File(UPLOAD_DIR);
                 if (!uploadsDir.exists()) {
                     uploadsDir.mkdirs();
@@ -150,11 +155,11 @@ public class PromoService {
                 Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
                 promo.setUrlImagem(fileName);
-        
+
             }
 
             promoRepository.save(promo);
-            
+
             return "salvou";
         } catch (Exception e) {
             throw new FileUploadException();
