@@ -47,6 +47,7 @@ public class ProdutoController {
         if (r != null && r == 1) {
             // Lógica para obter a URL do site oficial do produto baseado no ID
             ProdutoDto officialProductUrl = produtoService.pegarProduto(id);
+            
             // return ResponseEntity.status(302).header("Location", officialProductUrl.link_se()).build();
             return ResponseEntity.status(200).body(officialProductUrl);
         } else {

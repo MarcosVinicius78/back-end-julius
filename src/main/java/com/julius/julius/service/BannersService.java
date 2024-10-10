@@ -112,9 +112,7 @@ public class BannersService {
 
     public Link salvarLinks(Link link){
 
-
-
-        if (link.getSiteId() == null) { 
+        if (link.getId() != null && link.getSiteId() == 1) { 
             
             Optional<Link> links2 = linksRepository.findById(link.getId());
 
@@ -123,6 +121,16 @@ public class BannersService {
             links2.get().setInstagram(link.getInstagram());
             links2.get().setEmail(link.getEmail());
             links2.get().setSiteId(1L);
+            
+            return linksRepository.save(links2.get());
+        }else if(link.getId() != null && link.getSiteId() == 2){
+            Optional<Link> links2 = linksRepository.findById(link.getId());
+
+            links2.get().setWhatsapp(link.getWhatsapp());
+            links2.get().setTelegram(link.getTelegram());
+            links2.get().setInstagram(link.getInstagram());
+            links2.get().setEmail(link.getEmail());
+            links2.get().setSiteId(2L);
             
             return linksRepository.save(links2.get());
         }

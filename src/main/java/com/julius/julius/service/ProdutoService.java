@@ -596,7 +596,7 @@ public class ProdutoService {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setColor(Color.BLACK);
-            g.drawImage(foto, 69, 130, 950, 880, null);
+            g.drawImage(foto, 69, 130, 950, 950, null);
 
             // Configurar fonte para o título
             // Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
@@ -604,7 +604,7 @@ public class ProdutoService {
             g.setFont(fonteNegrito);
             FontMetrics fm = g.getFontMetrics();
             int imageWidth = image.getWidth();
-            int titleYPosition = 1080;
+            int titleYPosition = 1180;
 
             // Quebrar o título em múltiplas linhas
             List<String> lines = new ArrayList<>();
@@ -645,28 +645,33 @@ public class ProdutoService {
             }
 
             // Definir as coordenadas e dimensões do retângulo do cupom
-            int rectX = 380; // exemplo de coordenada X do retângulo
-            int rectY = 1180; // exemplo de coordenada Y do retângulo
-            int rectWidth = 580; // exemplo de largura do retângulo
-            int rectHeight = 120; // exemplo de altura do retângulo
+            int rectX = 430; // exemplo de coordenada X do retângulo
+            int rectY = 1280; // exemplo de coordenada Y do retângulo
+            int rectWidth = 600; // exemplo de largura do retângulo
+            int rectHeight = 100; // exemplo de altura do retângulo
 
             // g.fillRect(rectX, rectY, rectWidth, rectHeight);
 
             // Fontes baseadas no tamanho do texto
-            Font smallFont = customFont.deriveFont(Font.BOLD, 38);
-            Font mediumFont = customFont.deriveFont(Font.BOLD, 42);
-            Font largeFont = customFont.deriveFont(Font.BOLD, 55);
+            Font smallFont = customFont.deriveFont(Font.BOLD, 40);
+            Font mediumFont = customFont.deriveFont(Font.BOLD, 40);
+            Font largeFont = customFont.deriveFont(Font.BOLD, 40);
 
-            // Font font = customFont.deriveFont(Font.BOLD, 55);
-            // g.setFont(font);
+            g.setColor(Color.decode("#d8dbe4"));
+            g.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
+            g.drawRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
+            
+            g.setColor(Color.black);
+        
             FontMetrics couponFm = g.getFontMetrics();
-            // int couponXPosition = rectX + (rectWidth - couponFm.stringWidth("Cupom: " +
-            // cupom)) / 3;
+        
             int xPosition;
             FontMetrics metrics = g.getFontMetrics();
             int yPosition = rectY + (rectHeight + couponFm.getAscent()) / 2 - 3;
 
             if (!cupom.isEmpty() && !cupom.equals("null")) {
+
+                
                 if (cupom.length() <= 6) {
                     g.setFont(largeFont);
                     // g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
@@ -677,11 +682,11 @@ public class ProdutoService {
                     g.setFont(smallFont);
                 } else {
 
-                    int fontSize = 120;
+                    int fontSize = 140;
                     Font font = customFont.deriveFont(Font.BOLD, fontSize);
-
+                    
                     List<String> textoQuebrado = wrapTextToRectangle(cupom, metrics, rectWidth);
-
+                    
                     while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
                         fontSize--;
                         font = customFont.deriveFont(Font.BOLD, fontSize);
@@ -689,18 +694,16 @@ public class ProdutoService {
                         metrics = g.getFontMetrics();
                         textoQuebrado = wrapTextToRectangle(cupom, metrics, rectWidth);
                     }
-
+                
                     // Calcular a posição Y inicial para centralizar verticalmente o bloco de texto
                     int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
-                    int startY = rectY + (rectHeight - totalTextHeight) / 2 + fm.getAscent();
+                    int startY = rectY + (rectHeight - totalTextHeight) / 2 + metrics.getAscent();
 
-                    // Desenhar cada linha de text
-                    int lineY = startY;
                     for (String i : textoQuebrado) {
 
                         xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
-                        g.drawString(i, xPosition, lineY);
-                        lineY += metrics.getHeight();
+                        g.drawString(i, xPosition, startY);
+                        startY += metrics.getHeight();
                     }
 
                 }
@@ -710,131 +713,6 @@ public class ProdutoService {
                     xPosition = rectX + (rectWidth - metrics.stringWidth("Cupom: " + cupom)) / 2;
 
                     g.drawString("Cupom: " + cupom, xPosition, yPosition);
-                } else {
-
-                }
-            } else if (!frete.isEmpty() && frete.length() == 18) {
-                g.setFont(mediumFont);
-                metrics = g.getFontMetrics();
-                xPosition = rectX + (rectWidth - metrics.stringWidth(frete)) / 2;
-                // frete grátis prime
-                g.drawString(frete, xPosition, yPosition);
-                // g.drawString(frete, couponXPosition, couponYPosition);
-            } else if (!frete.isEmpty() && frete.length() == 12 || frete.length() > 45) {
-                g.setFont(largeFont);
-                metrics = g.getFontMetrics();
-                xPosition = rectX + (rectWidth - metrics.stringWidth(frete)) / 2;
-                // frete grátis
-                g.drawString("Frete Grátis", xPosition, yPosition);
-            } else if (!frete.isEmpty() && frete.length() == 15) {
-                // frete econômico
-                g.setFont(largeFont);
-                metrics = g.getFontMetrics();
-                xPosition = rectX + (rectWidth - metrics.stringWidth(frete)) / 2;
-                g.drawString(frete, xPosition, yPosition);
-            } else if (!frete.isEmpty() && frete.length() == 30) {
-                // Font font = customFont.deriveFont(Font.BOLD, 45);
-                // g.setFont(font);
-
-                // g.setFont(mediumFont);
-                // metrics = g.getFontMetrics();
-                int fontSize = 120;
-                Font font = customFont.deriveFont(Font.BOLD, fontSize);
-
-                frete = frete.replace("*", "");
-
-                List<String> textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
-
-                while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
-                    fontSize--;
-                    font = customFont.deriveFont(Font.BOLD, fontSize);
-                    g.setFont(font);
-                    metrics = g.getFontMetrics();
-                    textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
-                }
-
-                // Calcular a posição Y inicial para centralizar verticalmente o bloco de texto
-                int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
-                int startY = rectY + (rectHeight - totalTextHeight) / 2 + fm.getAscent();
-
-                // Desenhar cada linha de texto
-                int lineY = startY;
-                for (String i : textoQuebrado) {
-
-                    // g.setFont(mediumFont);
-                    // metrics = g.getFontMetrics();
-                    xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
-                    g.drawString(i, xPosition, lineY);
-                    lineY += metrics.getHeight();
-
-                }
-
-                // frete grátis algumas regioes
-                // g.drawString("Frete Grátis", 540, 1232);
-                // g.drawString("Algumas Regiões", 460, 1282);
-            } else if (!frete.isEmpty() && frete.length() == 24) {
-                // gratis retirando na loja
-                // Font font = customFont.deriveFont(Font.BOLD, 45);
-                // g.setFont(font);
-                // // g.setFont(font);
-                // g.drawString("Grátis Retirando", 477, 1232);
-                // g.drawString("Na Loja", 590, 1282);
-
-                int fontSize = 120;
-                Font font = customFont.deriveFont(Font.BOLD, fontSize);
-
-                List<String> textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
-
-                while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
-                    fontSize--;
-                    font = customFont.deriveFont(Font.BOLD, fontSize);
-                    g.setFont(font);
-                    metrics = g.getFontMetrics();
-                    textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
-                }
-
-                int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
-                int startY = rectY + (rectHeight - totalTextHeight) / 2 + fm.getAscent();
-
-                // Desenhar cada linha de texto
-                int lineY = startY;
-                for (String i : textoQuebrado) {
-
-                    // g.setFont(mediumFont);
-                    // metrics = g.getFontMetrics();
-                    xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
-                    g.drawString(i, xPosition, lineY);
-                    lineY += metrics.getHeight();
-
-                }
-
-            } else if (!frete.isEmpty() && frete.length() > 31) {
-                int fontSize = 60;
-                Font font = customFont.deriveFont(Font.BOLD, fontSize);
-
-                List<String> textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
-
-                while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
-                    fontSize--;
-                    font = customFont.deriveFont(Font.BOLD, fontSize);
-                    g.setFont(font);
-                    metrics = g.getFontMetrics();
-                    textoQuebrado = wrapTextToRectangle(frete, metrics, rectWidth);
-                }
-
-                int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
-                int startY = rectY + (rectHeight - totalTextHeight) / 2 + fm.getAscent();
-
-                // Desenhar cada linha de texto
-                int lineY = startY;
-                for (String i : textoQuebrado) {
-
-                    // g.setFont(mediumFont);
-                    // metrics = g.getFontMetrics();
-                    xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
-                    g.drawString(i, xPosition, lineY);
-                    lineY += metrics.getHeight();
-
                 }
             }
 
@@ -850,7 +728,7 @@ public class ProdutoService {
             g.setFont(fonteNegritoPreco);
             FontMetrics priceFm = g.getFontMetrics();
             int priceXPosition = (imageWidth - priceFm.stringWidth(preco)) / 2;
-            g.drawString(preco, priceXPosition, 1531);
+            g.drawString(preco, priceXPosition, 1781);
 
             g.dispose();
             // Converter a imagem para um array de bytes
