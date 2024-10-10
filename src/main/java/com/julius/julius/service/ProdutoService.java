@@ -657,21 +657,20 @@ public class ProdutoService {
             Font mediumFont = customFont.deriveFont(Font.BOLD, 40);
             Font largeFont = customFont.deriveFont(Font.BOLD, 40);
 
-            g.setColor(Color.decode("#d8dbe4"));
-            g.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
-            g.drawRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
             
-            g.setColor(Color.black);
-        
+
             FontMetrics couponFm = g.getFontMetrics();
-        
+
             int xPosition;
             FontMetrics metrics = g.getFontMetrics();
             int yPosition = rectY + (rectHeight + couponFm.getAscent()) / 2 - 3;
 
             if (!cupom.isEmpty() && !cupom.equals("null")) {
 
-                
+                g.setColor(Color.decode("#d8dbe4"));
+                g.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
+                g.drawRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
+
                 if (cupom.length() <= 6) {
                     g.setFont(largeFont);
                     // g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
@@ -684,9 +683,9 @@ public class ProdutoService {
 
                     int fontSize = 140;
                     Font font = customFont.deriveFont(Font.BOLD, fontSize);
-                    
+
                     List<String> textoQuebrado = wrapTextToRectangle(cupom, metrics, rectWidth);
-                    
+
                     while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
                         fontSize--;
                         font = customFont.deriveFont(Font.BOLD, fontSize);
@@ -694,7 +693,7 @@ public class ProdutoService {
                         metrics = g.getFontMetrics();
                         textoQuebrado = wrapTextToRectangle(cupom, metrics, rectWidth);
                     }
-                
+
                     // Calcular a posição Y inicial para centralizar verticalmente o bloco de texto
                     int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
                     int startY = rectY + (rectHeight - totalTextHeight) / 2 + metrics.getAscent();
@@ -715,6 +714,8 @@ public class ProdutoService {
                     g.drawString("Cupom: " + cupom, xPosition, yPosition);
                 }
             }
+
+            g.setColor(Color.black);
 
             // estilização do preço nos stories
             Font fonteNegritoPreco = customFont.deriveFont(Font.BOLD, 99);
