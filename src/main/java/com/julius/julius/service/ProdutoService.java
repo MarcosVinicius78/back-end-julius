@@ -671,6 +671,7 @@ public class ProdutoService {
                 g.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
                 g.drawRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
 
+                g.setColor(Color.black);
                 if (cupom.length() <= 6) {
                     g.setFont(largeFont);
                     // g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
