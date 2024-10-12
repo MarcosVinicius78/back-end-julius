@@ -1,6 +1,7 @@
 package com.julius.julius.controller;
 
 import java.awt.FontFormatException;
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.commons.io.FileExistsException;
@@ -193,6 +194,19 @@ public class ProdutoController {
             throws FileExistsException, FontFormatException {
 
         byte[] bytes = produtoService.gerarStory(preco, titulo, urlImagem, frete, cupom);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+        headers.setContentLength(bytes.length);
+        headers.setContentDispositionFormData("attachment", "nome_da_imagem.jpg");
+        return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
+    }
+    
+
+    @GetMapping("gerarFeed/{id}")
+    public ResponseEntity<byte[]> gerarFeed(@PathVariable Long id)
+            throws FontFormatException, IOException {
+
+        byte[] bytes = produtoService.gerarFeed(id);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.IMAGE_JPEG);
         headers.setContentLength(bytes.length);

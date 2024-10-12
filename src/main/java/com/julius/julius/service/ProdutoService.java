@@ -604,6 +604,7 @@ public class ProdutoService {
             g.setFont(fonteNegrito);
             FontMetrics fm = g.getFontMetrics();
             int imageWidth = image.getWidth();
+
             int titleYPosition = 1180;
 
             // Quebrar o título em múltiplas linhas
@@ -646,73 +647,81 @@ public class ProdutoService {
 
             // Definir as coordenadas e dimensões do retângulo do cupom
             int rectX = 430; // exemplo de coordenada X do retângulo
-            int rectY = 1280; // exemplo de coordenada Y do retângulo
+            int rectY = 1290; // exemplo de coordenada Y do retângulo
             int rectWidth = 600; // exemplo de largura do retângulo
             int rectHeight = 100; // exemplo de altura do retângulo
 
             // g.fillRect(rectX, rectY, rectWidth, rectHeight);
 
-            // Fontes baseadas no tamanho do texto
+            // Definir fontes com base no tamanho do texto
             Font smallFont = customFont.deriveFont(Font.BOLD, 40);
             Font mediumFont = customFont.deriveFont(Font.BOLD, 40);
             Font largeFont = customFont.deriveFont(Font.BOLD, 40);
 
-            
-
             FontMetrics couponFm = g.getFontMetrics();
-
-            int xPosition;
-            FontMetrics metrics = g.getFontMetrics();
             int yPosition = rectY + (rectHeight + couponFm.getAscent()) / 2 - 3;
+            int maxLines = 33; // Limite de linhas para textos longos
 
             if (!cupom.isEmpty() && !cupom.equals("null")) {
 
-                g.setColor(Color.decode("#d8dbe4"));
-                g.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
-                g.drawRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
+                // Verificar se o texto é curto (como "TOMA100") ou longo
+                if (cupom.length() <= 17) { // Texto curto, ajuste o retângulo ao tamanho do texto
+                    g.setFont(largeFont); // Fonte maior para textos curtos
+                    FontMetrics metrics = g.getFontMetrics();
 
-                g.setColor(Color.black);
-                if (cupom.length() <= 6) {
-                    g.setFont(largeFont);
-                    // g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
-                } else if (cupom.length() <= 16) {
-                    g.setFont(mediumFont);
-                    // g.drawString("Cupom: " + cupom, couponXPosition, couponYPosition);
-                } else if (cupom.length() == 17) {
-                    g.setFont(smallFont);
-                } else {
+                    // Calcular largura e altura do texto
+                    int textWidth = metrics.stringWidth("Cupom: " + cupom);
+                    int textHeight = metrics.getHeight();
 
-                    int fontSize = 140;
-                    Font font = customFont.deriveFont(Font.BOLD, fontSize);
+                    // Ajustar o tamanho do retângulo com base no tamanho do texto
+                    int dynamicRectWidth = textWidth + 20; // Adicionar margem de 20
+                    int dynamicRectHeight = textHeight + 20;
 
-                    List<String> textoQuebrado = wrapTextToRectangle(cupom, metrics, rectWidth);
+                    // Desenhar retângulo ajustado
+                    g.setColor(Color.decode("#9b111e"));
+                    g.fillRoundRect(rectX, rectY, dynamicRectWidth, dynamicRectHeight, 30, 30);
+                    g.drawRoundRect(rectX, rectY, dynamicRectWidth, dynamicRectHeight, 30, 30);
+                    g.setColor(Color.white);
 
-                    while ((textoQuebrado.size() * metrics.getHeight()) > rectHeight && fontSize > 1) {
-                        fontSize--;
-                        font = customFont.deriveFont(Font.BOLD, fontSize);
-                        g.setFont(font);
-                        metrics = g.getFontMetrics();
-                        textoQuebrado = wrapTextToRectangle(cupom, metrics, rectWidth);
+                    // Centralizar o texto no retângulo
+                    int xPosition = rectX + (dynamicRectWidth - textWidth) / 2;
+                    int yPositionAdjusted = rectY + ((dynamicRectHeight - textHeight) / 2) + metrics.getAscent();
+                    g.drawString("Cupom: " + cupom, xPosition, yPositionAdjusted);
+
+                } else { // Texto longo, aplique quebra de linha e limite de 33 linhas
+                    g.setFont(smallFont); // Fonte menor para textos longos
+                    FontMetrics metrics = g.getFontMetrics();
+
+                    // Dividir o texto em várias linhas
+                    List<String> textoQuebrado = wrapTextToRectangle(cupom,
+                            metrics, rectWidth);
+
+                    g.setColor(Color.decode("#9b111e"));
+                    g.fillRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
+                    g.drawRoundRect(rectX, rectY, rectWidth, rectHeight, 30, 30);
+                    g.setColor(Color.white);
+
+                    // Se o número de linhas for maior que 33, cortar e adicionar reticências
+                    if (textoQuebrado.size() > maxLines) {
+                        textoQuebrado = textoQuebrado.subList(0, maxLines); // Manter apenas as primeiras 33 linhas
+                        String ultimaLinha = textoQuebrado.get(maxLines - 1); // Última linha
+                        ultimaLinha = ultimaLinha.substring(0, Math.min(ultimaLinha.length(), ultimaLinha.length() - 3))
+                                + "..."; // Adicionar reticências
+                        textoQuebrado.set(maxLines - 1, ultimaLinha); // Atualizar a última linha
                     }
 
-                    // Calcular a posição Y inicial para centralizar verticalmente o bloco de texto
+                    // Calcular a altura total do texto (considerando várias linhas)
                     int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
-                    int startY = rectY + (rectHeight - totalTextHeight) / 2 + metrics.getAscent();
+                    int startY = rectY + (rectHeight - totalTextHeight) / 2 + metrics.getAscent(); // Início para
+                                                                                                   // centralizar
 
-                    for (String i : textoQuebrado) {
-
-                        xPosition = rectX + (rectWidth - metrics.stringWidth(i)) / 2;
-                        g.drawString(i, xPosition, startY);
-                        startY += metrics.getHeight();
+                    // Desenhar o texto linha por linha
+                    for (String linha : textoQuebrado) {
+                        int textWidth = metrics.stringWidth(linha);
+                        int xPosition = rectX + (rectWidth - textWidth) / 2; // Centralizar horizontalmente
+                        g.drawString(linha, xPosition, startY);
+                        startY += metrics.getHeight(); // Mover para a próxima linha
                     }
-
-                }
-
-                if (cupom.length() <= 17) {
-                    metrics = g.getFontMetrics();
-                    xPosition = rectX + (rectWidth - metrics.stringWidth("Cupom: " + cupom)) / 2;
-
-                    g.drawString("Cupom: " + cupom, xPosition, yPosition);
                 }
             }
 
@@ -788,6 +797,123 @@ public class ProdutoService {
             throw new FileUploadException();
         }
 
+    }
+
+    public byte[] gerarFeed(Long id) throws IOException, FontFormatException {
+        BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/feed.jpeg"));
+
+        Produto produto = produtoRepository.findById(id).orElseThrow();
+
+        Image foto = ImageIO.read(new File(UPLOAD_DIR + "-real" + "/" + produto.getImagemSocial()));
+
+        // Carregar a fonte personalizada
+        InputStream is = getClass().getClassLoader().getResourceAsStream("fonts/Chonky_Cat.ttf");
+        Font customFont = Font.createFont(Font.TRUETYPE_FONT, is);
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(customFont);
+
+        // Desenhar a imagem e o texto na imagem
+        Graphics2D g = image.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setColor(Color.BLACK);
+        g.drawImage(foto, 86, 75, 910, 860, null);
+
+        // Definir retângulo para o título
+        int titleX = 150;
+        int titleY = 960;
+        int titleWidth = 600;
+        int titleHeight = 90;
+
+        // Desenhar o título
+        g.setColor(Color.white);
+        Font titleFont = customFont.deriveFont(Font.BOLD, 40); // Tamanho inicial da fonte
+        g.setFont(titleFont);
+
+        // Quebrar o título em até duas linhas e desenhá-lo
+        String titulo = produto.getTitulo();
+        drawTextInRectangle(g, titulo, titleX, titleY, titleWidth, titleHeight, customFont);
+
+        // Desenhar o preço no retângulo
+        int fontSize = 50;
+        Font priceFont = customFont.deriveFont(Font.BOLD, fontSize);
+        int yPreco = 960;
+        int xPreco = 730;
+        int width = 220;
+        int height = 90;
+        FontMetrics metrics;
+        int textWidth;
+        int textHeight;
+
+        // Ajustar o tamanho da fonte do preço para caber no retângulo
+        do {
+            priceFont = customFont.deriveFont(Font.BOLD, fontSize);
+            g.setFont(priceFont);
+            metrics = g.getFontMetrics(priceFont);
+            textWidth = metrics.stringWidth(produto.getPreco());
+            textHeight = metrics.getHeight();
+            fontSize--;
+        } while (textWidth > width - 20 || textHeight > height - 20); // Deixar 20px de margem
+
+        // Centralizar o preço dentro do retângulo
+        int x = xPreco + (width - textWidth) / 2;
+        int y = yPreco + ((height - textHeight) / 2) + metrics.getAscent();
+
+        // Desenhar o preço
+        g.drawString(produto.getPreco(), x, y);
+
+        g.dispose();
+
+        // Converter a imagem para um array de bytes
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", baos);
+        byte[] bytes = baos.toByteArray();
+
+        // Retornar a imagem gerada
+        return bytes;
+    }
+
+    // Método para desenhar texto com quebra de linha e reticências
+    private void drawTextInRectangle(Graphics2D g, String text, int x, int y, int width, int height, Font font) {
+        FontMetrics metrics = g.getFontMetrics(font);
+        int lineHeight = metrics.getHeight();
+        String line1 = "", line2 = "";
+        boolean fits = false;
+
+        // Ajustar o texto em até duas linhas
+        for (int i = 0; i < text.length(); i++) {
+            String testLine = text.substring(0, i + 1);
+            int testLineWidth = metrics.stringWidth(testLine);
+            if (testLineWidth > width) {
+                line1 = text.substring(0, i);
+                String remainingText = text.substring(i);
+
+                // Ajustar a segunda linha com reticências, se necessário
+                for (int j = 0; j < remainingText.length(); j++) {
+                    String testLine2 = remainingText.substring(0, j + 1);
+                    int testLine2Width = metrics.stringWidth(testLine2 + "...");
+                    if (testLine2Width > width) {
+                        line2 = remainingText.substring(0, j) + "...";
+                        fits = true;
+                        break;
+                    }
+                }
+                if (!fits) {
+                    line2 = remainingText;
+                }
+                break;
+            }
+        }
+
+        if (line1.isEmpty()) {
+            line1 = text;
+        }
+
+        // Desenhar as duas linhas dentro do retângulo
+        g.drawString(line1, x, y + metrics.getAscent());
+        if (!line2.isEmpty()) {
+            g.drawString(line2, x, y + lineHeight + metrics.getAscent());
+        }
     }
 
     @Transactional
