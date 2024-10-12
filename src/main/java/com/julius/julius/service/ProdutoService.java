@@ -819,20 +819,6 @@ public class ProdutoService {
         g.setColor(Color.BLACK);
         g.drawImage(foto, 86, 75, 910, 860, null);
 
-        // Definir retângulo para o título
-        int titleX = 150;
-        int titleY = 960;
-        int titleWidth = 600;
-        int titleHeight = 90;
-
-        // Desenhar o título
-        g.setColor(Color.white);
-        Font titleFont = customFont.deriveFont(Font.BOLD, 40); // Tamanho inicial da fonte
-        g.setFont(titleFont);
-
-        // Quebrar o título em até duas linhas e desenhá-lo
-        String titulo = produto.getTitulo();
-        drawTextInRectangle(g, titulo, titleX, titleY, titleWidth, titleHeight, customFont);
 
         // Desenhar o preço no retângulo
         int fontSize = 50;
@@ -844,6 +830,7 @@ public class ProdutoService {
         FontMetrics metrics;
         int textWidth;
         int textHeight;
+        g.setColor(Color.white);
 
         // Ajustar o tamanho da fonte do preço para caber no retângulo
         do {
@@ -862,6 +849,23 @@ public class ProdutoService {
         // Desenhar o preço
         g.drawString(produto.getPreco(), x, y);
 
+        // Configuração da cor de fundo (preto)
+        g.setColor(Color.BLACK);
+        // g.fillRect(130, 960, 530, 90);
+        
+        // Configuração da fonte e cor do texto
+        // g.setColor(Color.white);
+        g.setFont(customFont.deriveFont(Font.BOLD, 30));
+        
+        // Retângulo de exemplo (posição e tamanho)
+        int rectX = 130;
+        int rectY = 960;
+        int rectWidth = 540; // Largura do retângulo
+        int rectHeight = 90; // Altura do retângulo (aproximadamente 2 linhas de texto)
+
+        // Desenhar o texto no retângulo
+        drawTextInRectangle2(g, produto.getTitulo(), rectX, rectY, rectWidth, rectHeight);
+
         g.dispose();
 
         // Converter a imagem para um array de bytes
@@ -871,6 +875,76 @@ public class ProdutoService {
 
         // Retornar a imagem gerada
         return bytes;
+    }
+
+    private static void drawTextInRectangle2(Graphics2D g2d, String text, int x, int y, int width, int height) {
+        FontMetrics fm = g2d.getFontMetrics();
+        int lineHeight = fm.getHeight(); // Altura de cada linha de texto
+
+        // Lista para armazenar as linhas de texto
+        List<String> lines = new ArrayList<>();
+
+        // Divide o texto em palavras
+        String[] words = text.split(" ");
+        StringBuilder currentLine = new StringBuilder();
+
+        for (String word : words) {
+            String testLine = currentLine + word + " ";
+            int lineWidth = fm.stringWidth(testLine);
+
+            // Se a largura da linha for menor que a largura do retângulo, adiciona a palavra à linha atual
+            if (lineWidth < width) {
+                currentLine.append(word).append(" ");
+            } else {
+                // Se a linha estiver cheia, adiciona a linha à lista de linhas e começa uma nova
+                lines.add(currentLine.toString().trim());
+                currentLine = new StringBuilder(word).append(" ");
+            }
+
+            // Se já tiver duas linhas, para de adicionar palavras
+            if (lines.size() == 2) {
+                break;
+            }
+        }
+
+        // Adiciona a última linha (caso ela não tenha sido adicionada ainda)
+        if (!currentLine.toString().isEmpty() && lines.size() < 2) {
+            lines.add(currentLine.toString().trim());
+        }
+
+        // Se houver mais de duas linhas, corta a segunda linha e adiciona "..."
+        if (lines.size() == 2 && fm.stringWidth(lines.get(1)) > width) {
+            String truncatedLine = truncateToFit(g2d, lines.get(1), width);
+            lines.set(1, truncatedLine);
+        }
+
+        // Centralização vertical: calcula o ponto de partida para que o texto fique centralizado verticalmente
+        int totalTextHeight = lines.size() * lineHeight; // Altura total do texto
+        int startY = y + (height - totalTextHeight) / 2 + fm.getAscent(); // Posiciona a primeira linha
+
+        // Desenha as linhas no retângulo com centralização horizontal
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
+            int lineWidth = fm.stringWidth(line);
+            int startX = x + (width - lineWidth) / 2; // Calcula o ponto de partida para centralizar horizontalmente
+            g2d.drawString(line, startX, startY + (i * lineHeight));
+        }
+    }
+
+    private static String truncateToFit(Graphics2D g2d, String text, int maxWidth) {
+        FontMetrics fm = g2d.getFontMetrics();
+        String ellipsis = "...";
+        int ellipsisWidth = fm.stringWidth(ellipsis);
+
+        // Trunca a linha até que ela caiba no espaço disponível
+        for (int i = text.length() - 1; i > 0; i--) {
+            String testLine = text.substring(0, i) + ellipsis;
+            if (fm.stringWidth(testLine) <= maxWidth) {
+                return testLine;
+            }
+        }
+
+        return ellipsis; // Se não couber nada, retorna apenas "..."
     }
 
     // Método para desenhar texto com quebra de linha e reticências
