@@ -111,4 +111,41 @@ public class Produto {
             promocaoEncerrada = false;
         }
     }
+
+    public Produto duplicar() {
+        Produto copia = Produto.builder()
+                .titulo(this.titulo)
+                .copy(this.copy)
+                .preco(this.preco)
+                .precoParcelado(this.precoParcelado)
+                .descricao(this.descricao)
+                .cupom(this.cupom)
+                .freteVariacoes(this.freteVariacoes)
+                .link(this.link)
+                .mensagemAdicional(this.mensagemAdicional)
+                .urlImagem(this.urlImagem)
+                .imagemSocial(this.imagemSocial)
+                .categoria(this.categoria) // Assumindo que você quer copiar a referência para a mesma categoria
+                .loja(this.loja) // Assumindo que você quer copiar a referência para a mesma loja
+                .promocaoEncerrada(this.promocaoEncerrada)
+                .dataCriacao(this.dataCriacao) // Pode ou não querer duplicar esta data
+                .dataAtualizacao(this.dataAtualizacao) // Pode ou não querer duplicar esta data
+                .build();
+    
+        // Fazendo uma cópia das listas para evitar compartilhamento de referências
+        if (this.reports != null) {
+            copia.setReports(new ArrayList<>(this.reports));
+        }
+    
+        if (this.linksProdutos != null) {
+            copia.setLinksProdutos(new ArrayList<>(this.linksProdutos));
+        }
+    
+        if (this.promos != null) {
+            copia.setPromos(new ArrayList<>(this.promos));
+        }
+    
+        return copia;
+    }
+    
 }

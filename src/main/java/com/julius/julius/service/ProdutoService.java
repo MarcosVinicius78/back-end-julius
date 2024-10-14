@@ -214,19 +214,34 @@ public class ProdutoService {
         produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
         produto.setLoja(loja.get());
+        
+        produto.setLink(produtoSalvarDto.link_se());
+        produto.setCopy(produtoSalvarDto.copy());
+
+        loja.get().getProdutos().add(produto);
+        
+        if (!produtoSalvarDto.link_ofm().isEmpty() && produtoSalvarDto.link_ofm() != null) {
+            LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.link_ofm(), 2L);
+            
+            if (produtoSalvarDto.cupomOmc() == null) {
+                produto.getLinksProdutos().add(linksProdutosOfm);
+            }else{
+                Produto produtoOmc = produto.duplicar();
+                if (!produtoSalvarDto.urlImagem().equals("")) {
+                    produtoOmc.setUrlImagem(salvarImagem(produtoSalvarDto.urlImagem()));
+                } else {
+                    produtoOmc.setUrlImagem("");
+                }
+                produtoOmc.getLinksProdutos().add(linksProdutosOfm);
+                produtoOmc.setCupom(produtoSalvarDto.cupomOmc());
+                produtoRepository.save(produtoOmc);
+            }
+        }
 
         if (!produtoSalvarDto.link_se().isEmpty()) {
             LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link_se(), 1L);
             produto.getLinksProdutos().add(linksProdutosSe);
         }
-        if (!produtoSalvarDto.link_ofm().isEmpty() && produtoSalvarDto.link_ofm() != null) {
-            LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.link_ofm(), 2L);
-            produto.getLinksProdutos().add(linksProdutosOfm);
-        }
-        produto.setLink(produtoSalvarDto.link_se());
-        produto.setCopy(produtoSalvarDto.copy());
-
-        loja.get().getProdutos().add(produto);
 
         return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "");
     }

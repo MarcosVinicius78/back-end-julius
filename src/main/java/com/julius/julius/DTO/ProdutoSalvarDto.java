@@ -16,7 +16,7 @@ public record ProdutoSalvarDto(
 
         String link_se,
         String link_ofm,
-        
+        String cupomOmc,
         String cupom,
         String mensagemAdicional,
         
