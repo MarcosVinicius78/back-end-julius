@@ -197,6 +197,8 @@ public class ProdutoService {
         Optional<Categoria> categoria = categoriaRepository.findById(produtoSalvarDto.id_categoria());
         Optional<Loja> loja = lojaRepository.findById(produtoSalvarDto.id_loja());
 
+        Long idOmc = 0L;
+
         Produto produto = new Produto();
 
         if (!produtoSalvarDto.urlImagem().equals("")) {
@@ -234,7 +236,7 @@ public class ProdutoService {
                 }
                 produtoOmc.getLinksProdutos().add(linksProdutosOfm);
                 produtoOmc.setCupom(produtoSalvarDto.cupomOmc());
-                produtoRepository.save(produtoOmc);
+                idOmc = produtoRepository.save(produtoOmc).getId();
             }
         }
 
@@ -243,7 +245,7 @@ public class ProdutoService {
             produto.getLinksProdutos().add(linksProdutosSe);
         }
 
-        return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "");
+        return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "", idOmc);
     }
 
     public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable pageable) {
@@ -257,6 +259,7 @@ public class ProdutoService {
                     loja.setNomeLoja(produto.nomeLoja());
                     ProdutoResponseDto produtoResponseDto = new ProdutoResponseDto(
                             produto.id(),
+                            0L,
                             produto.titulo(),
                             produto.preco(), produto.parcelado(), null, produto.cupom(), produto.link(),
                             null, produto.freteVariacoes(), produto.dataCriacao(),
@@ -476,19 +479,19 @@ public class ProdutoService {
         produto.setLoja(loja);
         produto.setCopy(produtoAtualizarDto.copy());
 
-        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto), "");
+        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto), "", 0L);
     }
 
     public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site, Long categoriaId, Pageable pageable) {
         if (site == 1) {
             return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
                     .map(produto -> ProdutoResponseDto.toResonse(produto,
-                            produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+                            produtoRepository.sfindByProdutoBySite(produto.getId(), 1L),0L));
         }
 
         return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
                 .map(produto -> ProdutoResponseDto.toResonse(produto,
-                        produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
+                        produtoRepository.sfindByProdutoBySite(produto.getId(), 2L),0L));
     }
 
     // public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long
@@ -523,6 +526,7 @@ public class ProdutoService {
                     loja.setUrlImagem(produtoPesquisa.imagemLoja());
                     ProdutoResponseDto produtoResponseDto = new ProdutoResponseDto(
                             produtoPesquisa.id(),
+                            0L,
                             produtoPesquisa.titulo(),
                             produtoPesquisa.preco(), produtoPesquisa.parcelado(),
                             "", produtoPesquisa.cupom(),
@@ -585,7 +589,7 @@ public class ProdutoService {
 
         Page<ProdutoResponseDto> produtosPage = produtoRepository.listarProdutosDestaque(pageable)
                 .map(produto -> ProdutoResponseDto.toResonse(produto,
-                        produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
+                        produtoRepository.sfindByProdutoBySite(produto.getId(), 1L),0L));
         System.out.println(produtosPage.getNumber());
         return produtosPage;
     }

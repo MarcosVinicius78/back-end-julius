@@ -10,6 +10,7 @@ import com.julius.julius.models.Produto;
 public record ProdutoResponseDto(
 
         Long id,
+        Long idOmc,
         String titulo,
         String preco,
         String parcelado,
@@ -29,7 +30,7 @@ public record ProdutoResponseDto(
 
 ) {
 
-    public static ProdutoResponseDto toResonse(Produto produto, String url) {
+    public static ProdutoResponseDto toResonse(Produto produto, String url, Long idOmc) {
         
          LojaResponseDto lojaDto = null;     
         
@@ -41,6 +42,7 @@ public record ProdutoResponseDto(
 
         return new ProdutoResponseDto(
             produto.getId(),
+            idOmc,
             produto.getTitulo(),
             produto.getPreco(),
             produto.getPrecoParcelado(),

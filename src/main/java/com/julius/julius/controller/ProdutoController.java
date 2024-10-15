@@ -97,10 +97,14 @@ public class ProdutoController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam(name = "file", required = false) MultipartFile file,
             @RequestParam(name = "fileSocial", required = false) MultipartFile fileSocial, @RequestParam("id") Long id,
+            @RequestParam(name = "idOmc", required = false) Long idOmc,
             @RequestParam(name = "urlImagem", required = false) String urlImagem,
             @RequestParam(name = "urlImagemReal", required = false) String urlImagemReal)
             throws FileUploadException, FileExistsException {
         produtoService.salvarImagemProduto(file, id, urlImagem, fileSocial, urlImagemReal);
+        if (idOmc != 0) {
+            produtoService.salvarImagemProduto(file, idOmc, urlImagem, fileSocial, urlImagemReal);
+        }
         return ResponseEntity.ok().build();
     }
 
