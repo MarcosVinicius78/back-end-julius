@@ -30,8 +30,8 @@ public class BannersController {
     private final BannersService bannersService;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, @RequestParam("nome") String nome) {
-        return ResponseEntity.ok().body(bannersService.salvarBnners(file, nome));
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file,@RequestParam("fileMobile") MultipartFile fileMobile,@RequestParam("nome") String nome, @RequestParam(name = "link", required = false) String link) {
+        return ResponseEntity.ok().body(bannersService.salvarBnners(file, fileMobile, nome, link));
     }
 
     @GetMapping("/{imageName}")
@@ -57,4 +57,15 @@ public class BannersController {
         bannersService.excluirBanner(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{bannerId}")
+    public ResponseEntity<String> editarBanner(@PathVariable Long bannerId,
+                                               @RequestParam(value = "file", required = false) MultipartFile file,
+                                               @RequestParam(value = "fileMobile", required = false) MultipartFile fileMobile,
+                                               @RequestParam("nome") String nome,
+                                               @RequestParam("link") String link) {
+        String resultado = bannersService.editarBanner(bannerId, file, fileMobile, nome, link);
+        return ResponseEntity.ok(resultado);
+    }
 }
+

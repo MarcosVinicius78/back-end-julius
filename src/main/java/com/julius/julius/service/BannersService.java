@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.julius.julius.DTO.response.LinksBannersDto;
 import com.julius.julius.models.Banner;
 import com.julius.julius.models.Link;
-import com.julius.julius.models.Loja;
 import com.julius.julius.repository.BannerRepository;
 import com.julius.julius.repository.LinksRepository;
 
@@ -35,7 +34,7 @@ public class BannersService {
 
     private final BannerRepository bannerRepository;
 
-    public String salvarBnners(MultipartFile file, String link) {
+    public String salvarBnnersImagem(MultipartFile file) {
 
         try {
             File uploadsDir = new File(UPLOAD_DIR);
@@ -45,7 +44,6 @@ public class BannersService {
 
             Date data = new Date();
 
-            
             String fileName = file.getOriginalFilename();
             String nomeImagem = data.getTime() + fileName;
             Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
@@ -53,19 +51,27 @@ public class BannersService {
             Files.copy(file.getInputStream(), filePath,
                     StandardCopyOption.REPLACE_EXISTING);
 
-            String imageUrl = uploadsDir.getAbsolutePath() + fileName;
+            // String imageUrl = uploadsDir.getAbsolutePath() + fileName;
 
-            Banner banner = Banner.builder()
-                            .link(link)
-                            .urlImagem(nomeImagem)
-                            .build();
-
-            bannerRepository.save(banner);
-            return imageUrl;
+            return nomeImagem;
         } catch (Exception e) {
             return null;
         }
 
+    }
+
+    public String salvarBnners(MultipartFile file, MultipartFile fileMobile, String nome, String link) {
+
+        Banner banner = Banner.builder()
+                .nome(nome)
+                .link(link)
+                .urlImagem(salvarBnnersImagem(file))
+                .urlImagemMobile(salvarBnnersImagem(fileMobile))
+                .build();
+
+        bannerRepository.save(banner);
+
+        return "";
     }
 
     // Novo método para excluir banners
@@ -110,10 +116,10 @@ public class BannersService {
         }
     }
 
-    public Link salvarLinks(Link link){
+    public Link salvarLinks(Link link) {
 
-        if (link.getId() != null && link.getSiteId() == 1) { 
-            
+        if (link.getId() != null && link.getSiteId() == 1) {
+
             Optional<Link> links2 = linksRepository.findById(link.getId());
 
             links2.get().setWhatsapp(link.getWhatsapp());
@@ -121,9 +127,9 @@ public class BannersService {
             links2.get().setInstagram(link.getInstagram());
             links2.get().setEmail(link.getEmail());
             links2.get().setSiteId(1L);
-            
+
             return linksRepository.save(links2.get());
-        }else if(link.getId() != null && link.getSiteId() == 2){
+        } else if (link.getId() != null && link.getSiteId() == 2) {
             Optional<Link> links2 = linksRepository.findById(link.getId());
 
             links2.get().setWhatsapp(link.getWhatsapp());
@@ -131,19 +137,66 @@ public class BannersService {
             links2.get().setInstagram(link.getInstagram());
             links2.get().setEmail(link.getEmail());
             links2.get().setSiteId(2L);
-            
+
             return linksRepository.save(links2.get());
         }
-        
+
         return linksRepository.save(link);
     }
 
-    public LinksBannersDto listarLinksEbanners(Long siteId){
+    public LinksBannersDto listarLinksEbanners(Long siteId) {
 
         Link links = linksRepository.pegarLinkeBannersSiteId(siteId);
-        
+
         List<Banner> banners = bannerRepository.findAll();
 
         return LinksBannersDto.toResonse(links, banners);
     }
+
+    // Método para editar um banner existente
+public String editarBanner(Long bannerId, MultipartFile file, MultipartFile fileMobile, String nome, String link) {
+    try {
+        // Buscar o banner no banco de dados
+        Banner banner = bannerRepository.findById(bannerId)
+                .orElseThrow(() -> new RuntimeException("Banner não encontrado"));
+
+        // Atualizar o nome e o link do banner
+        banner.setNome(nome);
+        banner.setLink(link);
+
+        // Se uma nova imagem foi enviada, substitua a anterior
+        if (file != null && !file.isEmpty()) {
+            String novaImagem = salvarBnnersImagem(file);
+            if (novaImagem != null) {
+                // Excluir a imagem antiga, se existir
+                Path oldImagePath = Paths.get(UPLOAD_DIR, banner.getUrlImagem());
+                Files.deleteIfExists(oldImagePath);
+
+                // Atualizar a nova URL da imagem no banner
+                banner.setUrlImagem(novaImagem);
+            }
+        }
+
+        // Se uma nova imagem mobile foi enviada, substitua a anterior
+        if (fileMobile != null && !fileMobile.isEmpty()) {
+            String novaImagemMobile = salvarBnnersImagem(fileMobile);
+            if (novaImagemMobile != null) {
+                // Excluir a imagem mobile antiga, se existir
+                Path oldMobileImagePath = Paths.get(UPLOAD_DIR, banner.getUrlImagemMobile());
+                Files.deleteIfExists(oldMobileImagePath);
+
+                // Atualizar a nova URL da imagem mobile no banner
+                banner.setUrlImagemMobile(novaImagemMobile);
+            }
+        }
+
+        // Salvar as alterações no banco de dados
+        bannerRepository.save(banner);
+
+        return "Banner atualizado com sucesso";
+    } catch (Exception e) {
+        return "Erro ao atualizar o banner";
+    }
+}
+
 }
