@@ -10,4 +10,5 @@ public interface LojaRepository extends JpaRepository<Loja, Long>{
     
     List<Loja> findAllByOrderByNomeLojaAsc();
 
+    Loja findByNomeLojaContainingIgnoreCase(String nome);
 }

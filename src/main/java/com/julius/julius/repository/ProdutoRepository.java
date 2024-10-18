@@ -123,6 +123,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
         @Query(value = "SELECT p.* FROM produtos p WHERE p.data_criacao >= CURRENT_DATE - INTERVAL '7 days' ORDER BY EXTRACT(EPOCH FROM (CURRENT_DATE - p.data_criacao)) DESC, produto_id", nativeQuery = true)
         Page<Produto> listarProdutosDestaque(Pageable pageable);
 
-
         long countByPromosId(Long promoId);
+
+        boolean existsByTitulo(String titulo);
 }

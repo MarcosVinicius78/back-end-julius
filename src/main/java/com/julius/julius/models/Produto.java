@@ -63,16 +63,16 @@ public class Produto {
     @Column(name = "frete_variacoes")
     private String freteVariacoes;
 
-    @Column(name = "link")
+    @Column(name = "link", length = 500)
     private String link;
 
     @Column(name = "mensagem_adicional")
     private String mensagemAdicional;
 
-    @Column(name = "url_imagem", nullable = true)
+    @Column(name = "url_imagem", nullable = true, length = 500)
     private String urlImagem;
 
-    @Column(name = "imagem_social", nullable = true)
+    @Column(name = "imagem_social", nullable = true, length = 500)
     private String imagemSocial;
 
     @OneToMany(mappedBy = "produto")

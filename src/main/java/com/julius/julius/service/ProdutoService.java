@@ -182,7 +182,7 @@ public class ProdutoService {
         }
     }
 
-    private LinksProdutos salvarLinkProduto(String url, Long site) {
+    public LinksProdutos salvarLinkProduto(String url, Long site) {
 
         LinksProdutos linkProduto = LinksProdutos.builder()
                 .url(url)

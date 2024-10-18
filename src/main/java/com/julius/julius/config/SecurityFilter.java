@@ -75,7 +75,7 @@ public class SecurityFilter {
         //     });
         // });
 
-        .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**","/banners/**", "/generate-image","/report/**","/post/**", "/promos/**")
+        .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**","/banners/**", "/generate-image","/report/**","/post/**", "/promos/**", "/mensagem/**")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 // .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTGeneratorFilter(), BasicAuthenticationFilter.class)
@@ -98,7 +98,8 @@ public class SecurityFilter {
                 .requestMatchers(HttpMethod.GET, "/post/**").permitAll()
                 .requestMatchers("/post/**").authenticated()
                 .requestMatchers(HttpMethod.GET,"/promos/**").permitAll()
-                .requestMatchers("/promos/**").permitAll())
+                .requestMatchers("/promos/**").permitAll()
+                .requestMatchers("/mensagem/**").permitAll())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
 

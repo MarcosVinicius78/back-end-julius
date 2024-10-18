@@ -71,6 +71,8 @@ public class JWTValidationFilter extends OncePerRequestFilter{
                     return false;
                 }else if (path.contains("/promos")) {
                     return false;
+                }else if(path.contains("/mensagem")){
+
                 }
             case "PUT":
                 if (path.contains("/produto")) {

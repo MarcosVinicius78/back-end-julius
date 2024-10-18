@@ -36,29 +36,25 @@ public class AmazonService {
     private static final String URI_PATH = "/paapi5/getitems";
     @Value("${aws.accessKeyId}")
     private String ACCESS_KEY;
-
+    
     @Value("${aws.secretAccessKey}")
     private String SECRET_KEY;
+    
+    @Value("${aws.secretAccessKeyOmc}")
+    private String SECRET_KEY_OMC;
+    
+    @Value("${aws.accessKeyIdOmc}")
+    private String ACCESS_KEY_OMC;
+
     private static final String REGION = "us-east-1";
+
 
     private static final Pattern ASIN_PATTERN = Pattern.compile("/([A-Z0-9]{10})(?:[/?]|$)");
 
-    public String getProdutoAmazon(String codigoProduto) {
+    public String getProdutoAmazon(String codigoProduto, int site) {
 
         try {
-            String requestPayload = "{"
-                    + " \"ItemIds\": ["
-                    + "  \"" + codigoProduto + "\""
-                    + " ],"
-                    + " \"Resources\": ["
-                    + "  \"Images.Primary.Large\","
-                    + "  \"ItemInfo.Title\","
-                    + "  \"Offers.Listings.Price\""
-                    + " ],"
-                    + " \"PartnerTag\": \"sergipeofer0e-20\","
-                    + " \"PartnerType\": \"Associates\","
-                    + " \"Marketplace\": \"www.amazon.com.br\""
-                    + "}";
+            String requestPayload = payload(codigoProduto, site == 1? "sergipeofer0e-20" : "ofertasmaiscupons-20");
 
             TreeMap<String, String> headers = new TreeMap<String, String>();
             headers.put("host", HOST);
@@ -66,14 +62,12 @@ public class AmazonService {
             headers.put("x-amz-target", "com.amazon.paapi5.v1.ProductAdvertisingAPIv1.GetItems");
             headers.put("content-encoding", "amz-1.0");
 
-            AWSV4Auth awsv4Auth = new AWSV4Auth.Builder(ACCESS_KEY, SECRET_KEY)
-                    .path(URI_PATH)
-                    .region(REGION)
-                    .service("ProductAdvertisingAPI")
-                    .httpMethodName("POST")
-                    .headers(headers)
-                    .payload(requestPayload)
-                    .build();
+            AWSV4Auth awsv4Auth = null;
+            if (site == 1) {
+                awsv4Auth = auth(headers, requestPayload, ACCESS_KEY, SECRET_KEY);
+            }else if(site == 2){
+                awsv4Auth = auth(headers, requestPayload, ACCESS_KEY_OMC, SECRET_KEY_OMC);
+            }
 
             HttpClient client = (HttpClient) HttpClientBuilder.create().build();
             HttpPost httpPost = new HttpPost("https://" + HOST + URI_PATH);
@@ -111,6 +105,37 @@ public class AmazonService {
 
     }
 
+    public String payload(String codigoProduto, String tag){
+        String requestPayload = "{"
+                    + " \"ItemIds\": ["
+                    + "  \"" + codigoProduto + "\""
+                    + " ],"
+                    + " \"Resources\": ["
+                    + "  \"Images.Primary.Large\","
+                    + "  \"ItemInfo.Title\","
+                    + "  \"Offers.Listings.Price\""
+                    + " ],"
+                    + " \"PartnerTag\": \"" + tag +"\","
+                    + " \"PartnerType\": \"Associates\","
+                    + " \"Marketplace\": \"www.amazon.com.br\""
+                    + "}";
+        return requestPayload;
+    }
+
+    public AWSV4Auth auth(TreeMap<String, String> headers, String requestPayload, String accessKey, String secretKey){
+
+        AWSV4Auth awsv4Auth = new AWSV4Auth.Builder(accessKey, secretKey)
+                    .path(URI_PATH)
+                    .region(REGION)
+                    .service("ProductAdvertisingAPI")
+                    .httpMethodName("POST")
+                    .headers(headers)
+                    .payload(requestPayload)
+                    .build();
+
+        return awsv4Auth;
+    }
+
     public String pegarCodigoProdutoAmazon(String url) {
 
         String expandedUrl = url;
@@ -127,17 +152,6 @@ public class AmazonService {
         } catch (Exception e) {
             throw new NotFoundException("Não Foi Possivel acessar o Link");
         }
-
-        // if (url.contains("amz")) {
-        // try {
-        // URL urlGet = new URL(url);
-        // URLConnection connection = urlGet.openConnection();
-        // InputStream is = connection.getInputStream();
-        // expandedUrl = connection.getURL().toString();
-        // } catch (Exception e) {
-        // throw new NotFoundException("Não Foi Possivel acessar o Link");
-        // }
-        // }
 
         String regexDp = "/dp/(\\w+)";
         Pattern pattern = Pattern.compile(regexDp);
@@ -162,7 +176,7 @@ public class AmazonService {
         throw new IllegalStateException("No ASIN found in the provided URL");
     }
 
-    public ProdutoScraperDTO montarProdutoAmazon(String jsonResponse, String url) {
+    public ProdutoScraperDTO montarProdutoAmazon(String jsonResponse, String urlOmc) {
 
         JSONObject jsonObject = new JSONObject(jsonResponse);
 
@@ -172,6 +186,8 @@ public class AmazonService {
 
         // Vamos considerar apenas o primeiro item do array
         JSONObject firstItem = itemsArray.getJSONObject(0);
+
+        String urlAmazon = firstItem.getString("DetailPageURL");
 
         JSONObject itemInfo = firstItem.getJSONObject("ItemInfo");
 
@@ -201,7 +217,7 @@ public class AmazonService {
 
         String amount = priceResult.getString("DisplayAmount");
 
-        return new ProdutoScraperDTO(displayValue, amount, urlImagem, url, "", "");
+        return new ProdutoScraperDTO(displayValue, amount, urlImagem, urlAmazon, urlOmc, "");
     }
 
 }
