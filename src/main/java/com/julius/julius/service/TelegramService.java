@@ -13,8 +13,8 @@ public class TelegramService {
     private final String TELEGRAM_BOT_TOKEN = "7889228882:AAEZSaj2jveJvmC1vwkZEN1-fOdQgboFkm8";
     // private final String TELEGRAM_CHAT_ID = "-1002452348897"; // Chat ID do canal/grupo
     // private final String TELEGRAM_CHAT_ID = "-1002452348897"; // Chat ID do canal/grupo OMC
-    private final String TELEGRAM_CHAT_ID = "-1002017124017"; // Chat ID do canal/grupo julius
-    // private final String TELEGRAM_CHAT_ID = "-1001724288449"; // Chat ID do canal/grupo Sergipe Ofertas
+    // private final String TELEGRAM_CHAT_ID = "-1002017124017"; // Chat ID do canal/grupo julius
+    private final String TELEGRAM_CHAT_ID = "-1001724288449"; // Chat ID do canal/grupo Sergipe Ofertas
     private final String API_IMAGEM = "https://sergipeofertas.com.br/api/produto/download-imagem-real/";
 
     public void enviarProdutoParaTelegram(MensagemRequest mensagem) {
