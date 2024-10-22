@@ -145,7 +145,7 @@ public class ScraperService {
 
                         // Verifica se o produto já foi processado
                         if (!produtoRepository.existsByTitulo(titulo)
-                                && (link.contains("amazon") || link.contains("maga"))) {
+                                && (link.contains("amazon") || link.contains("maga") || !firstCoupon.contains("PECHINCHOU"))) {
                             Produto produto = new Produto();
                             // produto.setProductId(productId);
                             produto.setPreco(formatter.format(Double.parseDouble(preco)));
