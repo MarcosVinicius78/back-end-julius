@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.julius.julius.DTO.request.postDTO.PostRequestDTO;
 import com.julius.julius.DTO.response.postDTO.PostResponseDTO;
 import com.julius.julius.models.Post;
-import com.julius.julius.models.Produto;
 import com.julius.julius.repository.PostRepository;
 
 import lombok.AllArgsConstructor;

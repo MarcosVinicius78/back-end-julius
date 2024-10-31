@@ -85,8 +85,6 @@ public class ProdutoController {
 
     @PostMapping("/salvar")
     public ResponseEntity<ProdutoResponseDto> salvarProduto(@RequestBody @Valid ProdutoSalvarDto produtoSalvarDto) {
-        System.out.println(produtoSalvarDto.link_ofm());
-        System.out.println(produtoSalvarDto.link_se());
         if (produtoSalvarDto != null) {
             return ResponseEntity.ok().body(produtoService.salvarProduto(produtoSalvarDto));
         }

@@ -50,7 +50,6 @@ public class CategoriaService {
             try {
                 produtoService.apagarProduto(i.getId(), i.getUrlImagem(), i.getImagemSocial());
             } catch (FileExistsException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }

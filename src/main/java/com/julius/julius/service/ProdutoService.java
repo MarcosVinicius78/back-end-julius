@@ -216,34 +216,46 @@ public class ProdutoService {
         produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
         produto.setLoja(loja.get());
-        
-        produto.setLink(produtoSalvarDto.link_se());
+
+        produto.setLink(produtoSalvarDto.link());
         produto.setCopy(produtoSalvarDto.copy());
 
         loja.get().getProdutos().add(produto);
-        
-        if (!produtoSalvarDto.link_ofm().isEmpty() && produtoSalvarDto.link_ofm() != null) {
-            LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.link_ofm(), 2L);
-            
-            if (produtoSalvarDto.cupomOmc() == null) {
-                produto.getLinksProdutos().add(linksProdutosOfm);
-            }else{
+
+        if (!produtoSalvarDto.link_ofm().isEmpty() || !produtoSalvarDto.descricao().isEmpty()) {
+
+            if (loja.get().getNomeLoja().contains("maga")) {
+                LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.descricao(), 2L);
+    
                 Produto produtoOmc = produto.duplicar();
+                produtoOmc.setLink(produtoSalvarDto.descricao());
+                produtoOmc.setDescricao(produtoSalvarDto.link_ofm());
                 if (!produtoSalvarDto.urlImagem().equals("")) {
                     produtoOmc.setUrlImagem(salvarImagem(produtoSalvarDto.urlImagem()));
                 } else {
                     produtoOmc.setUrlImagem("");
                 }
                 produtoOmc.getLinksProdutos().add(linksProdutosOfm);
-                produtoOmc.setCupom(produtoSalvarDto.cupomOmc());
-                idOmc = produtoRepository.save(produtoOmc).getId();
+    
+                if (produtoSalvarDto.cupomOmc() != null) {
+                    produtoOmc.setCupom(produtoSalvarDto.cupomOmc());
+                }else{
+                    produtoOmc.setCupom(produtoSalvarDto.cupom());
+                }
+                idOmc = produtoRepository.save(produtoOmc).getId();    
+            }else{
+                LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.link_ofm(), 2L);
+                produto.getLinksProdutos().add(linksProdutosOfm);
             }
+
+            produto.setDescricao(produtoSalvarDto.link_se());
         }
 
-        if (!produtoSalvarDto.link_se().isEmpty()) {
-            LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link_se(), 1L);
+        if (!produtoSalvarDto.link_se().isEmpty() || !produtoSalvarDto.link().isEmpty()) {
+            LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link(), 1L);
             produto.getLinksProdutos().add(linksProdutosSe);
         }
+
 
         return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "", idOmc);
     }
@@ -486,12 +498,12 @@ public class ProdutoService {
         if (site == 1) {
             return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
                     .map(produto -> ProdutoResponseDto.toResonse(produto,
-                            produtoRepository.sfindByProdutoBySite(produto.getId(), 1L),0L));
+                            produtoRepository.sfindByProdutoBySite(produto.getId(), 1L), 0L));
         }
 
         return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
                 .map(produto -> ProdutoResponseDto.toResonse(produto,
-                        produtoRepository.sfindByProdutoBySite(produto.getId(), 2L),0L));
+                        produtoRepository.sfindByProdutoBySite(produto.getId(), 2L), 0L));
     }
 
     // public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long
@@ -589,7 +601,7 @@ public class ProdutoService {
 
         Page<ProdutoResponseDto> produtosPage = produtoRepository.listarProdutosDestaque(pageable)
                 .map(produto -> ProdutoResponseDto.toResonse(produto,
-                        produtoRepository.sfindByProdutoBySite(produto.getId(), 1L),0L));
+                        produtoRepository.sfindByProdutoBySite(produto.getId(), 1L), 0L));
         System.out.println(produtosPage.getNumber());
         return produtosPage;
     }
@@ -838,7 +850,6 @@ public class ProdutoService {
         g.setColor(Color.BLACK);
         g.drawImage(foto, 86, 75, 910, 860, null);
 
-
         // Desenhar o preço no retângulo
         int fontSize = 50;
         Font priceFont = customFont.deriveFont(Font.BOLD, fontSize);
@@ -871,11 +882,11 @@ public class ProdutoService {
         // Configuração da cor de fundo (preto)
         g.setColor(Color.BLACK);
         // g.fillRect(130, 960, 530, 90);
-        
+
         // Configuração da fonte e cor do texto
         // g.setColor(Color.white);
         g.setFont(customFont.deriveFont(Font.BOLD, 30));
-        
+
         // Retângulo de exemplo (posição e tamanho)
         int rectX = 130;
         int rectY = 960;
@@ -911,11 +922,13 @@ public class ProdutoService {
             String testLine = currentLine + word + " ";
             int lineWidth = fm.stringWidth(testLine);
 
-            // Se a largura da linha for menor que a largura do retângulo, adiciona a palavra à linha atual
+            // Se a largura da linha for menor que a largura do retângulo, adiciona a
+            // palavra à linha atual
             if (lineWidth < width) {
                 currentLine.append(word).append(" ");
             } else {
-                // Se a linha estiver cheia, adiciona a linha à lista de linhas e começa uma nova
+                // Se a linha estiver cheia, adiciona a linha à lista de linhas e começa uma
+                // nova
                 lines.add(currentLine.toString().trim());
                 currentLine = new StringBuilder(word).append(" ");
             }
@@ -937,7 +950,8 @@ public class ProdutoService {
             lines.set(1, truncatedLine);
         }
 
-        // Centralização vertical: calcula o ponto de partida para que o texto fique centralizado verticalmente
+        // Centralização vertical: calcula o ponto de partida para que o texto fique
+        // centralizado verticalmente
         int totalTextHeight = lines.size() * lineHeight; // Altura total do texto
         int startY = y + (height - totalTextHeight) / 2 + fm.getAscent(); // Posiciona a primeira linha
 

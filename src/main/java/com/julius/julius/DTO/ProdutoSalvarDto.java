@@ -13,16 +13,13 @@ public record ProdutoSalvarDto(
 
         String precoParcelado,
         String descricao,
-
         String link_se,
         String link_ofm,
         String cupomOmc,
         String cupom,
         String mensagemAdicional,
-        
+        String link,
         String freteVariacoes,
-        
-        // @NotBlank(message = "O campo 'imagem' é obrigatório")
         String urlImagem,
 
         @NotNull(message = "O Campo 'id_categoria' é obrigatorio")

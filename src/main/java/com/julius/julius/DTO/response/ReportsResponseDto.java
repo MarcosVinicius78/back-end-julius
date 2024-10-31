@@ -4,9 +4,6 @@ import java.util.Date;
 
 import com.julius.julius.models.Report;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 public record ReportsResponseDto(
 
     
