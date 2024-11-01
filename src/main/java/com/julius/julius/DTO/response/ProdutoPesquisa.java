@@ -18,7 +18,8 @@ public record ProdutoPesquisa(
         String imagem,
         String imagemSocial,
         String imagemLoja,
-        String nomeLoja
+        String nomeLoja,
+        String descricao
 ) {
 
 }

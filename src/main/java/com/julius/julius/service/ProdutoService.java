@@ -226,7 +226,7 @@ public class ProdutoService {
 
             if (loja.get().getNomeLoja().contains("maga")) {
                 LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.descricao(), 2L);
-    
+
                 Produto produtoOmc = produto.duplicar();
                 produtoOmc.setLink(produtoSalvarDto.descricao());
                 produtoOmc.setDescricao(produtoSalvarDto.link_ofm());
@@ -236,14 +236,14 @@ public class ProdutoService {
                     produtoOmc.setUrlImagem("");
                 }
                 produtoOmc.getLinksProdutos().add(linksProdutosOfm);
-    
+
                 if (produtoSalvarDto.cupomOmc() != null) {
                     produtoOmc.setCupom(produtoSalvarDto.cupomOmc());
-                }else{
+                } else {
                     produtoOmc.setCupom(produtoSalvarDto.cupom());
                 }
-                idOmc = produtoRepository.save(produtoOmc).getId();    
-            }else{
+                idOmc = produtoRepository.save(produtoOmc).getId();
+            } else {
                 LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.link_ofm(), 2L);
                 produto.getLinksProdutos().add(linksProdutosOfm);
             }
@@ -255,7 +255,6 @@ public class ProdutoService {
             LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link(), 1L);
             produto.getLinksProdutos().add(linksProdutosSe);
         }
-
 
         return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "", idOmc);
     }
@@ -273,7 +272,7 @@ public class ProdutoService {
                             produto.id(),
                             0L,
                             produto.titulo(),
-                            produto.preco(), produto.parcelado(), null, produto.cupom(), produto.link(),
+                            produto.preco(), produto.parcelado(), produto.descricao(), produto.cupom(), produto.link(),
                             null, produto.freteVariacoes(), produto.dataCriacao(),
                             produto.imagem(), LojaResponseDto.toResonse(loja), produto.imagemSocial(), produto.copy(),
                             produto.mensagemAdicional(), produto.promocaoEncerrada());
@@ -468,21 +467,29 @@ public class ProdutoService {
         // Adicionando novos links, se necessário
         if (produtoAtualizarDto.link_se() != null && !produtoAtualizarDto.link_se().isEmpty()
                 && linksProdutos.stream().noneMatch(lp -> lp.getSite() == 1)) {
-            LinksProdutos novoLinkSe = salvarLinkProduto(produtoAtualizarDto.link_se(), 1L);
-            produto.getLinksProdutos().add(novoLinkSe);
+
+            if (!produtoAtualizarDto.link_se().contains("one")) {
+                LinksProdutos novoLinkSe = salvarLinkProduto(produtoAtualizarDto.link_se(), 1L);
+                produto.getLinksProdutos().add(novoLinkSe);
+            }
         }
         if (produtoAtualizarDto.link_ofm() != null && !produtoAtualizarDto.link_ofm().isEmpty()
                 && linksProdutos.stream().noneMatch(lp -> lp.getSite() == 2)) {
-            LinksProdutos novoLinkOfm = salvarLinkProduto(produtoAtualizarDto.link_ofm(), 2L);
-            produto.getLinksProdutos().add(novoLinkOfm);
+            if (!produtoAtualizarDto.link_se().contains("one")) {
+                LinksProdutos novoLinkOfm = salvarLinkProduto(produtoAtualizarDto.link_ofm(), 2L);
+                produto.getLinksProdutos().add(novoLinkOfm);
+            }
         }
 
         produto.setId(produtoAtualizarDto.id());
         produto.setTitulo(produtoAtualizarDto.titulo());
         produto.setPreco(produtoAtualizarDto.preco());
         produto.setPrecoParcelado(produtoAtualizarDto.precoParcelado());
-        produto.setDescricao(produtoAtualizarDto.descricao());
-        produto.setLink(produtoAtualizarDto.link_se());
+        if (produtoAtualizarDto.link_se().contains("one")) {
+            produto.setDescricao(produtoAtualizarDto.link_se());
+        } else {
+            produto.setLink(produtoAtualizarDto.link_se());
+        }
         // linkProdutoRepository.atualizarUrlsPorProduto(produtoAtualizarDto.id(),
         produto.setCupom(produtoAtualizarDto.cupom());
         produto.setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
