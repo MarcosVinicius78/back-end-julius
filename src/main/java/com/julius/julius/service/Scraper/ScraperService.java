@@ -108,7 +108,7 @@ public class ScraperService {
         return shopeeService.pegarInfoProdutosShopee(response, url);
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 300000)
     public void checkForNewProducts() {
 
         if (ativar) {
