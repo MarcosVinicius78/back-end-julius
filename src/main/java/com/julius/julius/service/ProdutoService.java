@@ -224,7 +224,7 @@ public class ProdutoService {
 
         if (!produtoSalvarDto.link_ofm().isEmpty() || !produtoSalvarDto.descricao().isEmpty()) {
 
-            if (loja.get().getNomeLoja().contains("maga")) {
+            if (loja.get().getNomeLoja().contains("Maga")) {
                 LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.descricao(), 2L);
 
                 Produto produtoOmc = produto.duplicar();
