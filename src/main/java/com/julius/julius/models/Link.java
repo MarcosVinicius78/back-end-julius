@@ -37,6 +37,9 @@ public class Link {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "outros")
+    private String outros;
+
     @Column(name = "site_id")
     private Long siteId;
 }
