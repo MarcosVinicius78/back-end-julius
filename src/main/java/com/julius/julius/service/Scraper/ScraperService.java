@@ -28,6 +28,7 @@ import com.julius.julius.service.Scraper.awin.ScraperLojasAwin;
 import com.julius.julius.service.Scraper.magazine.MagazineService;
 import com.julius.julius.service.Scraper.mercadolivre.MercadoLivre;
 
+import io.jsonwebtoken.io.IOException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -108,7 +109,7 @@ public class ScraperService {
         return shopeeService.pegarInfoProdutosShopee(response, url);
     }
 
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRate = 30000)
     public void checkForNewProducts() {
 
         if (ativar) {
@@ -131,17 +132,17 @@ public class ScraperService {
                         String titulo = promo.get("title").getAsString();
                         String image = promo.get("image").getAsString();
                         String link = promo.get("long_url").getAsString();
+                        String slug = promo.get("slug").getAsString();
+
+                        String imagemSocial = extractImageReal("https://pechinchou.com.br/oferta/"+slug);
 
                         JsonArray couponsArray = promo.getAsJsonArray("coupons");
                         String firstCoupon = "";
                         if (couponsArray != null && couponsArray.size() > 0) {
-                            System.out.println("aqui");
                             firstCoupon = couponsArray.get(0).getAsString();
-                            System.out.println(firstCoupon);
                         }
 
                         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-
 
                         // Verifica se o produto já foi processado
                         if (!produtoRepository.existsByTitulo(titulo)
@@ -156,6 +157,10 @@ public class ScraperService {
                             produto.setCupom(firstCoupon);
                             produto.setMensagemAdicional("Promoção sujeita a alteração a qualquer momento");
 
+                            if (imagemSocial != null) {
+                                produto.setImagemSocial(produtoService.salvarImagemRealUrl(imagemSocial));
+                                // System.out.println("iamgem soscial: "+ produtoService.salvarImagem(imagemSocial));
+                            }
                             if (link.contains("amazon")) {
                                 String linkSe = handleAmazon(link).urlProdutoSe();
                                 String linkOmc = handleAmazon(link).urlProdutoOfm();
@@ -183,12 +188,10 @@ public class ScraperService {
                                 produto.getLinksProdutos().add(linksProdutosSe);
                                 produto.getLinksProdutos().add(linksProdutosOmc);
                                 produto.setLink(link.replace("magazinedopechinchou", "sergipeeofertas"));
-                                System.out.println("maga");
                             }
 
                             produtoRepository.save(produto);
 
-                            // System.out.printf("Novo Produto Encontrado: Titulo: %s \n\n",titulo);
                             System.out.printf("Novo Produto Encontrado");
                         }
                     }
@@ -199,6 +202,28 @@ public class ScraperService {
                 e.printStackTrace();
             }
         }
+    }
+
+    private String extractImageReal(String url) throws java.io.IOException{
+        
+            // Conecte-se ao site e obtenha o conteúdo HTML
+            Document docProduto = Jsoup.connect(url).get();
+            
+            Element scriptTagProduto = docProduto.selectFirst("script#__NEXT_DATA__");
+            
+            if (scriptTagProduto != null) {
+                String jsonData = scriptTagProduto.html();
+                JsonObject jsonObject = JsonParser.parseString(jsonData).getAsJsonObject();
+                JsonObject pageProps = jsonObject.getAsJsonObject("props").getAsJsonObject("pageProps");
+                JsonObject promo = pageProps.getAsJsonObject("promo");
+                if (promo.get("image_social") != null) {
+                    return promo.get("image_social").getAsString();
+                }else{
+                    System.out.println("A imagem social e null");
+                }
+
+            }
+            return "";
     }
 
     public void ativarBot(Boolean valor){

@@ -181,6 +181,33 @@ public class ProdutoService {
             throw new NotFoundException("Imagem não foi salva");
         }
     }
+    
+    public String salvarImagemRealUrl(String url) {
+
+        try {
+
+            URL file = new URL(url);
+
+            File uploadsDir = new File(UPLOAD_DIR + "-real");
+            if (!uploadsDir.exists()) {
+                uploadsDir.mkdirs();
+            }
+
+            Date data = new Date();
+
+            String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
+
+            String nomeImagem = data.getTime() + fileName;
+            Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
+
+            Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            return nomeImagem;
+
+        } catch (Exception e) {
+            throw new NotFoundException("Imagem não foi salva");
+        }
+    }
 
     public LinksProdutos salvarLinkProduto(String url, Long site) {
 
