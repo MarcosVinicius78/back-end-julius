@@ -81,7 +81,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
         @Query("SELECT new com.julius.julius.DTO.response.ProdutoPesquisa(" +
                         "p.id, p.titulo, p.copy, p.preco, p.precoParcelado, " +
                         "p.cupom, pl.url, p.freteVariacoes, p.mensagemAdicional, p.promocaoEncerrada, " +
-                        "p.dataCriacao, p.urlImagem, p.imagemSocial ,l.urlImagem, l.nomeLoja) " +
+                        "p.dataCriacao, p.urlImagem, p.imagemSocial ,l.urlImagem, l.nomeLoja, p.descricao) " +
                         "FROM Produto p " +
                         "JOIN linksProdutos pl " +
                         "JOIN p.loja l " +
