@@ -244,7 +244,11 @@ public class ProdutoService {
         produto.setCategoria(categoria.get());
         produto.setLoja(loja.get());
 
-        produto.setLink(produtoSalvarDto.link());
+        if (produtoSalvarDto.link().isEmpty()) {
+            produto.setLink(produtoSalvarDto.link_se());
+        }else{
+            produto.setLink(produtoSalvarDto.link());
+        }
         produto.setCopy(produtoSalvarDto.copy());
 
         loja.get().getProdutos().add(produto);
