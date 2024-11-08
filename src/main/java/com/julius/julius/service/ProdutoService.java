@@ -253,7 +253,7 @@ public class ProdutoService {
 
         loja.get().getProdutos().add(produto);
 
-        if (!produtoSalvarDto.link_ofm().isEmpty() || !produtoSalvarDto.descricao().isEmpty()) {
+        if (!produtoSalvarDto.link_ofm().isEmpty() || produtoSalvarDto.descricao() != null) {
 
             if (loja.get().getNomeLoja().contains("Maga")) {
                 LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.descricao(), 2L);
