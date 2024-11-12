@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.io.FileExistsException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.julius.julius.DTO.CategoriaSalvar;
@@ -36,10 +38,11 @@ public class CategoriaService {
         return CategoriaResponseDto.toResonse(categoriaRepository.save(categoria));
     }
 
-    public List<CategoriaResponseDto> listarCategoria() {
-        return this.categoriaRepository.findAllByOrderByNomeCategoriaAsc().stream().map(CategoriaResponseDto::toResonse)
-                .toList();
+    public Page<CategoriaResponseDto> listarCategoria(Pageable pageable) {
+        return this.categoriaRepository.findAll(pageable)
+                .map(CategoriaResponseDto::toResonse);
     }
+    
 
     @Transactional
     public void apagarCategoria(Long id) {
