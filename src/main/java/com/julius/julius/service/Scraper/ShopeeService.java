@@ -74,14 +74,16 @@ public class ShopeeService {
         String produtoNome = "";
         String preco = "";
         String imagemUrl = "";
+        String link = "";
         // Loop through nodes and extract values
         for (int i = 0; i < nodesArray.length(); i++) {
             JSONObject node = nodesArray.getJSONObject(i);
             produtoNome = node.getString("productName");
             preco = "R$ " + node.getString("price");
             imagemUrl = node.getString("imageUrl");
+            link = node.getString("offerLink");
         }
-        return new ProdutoScraperDTO(produtoNome, preco.replace(".", ","), imagemUrl, url, "", "");
+        return new ProdutoScraperDTO(produtoNome, preco.replace(".", ","), imagemUrl, link, "", "");
     }
 
     // Método para obter a URL final após redirecionamentos

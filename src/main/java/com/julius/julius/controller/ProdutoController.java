@@ -124,7 +124,7 @@ public class ProdutoController {
     }
 
     @GetMapping("/por-categoria")
-    public ResponseEntity<List<ProdutoResponseDto>> obterProdutosPorCategoria(
+    public ResponseEntity<Page<ProdutoResponseDto>> obterProdutosPorCategoria(
             @RequestParam("categoriaId") Long categoriaId,
             @RequestParam("site") Long site,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -134,7 +134,7 @@ public class ProdutoController {
 
         Page<ProdutoResponseDto> produtos = produtoService.obterProdutosPorCategoria(site, categoriaId, pageable);
 
-        return new ResponseEntity<>(produtos.getContent(), HttpStatus.OK);
+        return new ResponseEntity<>(produtos, HttpStatus.OK);
     }
 
     @PostMapping("/apagar-varios")
