@@ -104,9 +104,14 @@ public class ScraperService {
     }
 
     private ProdutoScraperDTO handleShopee(String url) {
-        String response = shopeeService.fetchProductOffers(url);
+        String responseSe = shopeeService.fetchProductOffers(url, 1L);
 
-        return shopeeService.pegarInfoProdutosShopee(response, url);
+        ProdutoScraperDTO produtoSe = shopeeService.pegarInfoProdutosShopee(responseSe);
+        
+        String responseOmc = shopeeService.fetchProductOffers(url, 2L);
+        ProdutoScraperDTO produtoOmc = shopeeService.pegarInfoProdutosShopee(responseOmc);
+
+        return new ProdutoScraperDTO(produtoSe.nomeProduto(), produtoSe.precoProduto(), produtoSe.urlImagem(), produtoSe.urlProdutoSe(), produtoOmc.urlProdutoOfm(), produtoSe.precoParcelado());
     }
 
     @Scheduled(fixedRate = 300000)

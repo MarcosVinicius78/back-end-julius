@@ -36,7 +36,7 @@ public class LinksProdutos {
     private String url;
 
     @Column(name = "site")
-    private Long site;;
+    private Long site;
 
     @JsonBackReference
     @ManyToMany(mappedBy = "linksProdutos")

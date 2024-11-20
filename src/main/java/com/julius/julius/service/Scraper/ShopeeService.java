@@ -26,12 +26,15 @@ import com.julius.julius.DTO.response.ProdutoScraperDTO;
 @Service
 public class ShopeeService {
 
-    private static final String appID = "18199430003"; // Substitua pelo seu appID real
-    private static final String secret = "HB6T6RCEXPLBYXMT4ZGDD2PMUZE5DGII"; // Substitua pelo seu secret real
+    private static final String appIdSe = "18199430003"; // Substitua pelo seu appID real
+    private static final String secretSe = "HB6T6RCEXPLBYXMT4ZGDD2PMUZE5DGII"; // Substitua pelo seu secret real
+
+    private static final String appIdOmc = "18164950004"; // Substitua pelo seu appID real
+    private static final String secretOmc = "APTSBAEACEBBD6ZQVJ6M2XFDVDDNV3NN"; // Substitua pelo seu secret real
     private String url = "https://open-api.affiliate.shopee.com.br/graphql"; // Substitua pela sua URL
                                                                              // real7
 
-    public String fetchProductOffers(String url) {
+    public String fetchProductOffers(String url, Long site) {
         try {
             String codigoProduto;
             codigoProduto = extractCodeFromUrl(getFinalUrl(url));
@@ -42,22 +45,35 @@ public class ShopeeService {
                     codigoProduto);
 
             // Obtenha o timestamp atual
-            long timestamp = Instant.now().getEpochSecond();
 
+            String factor = "";
+            String authorizationHeader = "";
             // Construa o fator de assinatura
-            String factor = appID + timestamp + payload + secret;
+            if (site == 1L) {
+                long timestampSe = Instant.now().getEpochSecond();
+                String factorSe = appIdSe + timestampSe + payload + secretSe;
+                // Calcule a assinatura
+                String signature = sha256(factorSe);
 
-            // Calcule a assinatura
-            String signature = sha256(factor);
+                // Construa o cabeçalho de autorização
+                String authorizationHeaderSe = String.format("SHA256 Credential=%s, Timestamp=%d, Signature=%s",
+                        appIdSe,
+                        timestampSe, signature);
+                return sendPostRequest(this.url, payload, authorizationHeaderSe);
+            } else {
+                long timestampOmc = Instant.now().getEpochSecond();
+                String factorOmc = appIdOmc + timestampOmc + payload + secretOmc;
+                // Calcule a assinatura
+                String signature = sha256(factorOmc);
 
-            // Construa o cabeçalho de autorização
-            String authorizationHeader = String.format("SHA256 Credential=%s, Timestamp=%d, Signature=%s", appID,
-                    timestamp, signature);
+                // Construa o cabeçalho de autorização
+                String authorizationHeaderOmc = String.format("SHA256 Credential=%s, Timestamp=%d, Signature=%s",
+                        appIdOmc,
+                        timestampOmc, signature);
+                return sendPostRequest(this.url, payload, authorizationHeaderOmc);
+            }
 
             // Envie a requisição
-            String response = sendPostRequest(this.url, payload, authorizationHeader);
-            System.out.println(response);
-            return response;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,7 +81,7 @@ public class ShopeeService {
         return "";
     }
 
-    public ProdutoScraperDTO pegarInfoProdutosShopee(String response, String url) {
+    public ProdutoScraperDTO pegarInfoProdutosShopee(String response) {
         JSONObject jsonObject = new JSONObject(response);
         JSONObject dataObject = jsonObject.getJSONObject("data");
         JSONObject productOfferV2 = dataObject.getJSONObject("productOfferV2");
@@ -83,7 +99,7 @@ public class ShopeeService {
             imagemUrl = node.getString("imageUrl");
             link = node.getString("offerLink");
         }
-        return new ProdutoScraperDTO(produtoNome, preco.replace(".", ","), imagemUrl, link, "", "");
+        return new ProdutoScraperDTO(produtoNome, preco.replace(".", ","), imagemUrl, link, link, "");
     }
 
     // Método para obter a URL final após redirecionamentos
@@ -109,30 +125,20 @@ public class ShopeeService {
         // Procura pelo padrão "-i.{storeId}.{productId}" no final da URL
         Pattern pattern = Pattern.compile("-i\\.(\\d+)\\.(\\d+)");
         Matcher matcher = pattern.matcher(path);
-        
+
         if (matcher.find()) {
             // Captura o código do produto (productId)
             return matcher.group(2); // O segundo grupo é o productId
-        }else{
+        } else {
             Pattern pattern2 = Pattern.compile("/product/(\\d+)/(\\d+)");
             Matcher matcher2 = pattern2.matcher(path);
-            
+
             if (matcher2.find()) {
                 // Captura o código do produto (productId)
                 return matcher2.group(2); // O segundo grupo é o productId
             }
         }
 
-        // // Verifica se a URL segue o formato "/{productName}-i.{storeId}.{productId}"
-        // if (segments.length > 1 && segments[segments.length - 1].contains("-i.")) {
-        //     String lastSegment = segments[segments.length - 1];
-        //     String[] parts = lastSegment.split("-i\\.|\\.");
-        //     if (parts.length >= 3) {
-        //         return parts[parts.length]; // Retorna o productId
-        //     }
-        // }
-
-        // Retorna uma string vazia se o código não for encontrado
         return "";
     }
 
