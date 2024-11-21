@@ -150,32 +150,32 @@ public class ScraperService {
                     String image = atributos.get("image").getAsString();
                     String link = atributos.get("link").getAsString();
                     // String slug = promo.get("slug").getAsString();
-
                     
-                    NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+                    // NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
                     
                     // System.out.println("produtos encontrados mas nenhum é shopee");
                     // Verifica se o produto já foi processado
                     if (!produtoRepository.existsByTitulo(titulo)
                     && (link.contains("shopee"))) {
-                        String imagemSocial = extractImageReal(image);
+                        // String imagemSocial = extractImageReal(image);
                         Produto produto = new Produto();
                         // produto.setProductId(productId);
-                        produto.setPreco(formatter.format(Double.parseDouble(preco)));
+                        produto.setPreco(preco);
                         produto.setUrlImagem(produtoService.salvarImagem(image));
+                        produto.setImagemSocial(produtoService.salvarImagemRealUrl(image));
                         produto.setTitulo(titulo);
                         produto.setCategoria(categoriaRepository.getById(10L));
 
                         produto.setMensagemAdicional("Promoção sujeita a alteração a qualquer momento");
 
-                        if (imagemSocial != null) {
-                            produto.setImagemSocial(produtoService.salvarImagemRealUrl(imagemSocial));
-                        }
+                        ProdutoScraperDTO produtoScraperDTO = handleShopee(link);
 
-                        String linkSe = handleShopee(link).urlProdutoSe();
+                        String linkSe = produtoScraperDTO.urlProdutoSe();
                         // String linkOmc = handleAmazon(link).urlProdutoOfm();
+                        String linkOmc = produtoScraperDTO.urlProdutoOfm();
+                        System.out.println(linkOmc);
 
-                        produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("amazon"));
+                        produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("shopee"));
 
                         LinksProdutos linksProdutosSe = produtoService.salvarLinkProduto(linkSe, 1L);
                         // LinksProdutos linksProdutosOmc = produtoService.salvarLinkProduto(linkOmc,
