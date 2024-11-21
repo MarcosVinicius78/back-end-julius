@@ -173,16 +173,14 @@ public class ScraperService {
                         String linkSe = produtoScraperDTO.urlProdutoSe();
                         // String linkOmc = handleAmazon(link).urlProdutoOfm();
                         String linkOmc = produtoScraperDTO.urlProdutoOfm();
-                        System.out.println(linkOmc);
 
                         produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("shopee"));
 
+                        LinksProdutos linksProdutosOmc = produtoService.salvarLinkProduto(linkOmc, 2L); 
                         LinksProdutos linksProdutosSe = produtoService.salvarLinkProduto(linkSe, 1L);
-                        // LinksProdutos linksProdutosOmc = produtoService.salvarLinkProduto(linkOmc,
-                        // 2L);
 
                         produto.getLinksProdutos().add(linksProdutosSe);
-                        // produto.getLinksProdutos().add(linksProdutosOmc);
+                        produto.getLinksProdutos().add(linksProdutosOmc);
 
                         produto.setLink(linkSe);
                         // System.out.println("amazon");
