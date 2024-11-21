@@ -8,7 +8,7 @@ COPY src ./src
 RUN mvn clean install -DskipTests
 
 # Etapa 2: Imagem final usando OpenJDK
-FROM openjdk:latest
+FROM openjdk:21
 
 WORKDIR /app
 
