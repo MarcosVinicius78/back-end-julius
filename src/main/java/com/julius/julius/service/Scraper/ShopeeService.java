@@ -36,48 +36,52 @@ public class ShopeeService {
 
     public String fetchProductOffers(String url, Long site) {
         try {
-            String codigoProduto;
-            codigoProduto = extractCodeFromUrl(getFinalUrl(url));
+            // Extrair código do produto
+            String codigoProduto = extractCodeFromUrl(getFinalUrl(url));
 
-            // Payload da requisição
+            // Montar payload
             String payload = String.format(
                     "{\"query\":\"{productOfferV2(itemId: %s){nodes{productName price imageUrl productLink offerLink}}}\"}",
                     codigoProduto);
 
-            // Obtenha o timestamp atual
+            // Obter cabeçalho de autorização baseado no site
+            String authorizationHeader = generateAuthorizationHeader(site, payload);
 
-            String factor = "";
-            String authorizationHeader = "";
-            // Construa o fator de assinatura
-            if (site == 1L) {
-                long timestampSe = Instant.now().getEpochSecond();
-                String factorSe = appIdSe + timestampSe + payload + secretSe;
-                // Calcule a assinatura
-                String signature = sha256(factorSe);
-
-                // Construa o cabeçalho de autorização
-                String authorizationHeaderSe = String.format("SHA256 Credential=%s, Timestamp=%d, Signature=%s",
-                        appIdSe,
-                        timestampSe, signature);
-                return sendPostRequest(this.url, payload, authorizationHeaderSe);
-            } else {
-                long timestampOmc = Instant.now().getEpochSecond();
-                String factorOmc = appIdOmc + timestampOmc + payload + secretOmc;
-                // Calcule a assinatura
-                String signature = sha256(factorOmc);
-
-                // Construa o cabeçalho de autorização
-                String authorizationHeaderOmc = String.format("SHA256 Credential=%s, Timestamp=%d, Signature=%s",
-                        appIdOmc,
-                        timestampOmc, signature);
-                return sendPostRequest(this.url, payload, authorizationHeaderOmc);
-            }
-
-            // Envie a requisição
+            // Enviar requisição POST
+            return sendPostRequest(this.url, payload, authorizationHeader);
         } catch (Exception e) {
-            e.printStackTrace();
+            // Logar exceção
+            
+            return ""; // Retorno vazio pode ser substituído por uma exceção personalizada, se
+                       // necessário
+        }
+    }
+
+    private String generateAuthorizationHeader(Long site, String payload) {
+        long timestamp = Instant.now().getEpochSecond();
+        String appId, secret;
+
+        // Configuração de credenciais com base no site
+        if (site == 1L) {
+            appId = appIdSe;
+            secret = secretSe;
+        } else if (site == 2L) {
+            appId = appIdOmc;
+            secret = secretOmc;
+        } else {
+            throw new IllegalArgumentException("Site inválido: " + site);
         }
 
+        // Construir fator de assinatura
+        String factor = appId + timestamp + payload + secret;
+        String signature;
+        try {
+            signature = sha256(factor);
+            return String.format("SHA256 Credential=%s, Timestamp=%d, Signature=%s", appId, timestamp, signature);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         return "";
     }
 

@@ -63,6 +63,11 @@ public class ScraperService {
         AWIN_LINKS.put("ponto", 17621);
         AWIN_LINKS.put("centauro", 17806);
         AWIN_LINKS.put("casas", 17629);
+        AWIN_LINKS.put("beleza", 29407);
+        AWIN_LINKS.put("cobasi", 17870);
+        AWIN_LINKS.put("tok", 36382);
+        AWIN_LINKS.put("eudora", 17837);
+        AWIN_LINKS.put("madeira", 17762);
     }
 
     public ProdutoScraperDTO scraperProduto(String url) {
