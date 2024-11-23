@@ -36,25 +36,24 @@ public class AmazonService {
     private static final String URI_PATH = "/paapi5/getitems";
     @Value("${aws.accessKeyId}")
     private String ACCESS_KEY;
-    
+
     @Value("${aws.secretAccessKey}")
     private String SECRET_KEY;
-    
+
     @Value("${aws.secretAccessKeyOmc}")
     private String SECRET_KEY_OMC;
-    
+
     @Value("${aws.accessKeyIdOmc}")
     private String ACCESS_KEY_OMC;
 
     private static final String REGION = "us-east-1";
-
 
     private static final Pattern ASIN_PATTERN = Pattern.compile("/([A-Z0-9]{10})(?:[/?]|$)");
 
     public String getProdutoAmazon(String codigoProduto, int site) {
 
         try {
-            String requestPayload = payload(codigoProduto, site == 1? "sergipeofer0e-20" : "ofertasmaiscupons-20");
+            String requestPayload = payload(codigoProduto, site == 1 ? "sergipeofer0e-20" : "ofertasmaiscupons-20");
 
             TreeMap<String, String> headers = new TreeMap<String, String>();
             headers.put("host", HOST);
@@ -65,7 +64,7 @@ public class AmazonService {
             AWSV4Auth awsv4Auth = null;
             if (site == 1) {
                 awsv4Auth = auth(headers, requestPayload, ACCESS_KEY, SECRET_KEY);
-            }else if(site == 2){
+            } else if (site == 2) {
                 awsv4Auth = auth(headers, requestPayload, ACCESS_KEY_OMC, SECRET_KEY_OMC);
             }
 
@@ -105,33 +104,33 @@ public class AmazonService {
 
     }
 
-    public String payload(String codigoProduto, String tag){
+    public String payload(String codigoProduto, String tag) {
         String requestPayload = "{"
-                    + " \"ItemIds\": ["
-                    + "  \"" + codigoProduto + "\""
-                    + " ],"
-                    + " \"Resources\": ["
-                    + "  \"Images.Primary.Large\","
-                    + "  \"ItemInfo.Title\","
-                    + "  \"Offers.Listings.Price\""
-                    + " ],"
-                    + " \"PartnerTag\": \"" + tag +"\","
-                    + " \"PartnerType\": \"Associates\","
-                    + " \"Marketplace\": \"www.amazon.com.br\""
-                    + "}";
+                + " \"ItemIds\": ["
+                + "  \"" + codigoProduto + "\""
+                + " ],"
+                + " \"Resources\": ["
+                + "  \"Images.Primary.Large\","
+                + "  \"ItemInfo.Title\","
+                + "  \"Offers.Listings.Price\""
+                + " ],"
+                + " \"PartnerTag\": \"" + tag + "\","
+                + " \"PartnerType\": \"Associates\","
+                + " \"Marketplace\": \"www.amazon.com.br\""
+                + "}";
         return requestPayload;
     }
 
-    public AWSV4Auth auth(TreeMap<String, String> headers, String requestPayload, String accessKey, String secretKey){
+    public AWSV4Auth auth(TreeMap<String, String> headers, String requestPayload, String accessKey, String secretKey) {
 
         AWSV4Auth awsv4Auth = new AWSV4Auth.Builder(accessKey, secretKey)
-                    .path(URI_PATH)
-                    .region(REGION)
-                    .service("ProductAdvertisingAPI")
-                    .httpMethodName("POST")
-                    .headers(headers)
-                    .payload(requestPayload)
-                    .build();
+                .path(URI_PATH)
+                .region(REGION)
+                .service("ProductAdvertisingAPI")
+                .httpMethodName("POST")
+                .headers(headers)
+                .payload(requestPayload)
+                .build();
 
         return awsv4Auth;
     }
@@ -173,7 +172,9 @@ public class AmazonService {
         if (matcher.find()) {
             return matcher.group(1);
         }
-        throw new IllegalStateException("No ASIN found in the provided URL");
+
+        return "";
+        // throw new IllegalStateException("No ASIN found in the provided URL");
     }
 
     public ProdutoScraperDTO montarProdutoAmazon(String jsonResponse, String urlOmc) {
@@ -219,5 +220,4 @@ public class AmazonService {
 
         return new ProdutoScraperDTO(displayValue, amount, urlImagem, urlAmazon, urlOmc, "");
     }
-
 }

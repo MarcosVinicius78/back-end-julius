@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.julius.julius.DTO.response.ProdutoScraperDTO;
@@ -96,10 +97,18 @@ public class ScraperService {
         // return null;
     }
 
-    private ProdutoScraperDTO handleAmazon(String url) {
+    public ProdutoScraperDTO handleAmazon(String url) {
         String codigo = amazonService.pegarCodigoProdutoAmazon(url);
+
+        if (codigo == null) {
+            return null;
+        }
         String responseSe = amazonService.getProdutoAmazon(codigo, 1);
         String responseOmc = amazonService.getProdutoAmazon(codigo, 2);
+
+        if (responseOmc.isEmpty()) {
+            return null;
+        }
         ProdutoScraperDTO produtoScraperDTO = amazonService.montarProdutoAmazon(responseOmc, url);
         return amazonService.montarProdutoAmazon(responseSe, produtoScraperDTO.urlProdutoSe());
     }
@@ -112,11 +121,12 @@ public class ScraperService {
         String responseSe = shopeeService.fetchProductOffers(url, 1L);
 
         ProdutoScraperDTO produtoSe = shopeeService.pegarInfoProdutosShopee(responseSe);
-        
+
         String responseOmc = shopeeService.fetchProductOffers(url, 2L);
         ProdutoScraperDTO produtoOmc = shopeeService.pegarInfoProdutosShopee(responseOmc);
 
-        return new ProdutoScraperDTO(produtoSe.nomeProduto(), produtoSe.precoProduto(), produtoSe.urlImagem(), produtoSe.urlProdutoSe(), produtoOmc.urlProdutoOfm(), produtoSe.precoParcelado());
+        return new ProdutoScraperDTO(produtoSe.nomeProduto(), produtoSe.precoProduto(), produtoSe.urlImagem(),
+                produtoSe.urlProdutoSe(), produtoOmc.urlProdutoOfm(), produtoSe.precoParcelado());
     }
 
     @Scheduled(fixedRate = 300000)
@@ -143,20 +153,23 @@ public class ScraperService {
                 for (int i = 0; i < produtos.size(); i++) {
                     JsonObject promo = produtos.get(i).getAsJsonObject();
                     JsonObject atributos = promo.getAsJsonObject("attributes");
-                
+
                     // String productId = promo.get("id").getAsString();
                     String preco = atributos.get("price").getAsString();
                     String titulo = atributos.get("title").getAsString();
                     String image = atributos.get("image").getAsString();
                     String link = atributos.get("link").getAsString();
                     // String slug = promo.get("slug").getAsString();
-                    
-                    // NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-                    
+
+                    System.out.println("produto: "+ produtoRepository.existsByTitulo(titulo));
+
+                    // NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt",
+                    // "BR"));
+
                     // System.out.println("produtos encontrados mas nenhum é shopee");
                     // Verifica se o produto já foi processado
                     if (!produtoRepository.existsByTitulo(titulo)
-                    && (link.contains("shopee"))) {
+                            && link.contains("shopee")) {
                         // String imagemSocial = extractImageReal(image);
                         Produto produto = new Produto();
                         // produto.setProductId(productId);
@@ -164,19 +177,18 @@ public class ScraperService {
                         produto.setUrlImagem(produtoService.salvarImagem(image));
                         produto.setImagemSocial(produtoService.salvarImagemRealUrl(image));
                         produto.setTitulo(titulo);
-                        produto.setCategoria(categoriaRepository.getById(10L));
+                        produto.setCategoria(categoriaRepository.getById(1L));
 
                         produto.setMensagemAdicional("Promoção sujeita a alteração a qualquer momento");
 
                         ProdutoScraperDTO produtoScraperDTO = handleShopee(link);
 
                         String linkSe = produtoScraperDTO.urlProdutoSe();
-                        // String linkOmc = handleAmazon(link).urlProdutoOfm();
                         String linkOmc = produtoScraperDTO.urlProdutoOfm();
 
                         produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("shopee"));
 
-                        LinksProdutos linksProdutosOmc = produtoService.salvarLinkProduto(linkOmc, 2L); 
+                        LinksProdutos linksProdutosOmc = produtoService.salvarLinkProduto(linkOmc, 2L);
                         LinksProdutos linksProdutosSe = produtoService.salvarLinkProduto(linkSe, 1L);
 
                         produto.getLinksProdutos().add(linksProdutosSe);
@@ -202,94 +214,129 @@ public class ScraperService {
 
     private void raspagemDadosPechinchou() {
         try {
+            // Conectar ao site e extrair o JSON do script
             Document doc = Jsoup.connect("https://pechinchou.com.br/").get();
             Element scriptTag = doc.selectFirst("script#__NEXT_DATA__");
 
-            if (scriptTag != null) {
-                String jsonData = scriptTag.html();
-                JsonObject jsonObject = JsonParser.parseString(jsonData).getAsJsonObject();
-                JsonObject pageProps = jsonObject.getAsJsonObject("props").getAsJsonObject("pageProps");
-                JsonObject promos = pageProps.getAsJsonObject("promos");
-                JsonArray results = promos.getAsJsonArray("results");
-
-                for (int i = 0; i < results.size(); i++) {
-                    JsonObject promo = results.get(i).getAsJsonObject();
-                    // String productId = promo.get("id").getAsString();
-                    String preco = promo.get("price").getAsString();
-                    String titulo = promo.get("title").getAsString();
-                    String image = promo.get("image").getAsString();
-                    String link = promo.get("long_url").getAsString();
-                    String slug = promo.get("slug").getAsString();
-
-                    String imagemSocial = extractImageReal("https://pechinchou.com.br/oferta/" + slug);
-
-                    JsonArray couponsArray = promo.getAsJsonArray("coupons");
-                    String firstCoupon = "";
-                    if (couponsArray != null && couponsArray.size() > 0) {
-                        firstCoupon = couponsArray.get(0).getAsString();
-                    }
-
-                    NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-
-                    // Verifica se o produto já foi processado
-                    if (!produtoRepository.existsByTitulo(titulo)
-                            && (link.contains("amazon") || link.contains("maga")
-                                    || !firstCoupon.contains("PECHINCHOU"))) {
-                        Produto produto = new Produto();
-                        // produto.setProductId(productId);
-                        produto.setPreco(formatter.format(Double.parseDouble(preco)));
-                        produto.setUrlImagem(produtoService.salvarImagem(image));
-                        produto.setTitulo(titulo);
-                        produto.setCategoria(categoriaRepository.getById(10L));
-
-                        produto.setCupom(firstCoupon);
-                        produto.setMensagemAdicional("Promoção sujeita a alteração a qualquer momento");
-
-                        if (imagemSocial != null) {
-                            produto.setImagemSocial(produtoService.salvarImagemRealUrl(imagemSocial));
-                            // System.out.println("iamgem soscial: "+
-                            // produtoService.salvarImagem(imagemSocial));
-                        }
-                        if (link.contains("amazon")) {
-                            String linkSe = handleAmazon(link).urlProdutoSe();
-                            String linkOmc = handleAmazon(link).urlProdutoOfm();
-
-                            produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("amazon"));
-
-                            LinksProdutos linksProdutosSe = produtoService.salvarLinkProduto(linkSe, 1L);
-                            LinksProdutos linksProdutosOmc = produtoService.salvarLinkProduto(linkOmc, 2L);
-
-                            produto.getLinksProdutos().add(linksProdutosSe);
-                            produto.getLinksProdutos().add(linksProdutosOmc);
-
-                            produto.setLink(linkSe);
-                            // System.out.println("amazon");
-                        } else if (link.contains("mercado")) {
-                            produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("mercado"));
-                            System.out.println("mercado");
-                        } else if (link.contains("maga")) {
-                            produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("magazine"));
-                            LinksProdutos linksProdutosSe = produtoService
-                                    .salvarLinkProduto(link.replace("magazinedopechinchou", "sergipeeofertas"), 1L);
-                            LinksProdutos linksProdutosOmc = produtoService
-                                    .salvarLinkProduto(
-                                            link.replace("magazinedopechinchou", "magazineofertasmaiscupom"), 2L);
-                            produto.getLinksProdutos().add(linksProdutosSe);
-                            produto.getLinksProdutos().add(linksProdutosOmc);
-                            produto.setLink(link.replace("magazinedopechinchou", "sergipeeofertas"));
-                        }
-
-                        produtoRepository.save(produto);
-
-                        System.out.printf("Novo Produto Encontrado");
-                    }
-                }
-            } else {
+            if (scriptTag == null) {
                 System.out.println("Script com JSON não encontrado.");
+                return;
+            }
+
+            String jsonData = scriptTag.html();
+            JsonObject jsonObject = JsonParser.parseString(jsonData).getAsJsonObject();
+            JsonObject pageProps = jsonObject.getAsJsonObject("props").getAsJsonObject("pageProps");
+            JsonObject promos = pageProps.getAsJsonObject("promos");
+            JsonArray results = promos.getAsJsonArray("results");
+
+            for (JsonElement result : results) {
+                JsonObject promo = result.getAsJsonObject();
+
+                // Validar e extrair dados
+                String titulo = promo.has("title") ? promo.get("title").getAsString() : null;
+                String preco = promo.has("price") ? promo.get("price").getAsString() : null;
+                String image = promo.has("image") ? promo.get("image").getAsString() : null;
+                String link = promo.has("long_url") ? promo.get("long_url").getAsString() : null;
+                String slug = promo.has("slug") ? promo.get("slug").getAsString() : null;
+                JsonArray couponsArray = promo.getAsJsonArray("coupons");
+                String firstCoupon = (couponsArray != null && couponsArray.size() > 0)
+                        ? couponsArray.get(0).getAsString()
+                        : "";
+
+    
+
+                // Validar se o produto é relevante
+                if (titulo == null || preco == null || image == null || link == null) {
+                    System.out.printf("Produto ignorado por falta de dados obrigatórios: %s\n", titulo);
+                    continue;
+                }
+                if (produtoRepository.existsByTitulo(titulo) || firstCoupon.contains("PECHINCHOU")) {
+                    System.out.printf("Produto já processado ou cupom inválido: %s\n", titulo);
+                    continue;
+                }
+
+                if (!link.contains("gp")) {
+                    continue;
+                }
+
+                // Criar e salvar o produto
+                Produto produto = criarProduto(titulo, preco, image, link, slug, firstCoupon);
+                configurarLinksLoja(produto, link);
+                if (produto.getLink() != null) {
+                    produtoRepository.save(produto);
+                    System.out.println("Novo Produto Encontrado: " + titulo);
+                }
             }
         } catch (Exception e) {
+            System.err.println("Erro ao realizar raspagem: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Cria um objeto Produto com os dados fornecidos.
+     */
+    private Produto criarProduto(String titulo, String preco, String image, String link, String slug,
+            String firstCoupon) {
+        Produto produto = new Produto();
+        produto.setTitulo(titulo);
+        produto.setPreco(NumberFormat.getCurrencyInstance(new Locale("pt", "BR")).format(Double.parseDouble(preco)));
+        produto.setUrlImagem(produtoService.salvarImagem(image));
+        produto.setCupom(firstCoupon);
+        produto.setMensagemAdicional("Promoção sujeita a alteração a qualquer momento");
+        produto.setCategoria(categoriaRepository.getById(10L));
+
+        // Adicionar imagem social, se disponível
+        String imagemSocial;
+        try {
+            imagemSocial = extractImageReal("https://pechinchou.com.br/oferta/" + slug);
+            if (imagemSocial != null) {
+                produto.setImagemSocial(produtoService.salvarImagemRealUrl(imagemSocial));
+            }
+        } catch (java.io.IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return produto;
+    }
+
+    /**
+     * Configura os links específicos da loja com base no domínio do link.
+     */
+    private void configurarLinksLoja(Produto produto, String link) {
+        if (link.contains("amazon")) {
+            configurarLinksAmazon(produto, link);
+        } else if (link.contains("mercado")) {
+            produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("mercado"));
+        } else if (link.contains("maga")) {
+            configurarLinksMagazine(produto, link);
+        }
+    }
+
+    /**
+     * Configura os links específicos para a loja Amazon.
+     */
+    private void configurarLinksAmazon(Produto produto, String link) {
+        String linkSe = handleAmazon(link).urlProdutoSe();
+        String linkOmc = handleAmazon(link).urlProdutoOfm();
+        produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("amazon"));
+        if (linkSe != null) {
+            produto.getLinksProdutos().add(produtoService.salvarLinkProduto(linkSe, 1L));
+            produto.getLinksProdutos().add(produtoService.salvarLinkProduto(linkOmc, 2L));
+            produto.setLink(linkSe);
+        }
+    }
+
+    /**
+     * Configura os links específicos para a loja Magazine Luiza.
+     */
+    private void configurarLinksMagazine(Produto produto, String link) {
+        produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("magazine"));
+        produto.getLinksProdutos()
+                .add(produtoService.salvarLinkProduto(link.replace("magazinedopechinchou", "sergipeeofertas"), 1L));
+        produto.getLinksProdutos().add(
+                produtoService.salvarLinkProduto(link.replace("magazinedopechinchou", "magazineofertasmaiscupom"), 2L));
+        produto.setLink(link.replace("magazinedopechinchou", "sergipeeofertas"));
     }
 
     private String extractImageReal(String url) throws java.io.IOException {
