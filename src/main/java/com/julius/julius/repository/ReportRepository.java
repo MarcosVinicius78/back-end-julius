@@ -37,5 +37,5 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     @Query(value = "DELETE FROM  r WHERE r.produto.id = :idProduto", nativeQuery = true)
     void deleteByProdutoPromos(@Param("idProduto") Long idProduto);
 
-
+    Page<Report> findAllByOrderByIdDesc(Pageable pageable);
 }

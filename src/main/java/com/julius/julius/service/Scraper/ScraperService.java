@@ -183,7 +183,7 @@ public class ScraperService {
                         produto.setUrlImagem(produtoService.salvarImagem(image));
                         produto.setImagemSocial(produtoService.salvarImagemRealUrl(image));
                         produto.setTitulo(titulo);
-                        produto.setCategoria(categoriaRepository.getById(1L));
+                        produto.setCategoria(categoriaRepository.getById(18L));
 
                         produto.setMensagemAdicional("Promoção sujeita a alteração a qualquer momento");
 
@@ -296,7 +296,7 @@ public class ScraperService {
         produto.setLink(link);
 
         // Busca da categoria com validação
-        Optional<Categoria> categoria = categoriaRepository.findById(1L);
+        Optional<Categoria> categoria = categoriaRepository.findById(18L);
         if (categoria.isPresent()) {
             produto.setCategoria(categoria.get());
         } else {

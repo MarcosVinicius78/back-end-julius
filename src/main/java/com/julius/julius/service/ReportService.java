@@ -23,13 +23,20 @@ public class ReportService {
 
     private final ProdutoRepository produtoRepository;
 
+    private final ProdutoService produtoService;
+
     @Transactional
     public void saveOrUpdateReport(Long productId, String reportType) {
         Report existingReport = reportRepository.findByProdutoIdAndTipo(productId, reportType);
 
+
         if (existingReport != null) {
-            // Se já existe, atualize o total
-            reportRepository.updateTotal(productId, reportType);
+            if (existingReport.getTotal() > 3){
+                produtoService.encerrarPromocao(true, existingReport.getProduto().getId());
+            }else{
+                // Se já existe, atualize o total
+                reportRepository.updateTotal(productId, reportType);
+            }
         } else {
             // Se não existe, faça um insert
             Report newReport = new Report();
@@ -41,7 +48,8 @@ public class ReportService {
     }
 
     public Page<ReportsResponseDto> listarReports(Pageable pageable) {
-        return reportRepository.findAll(pageable).map(ReportsResponseDto::toResonse);
+        return reportRepository.findAllByOrderByIdDesc(pageable).map(ReportsResponseDto::toResonse);
+        //        return reportRepository.findAll(pageable).map(ReportsResponseDto::toResonse);
     }
 
     public void apagarReport(Long id) {

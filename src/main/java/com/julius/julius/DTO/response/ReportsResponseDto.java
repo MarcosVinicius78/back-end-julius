@@ -9,15 +9,12 @@ public record ReportsResponseDto(
     
     Long id,
 
-    
     String tituloProduto,
 
     Long total,
 
-    
     Date dataCriacao,
 
-    
     String tipo
 
 ) {
