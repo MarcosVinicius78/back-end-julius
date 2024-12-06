@@ -1,6 +1,5 @@
 package com.julius.julius.service.Scraper.Amazon;
 
-import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -19,6 +18,10 @@ public class ImageProcessingService {
     // Diretório de upload
     private static final String UPLOAD_DIR = "/uploads/produtos-real";
 
+    // Tamanho final da imagem
+    private static final int TARGET_WIDTH = 652;
+    private static final int TARGET_HEIGHT = 650;
+
     public String processImageFromUrl(String imageUrl) throws IOException {
         // Baixar a imagem a partir da URL
         URL url = new URL(imageUrl);
@@ -29,7 +32,7 @@ public class ImageProcessingService {
             throw new IOException("Não foi possível carregar a imagem da URL: " + imageUrl);
         }
 
-        // Obter o maior lado da imagem
+        // Obter o maior lado da imagem para torná-la quadrada
         int size = Math.max(originalImage.getWidth(), originalImage.getHeight());
 
         // Criar uma nova imagem quadrada com fundo branco
@@ -44,6 +47,13 @@ public class ImageProcessingService {
         graphics.drawImage(originalImage, xOffset, yOffset, null);
         graphics.dispose();
 
+        // Redimensionar para o tamanho final fixo (652x650)
+        BufferedImage resizedImage = new BufferedImage(TARGET_WIDTH, TARGET_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D resizeGraphics = resizedImage.createGraphics();
+        resizeGraphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        resizeGraphics.drawImage(squareImage, 0, 0, TARGET_WIDTH, TARGET_HEIGHT, null);
+        resizeGraphics.dispose();
+
         // Gerar nome único para a imagem
         String uniqueFileName = UUID.randomUUID().toString() + ".png";
         String outputFilePath = UPLOAD_DIR + File.separator + uniqueFileName;
@@ -56,9 +66,10 @@ public class ImageProcessingService {
 
         // Salvar a imagem padronizada
         File outputFile = new File(outputFilePath);
-        ImageIO.write(squareImage, "png", outputFile);
+        ImageIO.write(resizedImage, "png", outputFile);
 
         // Retornar o nome da imagem salva
         return uniqueFileName;
     }
 }
+
