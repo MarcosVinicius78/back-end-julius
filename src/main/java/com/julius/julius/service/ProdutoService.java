@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import javax.imageio.ImageIO;
 
+import com.julius.julius.service.Scraper.Amazon.ImageProcessingService;
 import org.apache.commons.io.FileExistsException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.io.Resource;
@@ -76,6 +77,8 @@ public class ProdutoService {
     private final LinkProdutoRepository linkProdutoRepository;
 
     private final PromoService promoService;
+
+    private final ImageProcessingService imageProcessingService;
 
     private static final String UPLOAD_DIR = "/uploads/produtos";
 
@@ -285,6 +288,12 @@ public class ProdutoService {
         if (!produtoSalvarDto.link_se().isEmpty() || !produtoSalvarDto.link().isEmpty()) {
             LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link(), 1L);
             produto.getLinksProdutos().add(linksProdutosSe);
+        }
+
+        try {
+            produto.setImagemSocial(imageProcessingService.processImageFromUrl(produtoSalvarDto.urlImagem()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "", idOmc);

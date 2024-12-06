@@ -1,5 +1,6 @@
 package com.julius.julius.service.Scraper.Amazon;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -31,6 +32,8 @@ import lombok.RequiredArgsConstructor;
 public class AmazonService {
 
     private final CloseableHttpClient httpClient;
+
+    private final ImageProcessingService imageProcessingService;
 
     private static final String HOST = "webservices.amazon.com.br";
     private static final String URI_PATH = "/paapi5/getitems";
