@@ -35,7 +35,8 @@ public record ProdutoDto(
     String imagem,
     String imagemSocial,
     String copy,
-    Boolean promocaoEncerrada
+    Boolean promocaoEncerrada,
+    String nomeColaborador
 
 ) {
      public static ProdutoDto toResonse(Produto produto, LojaResponseDto lojaResponseDto, CategoriaResponseDto categoriaResponseDto, String urlSe, String urlOfm){
@@ -56,7 +57,8 @@ public record ProdutoDto(
             produto.getUrlImagem(),
             produto.getImagemSocial(),
             produto.getCopy(),
-            produto.getPromocaoEncerrada()
+            produto.getPromocaoEncerrada(),
+                produto.getNomeColaborador()
         );
     }
 }

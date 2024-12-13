@@ -89,6 +89,9 @@ public class Produto {
     @Column(name = "promocao_encerrada")
     private Boolean promocaoEncerrada;
 
+    @Column(name = "nome_colaborador")
+    private String nomeColaborador;
+
     @JsonManagedReference
     @ManyToMany
     @JoinTable(name = "produto_link", joinColumns = @JoinColumn(name = "produto_id"), inverseJoinColumns = @JoinColumn(name = "link_produto_id"))

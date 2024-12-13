@@ -19,11 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import javax.imageio.ImageIO;
 
@@ -79,6 +75,8 @@ public class ProdutoService {
     private final PromoService promoService;
 
     private final ImageProcessingService imageProcessingService;
+
+    private final List<String> colaboradores = Arrays.asList("Alex", "Maria", "Amanda", "Erick");
 
     private static final String UPLOAD_DIR = "/uploads/produtos";
 
@@ -224,6 +222,8 @@ public class ProdutoService {
 
     public ProdutoResponseDto salvarProduto(ProdutoSalvarDto produtoSalvarDto) {
 
+        Random random = new Random();
+
         Optional<Categoria> categoria = categoriaRepository.findById(produtoSalvarDto.id_categoria());
         Optional<Loja> loja = lojaRepository.findById(produtoSalvarDto.id_loja());
 
@@ -246,6 +246,7 @@ public class ProdutoService {
         produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
         produto.setCategoria(categoria.get());
         produto.setLoja(loja.get());
+        produto.setNomeColaborador(colaboradores.get(random.nextInt(colaboradores.size())));
 
         if (produtoSalvarDto.link().isEmpty()) {
             produto.setLink(produtoSalvarDto.link_se());
@@ -291,7 +292,9 @@ public class ProdutoService {
         }
 
         try {
-            produto.setImagemSocial(imageProcessingService.processImageFromUrl(produtoSalvarDto.urlImagem()));
+            if (!produtoSalvarDto.urlImagem().isEmpty()){
+                produto.setImagemSocial(imageProcessingService.processImageFromUrl(produtoSalvarDto.urlImagem()));
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
