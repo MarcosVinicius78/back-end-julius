@@ -38,44 +38,8 @@ public class SecurityFilter {
         requestHandler.setCsrfRequestAttributeName("_csrf");
         
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        
-        // .cors(cors -> {
-        //     cors.configurationSource(new CorsConfigurationSource() {
-                
-        //         @Override
-        //         @Nullable
-        //         public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-        //             CorsConfiguration config = new CorsConfiguration();
-        //             List<String> or = new ArrayList<>();
 
-        //             or.add("http://localhost:4200");
-        //             or.add("http://localhost:4201");
-
-
-        //             // config.setAllowedOrigins(Collections.singletonList("http://www.systemdevmv.site"));
-
-
-        //             config.setAllowedOrigins(Collections.singletonList("https://sergipeofertas.com.br"));
-                    
-                    
-        //             // config.setAllowedOrigins(Collections.singletonList("http://www.sergipeofertas.com.br"));
-        //             // config.setAllowedOrigins(Collections.singletonList("https://www.systemdevmv.site"));
-        //             // config.setAllowedOrigins(Collections.singletonList("http://62.72.11.56"));
-        //             // config.setAllowedOrigins(Collections.singletonList("http://62.72.11.56"));
-        //             // config.setAllowedOrigins(Collections.singletonList(or));
-        //             config.setAllowedMethods(Collections.singletonList("*"));
-        //             config.setAllowCredentials(true);
-        //             config.setAllowedHeaders(Collections.singletonList("*"));
-        //             config.setExposedHeaders(Arrays.asList("Authorization"));
-        //             config.setMaxAge(3600L);
-
-        //             return config;
-        //         }
-
-        //     });
-        // });
-
-        .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**","/banners/**", "/generate-image","/report/**","/post/**", "/promos/**", "/mensagem/**")
+        .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**","/banners/**", "/generate-image","/report/**","/post/**", "/promos/**", "/mensagem/**", "/eventos/**")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 // .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTGeneratorFilter(), BasicAuthenticationFilter.class)
@@ -99,7 +63,8 @@ public class SecurityFilter {
                 .requestMatchers("/post/**").authenticated()
                 .requestMatchers(HttpMethod.GET,"/promos/**").permitAll()
                 .requestMatchers("/promos/**").permitAll()
-                .requestMatchers("/mensagem/**").permitAll())
+                .requestMatchers("/mensagem/**").permitAll()
+                        .requestMatchers("/eventos/**").permitAll())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
 

@@ -36,8 +36,8 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<CategoriaResponseDto> salvarCategoria(@RequestBody String nome_categoria) {
-        return ResponseEntity.ok().body(this.categoriaService.salvarCategoria(nome_categoria));
+    public ResponseEntity<CategoriaResponseDto> salvarCategoria(@RequestBody CategoriaResponseDto categoria) {
+        return ResponseEntity.ok().body(this.categoriaService.salvarCategoria(categoria.nomeCategoria()));
     }
 
     @GetMapping("/{id}")
