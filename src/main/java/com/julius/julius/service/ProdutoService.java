@@ -627,7 +627,7 @@ public class ProdutoService {
 
     public Resource loadImagemAResourceReal(String imagemNome) {
         if (!imagemNome.equals("null")) {
-            System.out.println(imagemNome);
+
             try {
                 File uploadDir = new File(UPLOAD_DIR + "-real");
 
