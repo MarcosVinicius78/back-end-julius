@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +40,25 @@ public class EventoService {
 
     public List<Evento> listarTodosEventos() {
         return eventoRepository.findAll();
+    }
+
+    public Map<String, Long> contarAcessosSemanaAtual(String tipoEvento) {
+        // Calcula o início e o fim da semana
+        LocalDateTime inicioSemana = LocalDate.now().with(DayOfWeek.MONDAY).atStartOfDay();
+        LocalDateTime fimSemana = LocalDate.now().with(DayOfWeek.SUNDAY).atTime(23, 59, 59);
+
+        // Busca os dados do repositório
+        List<Object[]> resultados = eventoRepository.contarAcessosPorDiaSemana(tipoEvento, inicioSemana, fimSemana);
+
+        // Processa os resultados em um mapa
+        Map<String, Long> acessosPorDia = new HashMap<>();
+        for (Object[] resultado : resultados) {
+            String diaSemana = ((String) resultado[0]).trim();
+            Long total = (Long) resultado[1];
+            acessosPorDia.put(diaSemana, total);
+        }
+
+        return acessosPorDia;
     }
 
     public Map<String, Double> calcularPorcentagemCliquesNaoCliques() {

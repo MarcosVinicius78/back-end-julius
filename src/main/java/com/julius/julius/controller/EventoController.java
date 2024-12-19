@@ -22,6 +22,13 @@ public class EventoController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/acessos-semana")
+    public ResponseEntity<Map<String, Long>> contarAcessosSemana() {
+        Map<String, Long> acessosSemana = eventoService.contarAcessosSemanaAtual("ACESSO_SISTEMA");
+
+        return ResponseEntity.ok().body(acessosSemana);
+    }
+
     @GetMapping("/estatisticas")
     public ResponseEntity<Map<String, Long>> obterEstatisticas() {
         Map<String, Long> stats = new HashMap<>();
