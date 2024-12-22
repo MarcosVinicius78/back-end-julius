@@ -42,11 +42,7 @@ public class EventoService {
         return eventoRepository.findAll();
     }
 
-    public Map<String, Long> contarAcessosSemanaAtual(String tipoEvento) {
-        // Calcula o início e o fim da semana
-        LocalDateTime inicioSemana = LocalDate.now().with(DayOfWeek.MONDAY).atStartOfDay();
-        LocalDateTime fimSemana = LocalDate.now().with(DayOfWeek.SUNDAY).atTime(23, 59, 59);
-
+    public Map<String, Long> contarAcessosPorPeriodo(String tipoEvento, LocalDateTime inicioSemana, LocalDateTime fimSemana) {
         // Busca os dados do repositório
         List<Object[]> resultados = eventoRepository.contarAcessosPorDiaSemana(tipoEvento, inicioSemana, fimSemana);
 
@@ -60,6 +56,23 @@ public class EventoService {
 
         return acessosPorDia;
     }
+
+    public Map<String, Long> buscarEventosPorDia(LocalDate dataSelecionada) {
+        // Gera o início do dia selecionado
+        LocalDateTime dataInicio = dataSelecionada.atStartOfDay();
+
+        List<Object[]> resultados = eventoRepository.contarEventosPorTipo(dataInicio);
+
+        Map<String, Long> contagemEventos = new HashMap<>();
+        for (Object[] resultado : resultados) {
+            String tipoEvento = (String) resultado[0];
+            Long contagem = (Long) resultado[1];
+            contagemEventos.put(tipoEvento, contagem);
+        }
+
+        return contagemEventos;
+    }
+
 
     public Map<String, Double> calcularPorcentagemCliquesNaoCliques() {
         long totalAcessosOfertas = contarEventosPorTipo("ACESSO_OFERTAS");

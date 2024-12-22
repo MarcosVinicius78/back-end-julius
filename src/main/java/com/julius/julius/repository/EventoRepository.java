@@ -23,5 +23,9 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
                                              @Param("inicioSemana") LocalDateTime inicioSemana,
                                              @Param("fimSemana") LocalDateTime fimSemana);
 
-
+    @Query("SELECT e.tipoEvento, COUNT(e) FROM Evento e " +
+            "WHERE e.tipoEvento IN ('CLIQUE_BOTAO', 'ACESSO_OFERTAS') " +
+            "AND DATE(e.dataEvento) = DATE(:dataSelecionada) " +
+            "GROUP BY e.tipoEvento")
+    List<Object[]> contarEventosPorTipo(@Param("dataSelecionada") LocalDateTime dataSelecionada);
 }

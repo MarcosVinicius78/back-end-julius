@@ -296,7 +296,7 @@ public class ProdutoService {
                 produto.setImagemSocial(imageProcessingService.processImageFromUrl(produtoSalvarDto.urlImagem()));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "", idOmc);
