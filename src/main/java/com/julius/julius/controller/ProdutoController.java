@@ -57,11 +57,6 @@ public class ProdutoController {
         }
     }
 
-    // @GetMapping("{id}")
-    // public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id) {
-    // return ResponseEntity.ok().body(produtoService.pegarProduto(id));
-    // }
-
     @GetMapping("/encerrar-promocao")
     public ResponseEntity<?> encerrarPromocao(@RequestParam Boolean status, @RequestParam Long id){
 

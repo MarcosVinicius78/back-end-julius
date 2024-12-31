@@ -75,6 +75,7 @@ public class ScraperService {
         AWIN_LINKS.put("tok", 36382);
         AWIN_LINKS.put("eudora", 17837);
         AWIN_LINKS.put("madeira", 17762);
+        AWIN_LINKS.put("natura", 17658);
     }
 
     public ProdutoScraperDTO scraperProduto(String url) {
@@ -252,17 +253,23 @@ public class ScraperService {
                 boolean isMagazine = promo.getShort_url() != null && promo.getShort_url().contains("maga");
                 boolean tituloUnico = promo.getTitle() != null && !produtoRepository.existsByTitulo(promo.getTitle());
                 String cupom = "";
-                if (promo.getCoupons() != null && !promo.getCoupons().isEmpty()) {
-                    cupom = promo.getCoupons().get(0);
-                }
 
-                if (tituloUnico && (isAmazon || isMagazine) && !cupom.contains("PECHIN")) {
-                    Produto produto = criarProduto(promo.getTitle(), promo.getPrice(), promo.getImage(),
-                            promo.getShort_url(), promo.getSlug(), cupom);
-                    configurarLinksLoja(produto);
+                Double preco = Double.parseDouble(promo.getPrice());
 
-                    produtoRepository.save(produto);
-                    System.out.println("Novo Produto Encontrado: " + promo.getTitle());
+                if (preco >= 750){
+                    if (promo.getCoupons() != null && !promo.getCoupons().isEmpty()) {
+                        cupom = promo.getCoupons().get(0);
+                    }
+
+                    if (tituloUnico && (isAmazon || isMagazine) && !cupom.contains("PECHIN")) {
+                        Produto produto = criarProduto(promo.getTitle(), promo.getPrice(), promo.getImage(),
+                                promo.getShort_url(), promo.getSlug(), cupom);
+                        configurarLinksLoja(produto);
+
+                        produtoRepository.save(produto);
+                        System.out.println("Novo Produto Encontrado: " + promo.getTitle());
+                    }
+
                 }
             }
         } catch (Exception e) {
@@ -296,7 +303,7 @@ public class ScraperService {
         produto.setLink(link);
 
         // Busca da categoria com validação
-        Optional<Categoria> categoria = categoriaRepository.findById(18L);
+        Optional<Categoria> categoria = categoriaRepository.findById(3L);
         if (categoria.isPresent()) {
             produto.setCategoria(categoria.get());
         } else {
