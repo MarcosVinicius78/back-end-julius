@@ -7,9 +7,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.Getter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Getter
 public class ScraperService {
 
     private final GerarLinkAwin gerarLinkAwin;
@@ -55,7 +58,14 @@ public class ScraperService {
     private final LojaRepository lojaRepository;
     private final ProdutoService produtoService;
 
+    private final String API_OMC = "d8d2cc65-dd41-4f9d-853d-172fae7dcdfe";
+
+    private final String API_SE = "ec0428ab-5f35-4ac8-86e7-6573bbb26570";
+    private final String ID_AFILIADO_SE = "1397427";
+
     private boolean ativar = false;
+
+    private final RoboConfigService roboConfigService;
 
     private static final Map<String, Integer> AWIN_LINKS = new HashMap<>();
 
@@ -85,8 +95,9 @@ public class ScraperService {
     private ProdutoScraperDTO descobrirLoja(String url) {
         for (Map.Entry<String, Integer> entry : AWIN_LINKS.entrySet()) {
             if (url.contains(entry.getKey())) {
-                String urlAwin = gerarLinkAwin.gerarLink(url, entry.getValue());
-                return handleAwin(urlAwin, entry.getKey());
+                String urlSe = gerarLinkAwin.gerarLink(url, entry.getValue(), API_SE, ID_AFILIADO_SE);
+//                String urlOmc = gerarLinkAwin.gerarLink(url, entry.getValue(), API_OMC);
+                return scraperLojasAwin.pegarDadosDoProdutoAwin(urlSe, "", entry.getKey());
             }
         }
 
@@ -120,10 +131,6 @@ public class ScraperService {
         return amazonService.montarProdutoAmazon(responseSe, produtoScraperDTO.urlProdutoSe());
     }
 
-    private ProdutoScraperDTO handleAwin(String urlShort, String nomeLoja) {
-        return scraperLojasAwin.pegarDadosDoProdutoAwin(urlShort, nomeLoja);
-    }
-
     private ProdutoScraperDTO handleShopee(String url) {
         String responseSe = shopeeService.fetchProductOffers(url, 1L);
 
@@ -136,7 +143,7 @@ public class ScraperService {
                 produtoSe.urlProdutoSe(), produtoOmc.urlProdutoOfm(), produtoSe.precoParcelado());
     }
 
-    @Scheduled(fixedRate = 300000)
+    @Scheduled(fixedRateString  = "#{@roboConfigService.getTempoRobo}")
     public void checkForNewProducts() {
 
         if (ativar) {

@@ -65,6 +65,18 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
             "ORDER BY p.data_criacao DESC", nativeQuery = true)
     Page<Produto> findByCategoriIdOrderByDataCriacaoDesc(Long categoriaId, Pageable pageable);
 
+    @Query(value = """
+            SELECT
+                p.*
+            FROM produtos p
+            JOIN produto_link pl ON p.produto_id = pl.produto_id
+            JOIN links_produtos lp ON pl.link_produto_id = lp.id
+            WHERE p.fk_loja = :lojaId AND
+            lp.site = :site
+            ORDER BY p.data_criacao DESC
+    """, nativeQuery = true)
+    Page<Produto> buscarProdutosPorLoja(@Param("lojaId") Long lojaId, @Param("site") Long site, Pageable pageable);
+
     @Query(value = "SELECT p.* FROM produtos p " +
             "JOIN produto_link pl ON p.produto_id = pl.produto_id " +
             "JOIN links_produtos lp ON pl.link_produto_id = lp.id " +
@@ -111,9 +123,16 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     void deleteByProdutoPromos(@Param("idProduto") Long idProduto);
 
     @Query(value = """
-            SELECT p.* FROM produtos p WHERE p.data_criacao >= CURRENT_TIMESTAMP - INTERVAL '2 HOURS' ORDER BY p.data_criacao DESC
+            SELECT
+              p.*,
+              lp.site
+            FROM produtos p
+            JOIN produto_link pl ON p.produto_id = pl.produto_id
+            JOIN links_produtos lp ON pl.link_produto_id = lp.id
+            WHERE p.data_criacao >= CURRENT_TIMESTAMP - INTERVAL '2 HOURS' 
+            AND lp.site = :site ORDER BY p.data_criacao DESC
     """, nativeQuery = true)
-    Page<Produto> listarProdutosDestaque(Pageable pageable);
+    Page<Produto> listarProdutosDestaque(@Param("site") Long site,Pageable pageable);
 
     long countByPromosId(Long promoId);
 

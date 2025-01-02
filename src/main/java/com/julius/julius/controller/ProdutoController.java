@@ -132,6 +132,20 @@ public class ProdutoController {
         return new ResponseEntity<>(produtos, HttpStatus.OK);
     }
 
+    @GetMapping("/por-loja")
+    public ResponseEntity<Page<ProdutoResponseDto>> obterProdutosPorLoja(
+            @RequestParam("lojaId") Long lojaId,
+            @RequestParam("site") Long site,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ProdutoResponseDto> produtos = produtoService.obterProdutosPorLoja(site, lojaId, pageable);
+
+        return new ResponseEntity<>(produtos, HttpStatus.OK);
+    }
+
     @PostMapping("/apagar-varios")
     public ResponseEntity<Integer> apagarVariosProdutos(@RequestBody @Valid List<ProdutoDto> produtosSelecionados) {
 
@@ -217,8 +231,8 @@ public class ProdutoController {
     }
 
     @GetMapping("destaque")
-    public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosDestaque(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size){
-        return ResponseEntity.ok().body(produtoService.listarProdutosDestaque(page, size));
+    public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosDestaque(@RequestParam Long site ,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size){
+        return ResponseEntity.ok().body(produtoService.listarProdutosDestaque(site, page, size));
     }
 
 }

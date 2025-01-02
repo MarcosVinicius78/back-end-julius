@@ -2,6 +2,7 @@ package com.julius.julius.controller;
 
 import java.io.UnsupportedEncodingException;
 
+import com.julius.julius.service.Scraper.RoboConfigService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,8 @@ public class ScraperController {
     private final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36";
 
     private final ScraperService scraperService;
-    private final TelegramService telegramService;
+
+    private final RoboConfigService roboConfigService;
 
     @GetMapping("/teste")
     public ResponseEntity<ProdutoScraperDTO> getProduto() throws UnsupportedEncodingException {
@@ -46,12 +48,24 @@ public class ScraperController {
     @GetMapping("/ativarBot")
     public ResponseEntity<Void> ativarBot(@RequestParam Boolean ativar){
         scraperService.ativarBot(ativar);
-        System.out.println(scraperService.statusBot());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/statusBot")
     public ResponseEntity<Boolean> statusBot(){
         return ResponseEntity.ok().body(scraperService.statusBot());
+    }
+
+    @GetMapping("/mudar-tempo-do-robo")
+    public ResponseEntity<Void> mudarTempoDoRobo(@RequestParam Long tempo){
+
+        roboConfigService.mudarTempoRobo(tempo);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/buscar-tempo-do-robo")
+    public ResponseEntity<Long> mudarTempoDoRobo(){
+        return ResponseEntity.ok().body(roboConfigService.buscarTempoRobo());
     }
 }

@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.logging.Logger;
 
+import com.julius.julius.service.Scraper.JsoupConexaoService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -20,44 +21,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ScraperLojasAwin {
 
-    private static final Logger logger = Logger.getLogger(ScraperService.class.getName());
-
     private final BoticarioScrapper boticarioScrapper;
 
-    public ProdutoScraperDTO pegarDadosDoProdutoAwin(String urlShort, String nomeLoja) {
+    private final JsoupConexaoService jsoupConexaoService;
 
-        try {
+    public ProdutoScraperDTO pegarDadosDoProdutoAwin(String urlSe,String urlOmc, String nomeLoja) {
 
             if (nomeLoja.equals("boti")) {
-                Document response = getConnect(urlShort);
-                return boticarioScrapper.pegarInformacoes(response, urlShort);
+                return boticarioScrapper.pegarInformacoes(urlSe, urlOmc);
             }
 
-            return new ProdutoScraperDTO("", "", "", urlShort, "", "");
-        } catch (ConnectException e) {
-            e.printStackTrace();
-            return new ProdutoScraperDTO("", "", "", urlShort, "", "");
-        }
-        // return null;
-    }
-
-    private Document getConnect(String url) throws ConnectException {
-        try {
-            logger.info("Trying to connect to URL: " + url);
-            Document response = Jsoup.connect(url)
-                    .userAgent(
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
-                    .referrer("https://www.google.com.br")
-                    .timeout(5000)
-                    .cookie("PIM-SESSION-ID", "xtNeQ1oT77boxl64")
-                    .followRedirects(true)
-                    .get();
-            logger.info("Successfully connected to URL: " + url);
-            return response;
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.severe("Failed to connect to URL: " + url + ". Error: " + e.getMessage());
-            throw new ConnectException("Failed to connect to URL: " + url);
-        }
+            return new ProdutoScraperDTO("", "", "", urlSe, urlOmc, "");
     }
 }

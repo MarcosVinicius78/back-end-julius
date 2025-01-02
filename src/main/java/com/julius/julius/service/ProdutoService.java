@@ -556,20 +556,11 @@ public class ProdutoService {
                         produtoRepository.sfindByProdutoBySite(produto.getId(), 2L), 0L));
     }
 
-    // public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site,Long
-    // categoriaId, Pageable pageable) {
-    // if (site == 1) {
-    // return
-    // produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
-    // .map(produto -> ProdutoResponseDto.toResonse(produto,
-    // produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
-    // }
-
-    // return
-    // produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId,pageable)
-    // .map(produto -> ProdutoResponseDto.toResonse(produto,
-    // produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
-    // }
+    public Page<ProdutoResponseDto> obterProdutosPorLoja(Long site, Long lojaId, Pageable pageable) {
+            return produtoRepository.buscarProdutosPorLoja(lojaId, site, pageable)
+                    .map(produto -> ProdutoResponseDto.toResonse(produto,
+                            produtoRepository.sfindByProdutoBySite(produto.getId(), 1L), 0L));
+    }
 
     @Transactional
     public void apagarVariosProdutos(List<ProdutoDto> produtosSelecionados) {
@@ -645,14 +636,13 @@ public class ProdutoService {
         return null;
     }
 
-    public Page<ProdutoResponseDto> listarProdutosDestaque(int page, int size) {
+    public Page<ProdutoResponseDto> listarProdutosDestaque(Long site, int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ProdutoResponseDto> produtosPage = produtoRepository.listarProdutosDestaque(pageable)
+        Page<ProdutoResponseDto> produtosPage = produtoRepository.listarProdutosDestaque(site, pageable)
                 .map(produto -> ProdutoResponseDto.toResonse(produto,
-                        produtoRepository.sfindByProdutoBySite(produto.getId(), 1L), 0L));
-        System.out.println(produtosPage.getNumber());
+                        produtoRepository.sfindByProdutoBySite(produto.getId(), 2L), 0L));
         return produtosPage;
     }
 

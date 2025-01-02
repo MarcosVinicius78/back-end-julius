@@ -21,7 +21,7 @@ public class GerarLinkAwin {
 
     private final String HOST = "https://api.awin.com/publishers/1397427/linkbuilder/generate";
 
-    public String gerarLink(String url, long idLoja) {
+    public String gerarLink(String url, long idLoja, String api, String idAfiliado) {
         try {
             String requestPayload = """
                         {
@@ -44,13 +44,13 @@ public class GerarLinkAwin {
             HttpClient client = HttpClientBuilder.create().build();
 
             // Criar o objeto HttpPost com a URL do endpoint
-            HttpPost httpPost = new HttpPost(HOST);
+            HttpPost httpPost = new HttpPost("https://api.awin.com/publishers/" + idAfiliado +"/linkbuilder/generate");
 
             // Configurar o payload da solicitação
             httpPost.setEntity(new StringEntity(requestPayload));
 
             // Configurar o cabeçalho de autorização
-            httpPost.setHeader("Authorization", "Bearer ec0428ab-5f35-4ac8-86e7-6573bbb26570");
+            httpPost.setHeader("Authorization", "Bearer " + api);
             httpPost.setHeader("Content-Type", "application/json");
             // Executar a solicitação e obter a resposta
             HttpResponse response = client.execute(httpPost);
