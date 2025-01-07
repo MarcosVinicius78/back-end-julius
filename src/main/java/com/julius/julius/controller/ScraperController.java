@@ -1,8 +1,6 @@
 package com.julius.julius.controller;
 
-import java.io.UnsupportedEncodingException;
-
-import com.julius.julius.service.Scraper.RoboConfigService;
+import com.julius.julius.service.Scraper.ConfigSiteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.julius.julius.DTO.response.ProdutoScraperDTO;
-import com.julius.julius.service.TelegramService;
 import com.julius.julius.service.Scraper.ScraperService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,20 +17,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ScraperController {
 
-    private final String baseUrl = "https://api.shopee.com";
-    private final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.90 Safari/537.36";
-
     private final ScraperService scraperService;
 
-    private final RoboConfigService roboConfigService;
-
-    @GetMapping("/teste")
-    public ResponseEntity<ProdutoScraperDTO> getProduto() throws UnsupportedEncodingException {
-
-        // telegramService.enviarProdutoParaTelegram("teste", "teste", "teste", "https://bugoumods.com/fortaleza-x-atletico-mg/", "");
-
-        return ResponseEntity.noContent().build();
-    }
+    private final ConfigSiteService configSiteService;
 
     @GetMapping
     public ResponseEntity<ProdutoScraperDTO> getProductDetails(@RequestParam String url) throws Exception {
@@ -59,13 +45,24 @@ public class ScraperController {
     @GetMapping("/mudar-tempo-do-robo")
     public ResponseEntity<Void> mudarTempoDoRobo(@RequestParam Long tempo){
 
-        roboConfigService.mudarTempoRobo(tempo);
+        configSiteService.mudarTempoRobo(tempo);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/buscar-tempo-do-robo")
     public ResponseEntity<Long> mudarTempoDoRobo(){
-        return ResponseEntity.ok().body(roboConfigService.buscarTempoRobo());
+        return ResponseEntity.ok().body(configSiteService.buscarTempoRobo());
+    }
+
+    @GetMapping("/ativar-link-curto")
+    public ResponseEntity<Void> ativarLinkCurto(@RequestParam Boolean valor){
+        configSiteService.mudarLinkCurto(valor);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/status-link_curto")
+    public ResponseEntity<Boolean> statusLinkCurto(){
+        return ResponseEntity.ok().body(configSiteService.buscarLinkCurto());
     }
 }

@@ -65,9 +65,9 @@ public class ScraperService {
 
     private boolean ativar = false;
 
-    private final RoboConfigService roboConfigService;
-
     private static final Map<String, Integer> AWIN_LINKS = new HashMap<>();
+
+    private final ConfigSiteService configSiteService;
 
     static {
         AWIN_LINKS.put("extra", 17874);
@@ -143,7 +143,7 @@ public class ScraperService {
                 produtoSe.urlProdutoSe(), produtoOmc.urlProdutoOfm(), produtoSe.precoParcelado());
     }
 
-    @Scheduled(fixedRateString  = "#{@roboConfigService.getTempoRobo}")
+    @Scheduled(fixedRateString  = "#{@configSiteService.getTEMPO_ROBO()}")
     public void checkForNewProducts() {
 
         if (ativar) {
