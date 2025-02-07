@@ -1,12 +1,14 @@
 package com.julius.julius.service.Scraper;
 
 import java.text.NumberFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.julius.julius.DTO.produtoScrapperPeDto.ResponseScrapper;
+import com.julius.julius.models.Loja;
+import com.julius.julius.repository.LinkProdutoRepository;
+import com.julius.julius.service.ImagemService;
 import lombok.Getter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -51,6 +53,8 @@ public class ScraperService {
     private final MagazineService magazineService;
     private final ScraperLojasAwin scraperLojasAwin;
 
+    private final ImagemService imagemService;
+
     private final MercadoLivre mercadoLivre;
 
     private final ProdutoRepository produtoRepository;
@@ -58,10 +62,15 @@ public class ScraperService {
     private final LojaRepository lojaRepository;
     private final ProdutoService produtoService;
 
+    private final JsoupConexaoService jsoupConexaoService;
+
     private final String API_OMC = "d8d2cc65-dd41-4f9d-853d-172fae7dcdfe";
 
     private final String API_SE = "ec0428ab-5f35-4ac8-86e7-6573bbb26570";
     private final String ID_AFILIADO_SE = "1397427";
+    private final String ID_AFILIADO_OMC = "1619304";
+
+    private final LinkProdutoRepository linkProdutoRepository;
 
     private boolean ativar = false;
 
@@ -96,8 +105,8 @@ public class ScraperService {
         for (Map.Entry<String, Integer> entry : AWIN_LINKS.entrySet()) {
             if (url.contains(entry.getKey())) {
                 String urlSe = gerarLinkAwin.gerarLink(url, entry.getValue(), API_SE, ID_AFILIADO_SE);
-//                String urlOmc = gerarLinkAwin.gerarLink(url, entry.getValue(), API_OMC);
-                return scraperLojasAwin.pegarDadosDoProdutoAwin(urlSe, "", entry.getKey());
+                String urlOmc = gerarLinkAwin.gerarLink(url, entry.getValue(), API_OMC, ID_AFILIADO_OMC);
+                return scraperLojasAwin.pegarDadosDoProdutoAwin(urlSe, urlOmc, entry.getKey());
             }
         }
 
@@ -143,11 +152,11 @@ public class ScraperService {
                 produtoSe.urlProdutoSe(), produtoOmc.urlProdutoOfm(), produtoSe.precoParcelado());
     }
 
-    @Scheduled(fixedRateString  = "#{@configSiteService.getTEMPO_ROBO()}")
+    @Scheduled(fixedRateString = "#{@configSiteService.getTEMPO_ROBO()}")
     public void checkForNewProducts() {
 
         if (ativar) {
-            raspagemDadosEconomizando();
+//            raspagemDadosEconomizando();
             raspagemDadosPechinchou();
         }
     }
@@ -183,13 +192,13 @@ public class ScraperService {
                     // System.out.println("produtos encontrados mas nenhum é shopee");
                     // Verifica se o produto já foi processado
                     if (!produtoRepository.existsByTitulo(titulo)
-                            && link.contains("shopee")) {
+                        && link.contains("shopee")) {
                         // String imagemSocial = extractImageReal(image);
                         Produto produto = new Produto();
                         // produto.setProductId(productId);
                         produto.setPreco(preco);
-                        produto.setUrlImagem(produtoService.salvarImagem(image));
-                        produto.setImagemSocial(produtoService.salvarImagemRealUrl(image));
+//                        produto.setUrlImagem(produtoService.salvarImagem(image));
+//                        produto.setImagemSocial(produtoService.salvarImagemRealUrl(image));
                         produto.setTitulo(titulo);
                         produto.setCategoria(categoriaRepository.getById(18L));
 
@@ -221,178 +230,156 @@ public class ScraperService {
             }
         } catch (
 
-        Exception e) {
+                Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void raspagemDadosPechinchou() {
-        try {
-            // Conectar ao site e extrair o JSON do script
-            Document doc = Jsoup.connect("https://pechinchou.com.br/").get();
-            Element scriptTag = doc.selectFirst("script#__NEXT_DATA__");
+//    private void raspagemDadosPechinchou() {
+//        try {
+//            Document doc = jsoupConexaoService.getConnect("https://pechinchou.com.br/");
+//            Element scriptTag = doc.selectFirst("script#__NEXT_DATA__");
+//
+//            if (scriptTag == null) {
+//                System.out.println("Script com JSON não encontrado.");
+//                return;
+//            }
+//
+//            String jsonData = scriptTag.html();
+//
+//            ObjectMapper mapper = new ObjectMapper();
+//            ResponseScrapper response = mapper.readValue(jsonData, ResponseScrapper.class);
+//
+//            // Acesse os dados simplificados
+//            for (ProdutoJsonDto promo : response.props().pageProps().promos().results()) {
+//
+//                Double preco = Double.parseDouble(promo.getPrice());
+//
+//                boolean isAmazon = promo.getShortUrl().contains("amzn");
+//
+//                boolean isMagazine = promo.getShortUrl().contains("maga");
+//
+//                boolean tituloUnico = produtoRepository.existsByTitulo(promo.getTitle());
+//
+//                if (preco > 750 && !tituloUnico) {
+//
+//                    Categoria categoria = categoriaRepository.findById(3L).orElseThrow(() -> new RuntimeException("Categoria inexistente"));
+//
+//                    String imagemSite = imagemService.salvarImagemUrl(promo.getImage(), "produtos");
+//                    String imagemSocial = "";
+//
+//                    try {
+//                        imagemSocial = extractImageReal("https://pechinchou.com.br/oferta/" + promo.getSlug());
+//                        if (imagemSocial != null) {
+////                    produto.setImagemSocial(produtoService.salvarImagemRealUrl(imagemSocial));
+//                        } else {
+//                            System.out.println("Nenhuma imagem social foi encontrada para o slug: " + promo.getSlug());
+//                        }
+//                    } catch (Exception e) {
+//                        System.err.println("Erro ao extrair imagem social: " + e.getMessage());
+//                        e.printStackTrace();
+//                    }
+//
+//                    if (isMagazine) {
+//                        Pattern pattern = Pattern.compile("/p/([^/]+)");
+//                        Matcher matcher = pattern.matcher(promo.getShortUrl());
+//
+//                        String url = "";
+//
+//                        if (matcher.find()) {
+//                            url = matcher.group(1);
+//                        }
+//
+//                        ProdutoScraperDTO produto = magazineService.getProdutoMagazine(url);
+//
+//                        LinksProdutos linksProdutosSe = new LinksProdutos();
+//                        linksProdutosSe.setSite(1L);
+//                        linksProdutosSe.setUrl(produto.urlProdutoSe());
+//
+//                        LinksProdutos linksProdutosOmc = new LinksProdutos();
+//                        linksProdutosOmc.setSite(2L);
+//                        linksProdutosOmc.setUrl(produto.urlProdutoOfm());
+//
+//                        List<LinksProdutos> linksSalvos = new ArrayList<>();
+//                        linksSalvos.add(linksProdutosSe);
+//                        linksSalvos.add(linksProdutosOmc);
+//
+//                        Produto produtoSalvar = Produto.builder()
+//                                .titulo(produto.nomeProduto())
+//                                .preco(promo.getPrice())
+//                                .linksProdutos(linksSalvos)
+//                                .urlImagem(imagemSite)
+//                                .imagemSocial(imagemSocial)
+//                                .categoria(categoria)
+//                                .mensagemAdicional("Promoção sujeita a alteração a qualquer momento.")
+//                                .build();
+//
+//                        produtoRepository.save(produtoSalvar);
+//
+//                    } else if (isAmazon) {
+//                        ProdutoScraperDTO produto = handleAmazon(promo.getShortUrl());
+//
+//                        LinksProdutos linksProdutosSe = new LinksProdutos();
+//                        linksProdutosSe.setSite(1L);
+//                        linksProdutosSe.setUrl(produto.urlProdutoSe());
+//
+//                        LinksProdutos linksProdutosOmc = new LinksProdutos();
+//                        linksProdutosOmc.setSite(2L);
+//                        linksProdutosOmc.setUrl(produto.urlProdutoOfm());
+//
+//                        List<LinksProdutos> linksSalvos = new ArrayList<>();
+//                        linksSalvos.add(linksProdutosSe);
+//                        linksSalvos.add(linksProdutosOmc);
+//
+//                        NumberFormat precoFormatado = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+//
+//                        String valroFormatado = precoFormatado.format(promo.getPrice());
+//
+//                        Produto produtoSalvar = Produto.builder()
+//                                .titulo(produto.nomeProduto())
+//                                .preco(valroFormatado)
+//                                .linksProdutos(linksSalvos)
+//                                .urlImagem(imagemSite)
+//                                .imagemSocial(imagemSocial)
+//                                .mensagemAdicional("Promoção sujeita a alteração a qualquer momento.")
+//                                .build();
+//
+//                        produtoRepository.save(produtoSalvar);
+//                    }
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            System.err.println("Erro ao realizar raspagem: ");
+//            e.printStackTrace();
+//        }
+//    }
 
-            if (scriptTag == null) {
-                System.out.println("Script com JSON não encontrado.");
-                return;
-            }
-
-            String jsonData = scriptTag.html();
-            JsonObject jsonObject = JsonParser.parseString(jsonData).getAsJsonObject();
-            JsonObject pageProps = jsonObject.getAsJsonObject("props").getAsJsonObject("pageProps");
-            JsonObject promos = pageProps.getAsJsonObject("promos");
-
-            ObjectMapper mapper = new ObjectMapper();
-
-            // Converte o JSON completo em um JsonNode
-            JsonNode rootNode = mapper.readTree(promos.toString());
-            JsonNode resultsNode = rootNode.get("results");
-
-            // Cria um tipo de coleção para List<ProdutoJsonDto>
-            CollectionType listType = mapper.getTypeFactory().constructCollectionType(List.class, ProdutoJsonDto.class);
-
-            // Converte o JSON do nó "results" para uma lista de ProdutoJsonDto
-            List<ProdutoJsonDto> list = mapper.convertValue(resultsNode, listType);
-
-            for (ProdutoJsonDto promo : list) {
-
-                boolean isAmazon = promo.getShort_url() != null && promo.getShort_url().contains("amzn");
-                boolean isMagazine = promo.getShort_url() != null && promo.getShort_url().contains("maga");
-                boolean tituloUnico = promo.getTitle() != null && !produtoRepository.existsByTitulo(promo.getTitle());
-                String cupom = "";
-
-                Double preco = Double.parseDouble(promo.getPrice());
-
-                if (preco >= 750){
-                    if (promo.getCoupons() != null && !promo.getCoupons().isEmpty()) {
-                        cupom = promo.getCoupons().get(0);
-                    }
-
-                    if (tituloUnico && (isAmazon || isMagazine) && !cupom.contains("PECHIN")) {
-                        Produto produto = criarProduto(promo.getTitle(), promo.getPrice(), promo.getImage(),
-                                promo.getShort_url(), promo.getSlug(), cupom);
-                        configurarLinksLoja(produto);
-
-                        produtoRepository.save(produto);
-                        System.out.println("Novo Produto Encontrado: " + promo.getTitle());
-                    }
-
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Erro ao realizar raspagem: ");
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Cria um objeto Produto com os dados fornecidos.
-     */
-    private Produto criarProduto(String titulo, String preco, String image, String link, String slug,
-            String firstCoupon) {
-        if (titulo == null || preco == null || image == null || link == null) {
-            throw new IllegalArgumentException("Parâmetros obrigatórios não podem ser nulos.");
-        }
-
-        Produto produto = new Produto();
-
-        try {
-            double precoDouble = Double.parseDouble(preco);
-            produto.setPreco(NumberFormat.getCurrencyInstance(new Locale("pt", "BR")).format(precoDouble));
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("O preço informado é inválido: " + preco, e);
-        }
-
-        produto.setTitulo(titulo);
-        produto.setUrlImagem(produtoService.salvarImagem(image));
-        produto.setCupom(firstCoupon != null ? firstCoupon : "");
-        produto.setMensagemAdicional("Promoção sujeita a alteração a qualquer momento.");
-        produto.setLink(link);
-
-        // Busca da categoria com validação
-        Optional<Categoria> categoria = categoriaRepository.findById(3L);
-        if (categoria.isPresent()) {
-            produto.setCategoria(categoria.get());
-        } else {
-            throw new IllegalStateException("Categoria padrão não encontrada.");
-        }
-
-        // Adicionar imagem social, se disponível
-        String imagemSocial = null;
-        if (slug != null && !slug.isBlank()) {
-            try {
-                imagemSocial = extractImageReal("https://pechinchou.com.br/oferta/" + slug);
-                if (imagemSocial != null) {
-                    produto.setImagemSocial(produtoService.salvarImagemRealUrl(imagemSocial));
-                } else {
-                    System.out.println("Nenhuma imagem social foi encontrada para o slug: " + slug);
-                }
-            } catch (Exception e) {
-                System.err.println("Erro ao extrair imagem social: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
-        return produto;
-    }
-
-    /**
-     * Configura os links específicos da loja com base no domínio do link.
-     */
-    private void configurarLinksLoja(Produto produto) {
-        if (produto.getLink().contains("amzn")) {
-            configurarLinksAmazon(produto, produto.getLink());
-        } else if (produto.getLink().contains("maga")) {
-            configurarLinksMagazine(produto, produto.getLink());
-        }
-    }
-
-    /**
-     * Configura os links específicos para a loja Amazon.
-     */
-    private void configurarLinksAmazon(Produto produto, String link) {
-        String linkSe = handleAmazon(link).urlProdutoSe();
-        String linkOmc = handleAmazon(link).urlProdutoOfm();
-        produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("amazon"));
-        if (linkSe != null) {
-            produto.getLinksProdutos().add(produtoService.salvarLinkProduto(linkSe, 1L));
-            produto.getLinksProdutos().add(produtoService.salvarLinkProduto(linkOmc, 2L));
-            produto.setLink(linkSe);
-        }
-    }
-
-    /**
-     * Configura os links específicos para a loja Magazine Luiza.
-     */
-    private void configurarLinksMagazine(Produto produto, String link) {
-        produto.setLoja(lojaRepository.findByNomeLojaContainingIgnoreCase("magazine"));
-        produto.getLinksProdutos()
-                .add(produtoService.salvarLinkProduto(link.replace("magazinedopechinchou", "sergipeeofertas"), 1L));
-        produto.getLinksProdutos().add(
-                produtoService.salvarLinkProduto(link.replace("magazinedopechinchou", "magazineofertasmaiscupom"), 2L));
-        produto.setLink(link.replace("magazinedopechinchou", "sergipeeofertas"));
-    }
-
-    private String extractImageReal(String url) throws java.io.IOException {
+    public String extractImageReal(String url) {
 
         // Conecte-se ao site e obtenha o conteúdo HTML
-        Document docProduto = Jsoup.connect(url).get();
+        try {
+            Document docProduto = jsoupConexaoService.getConnect(url);
 
-        Element scriptTagProduto = docProduto.selectFirst("script#__NEXT_DATA__");
+            Element scriptTagProduto = docProduto.selectFirst("script#__NEXT_DATA__");
 
-        if (scriptTagProduto != null) {
-            String jsonData = scriptTagProduto.html();
-            JsonObject jsonObject = JsonParser.parseString(jsonData).getAsJsonObject();
-            JsonObject pageProps = jsonObject.getAsJsonObject("props").getAsJsonObject("pageProps");
-            JsonObject promo = pageProps.getAsJsonObject("promo");
-            if (promo.get("image_social") != null) {
-                return promo.get("image_social").getAsString();
-            } else {
-                System.out.println("A imagem social e null");
+            if (scriptTagProduto != null) {
+                String jsonData = scriptTagProduto.html();
+                JsonObject jsonObject = JsonParser.parseString(jsonData).getAsJsonObject();
+                JsonObject pageProps = jsonObject.getAsJsonObject("props").getAsJsonObject("pageProps");
+                JsonObject promo = pageProps.getAsJsonObject("promo");
+                if (promo.get("image_social") != null) {
+                    return promo.get("image_social").getAsString();
+                } else {
+                    System.out.println("A imagem social e null");
+                }
+
             }
+        } catch (Exception e) {
 
         }
         return "";
+
     }
 
     public void ativarBot(Boolean valor) {
@@ -401,6 +388,149 @@ public class ScraperService {
 
     public Boolean statusBot() {
         return ativar;
+    }
+
+    /// pechinchou
+
+    public void raspagemDadosPechinchou() {
+        try {
+            Document doc = jsoupConexaoService.getConnect("https://pechinchou.com.br/");
+            Element scriptTag = doc.selectFirst("script#__NEXT_DATA__");
+
+            if (scriptTag == null) {
+                System.out.println("Script com JSON não encontrado.");
+                return;
+            }
+
+            String jsonData = scriptTag.html();
+            ObjectMapper mapper = new ObjectMapper();
+            ResponseScrapper response = mapper.readValue(jsonData, ResponseScrapper.class);
+
+            for (ProdutoJsonDto promo : response.props().pageProps().promos().results()) {
+                processarProduto(promo);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erro ao realizar raspagem: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void processarProduto(ProdutoJsonDto promo) {
+        try {
+            Double preco = converterPreco(promo.getPrice());
+            if (preco == null || preco <= 750) return;
+
+            boolean isAmazon = promo.getShortUrl().contains("amzn");
+            boolean isMagazine = promo.getShortUrl().contains("maga");
+            boolean tituloUnico = produtoRepository.existsByTitulo(promo.getTitle());
+
+            if (tituloUnico || !(isMagazine || isAmazon)) return;
+
+            Categoria categoria = categoriaRepository.findById(3L)
+                    .orElseThrow(() -> new RuntimeException("Categoria inexistente"));
+
+            String imagemSite = imagemService.salvarImagemUrl(promo.getImage(), "produtos");
+            String imagemSocial = obterImagemSocial(promo.getSlug());
+
+            List<LinksProdutos> linksSalvos = new ArrayList<>();
+            ProdutoScraperDTO produto = null;
+
+            if (isMagazine) {
+                produto = processarMagazine(promo, linksSalvos);
+            } else if (isAmazon) {
+                produto = processarAmazon(promo, linksSalvos);
+            }
+
+            if (produto != null) {
+                salvarProduto(promo, categoria, imagemSite, imagemSocial, linksSalvos);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erro ao processar produto: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private Double converterPreco(String precoStr) {
+        try {
+            return Double.parseDouble(precoStr);
+        } catch (NumberFormatException e) {
+            System.err.println("Erro ao converter preço: " + precoStr);
+            return null;
+        }
+    }
+
+    private String obterImagemSocial(String slug) {
+        try {
+            String imagem = extractImageReal("https://pechinchou.com.br/oferta/" + slug);
+            return imagem != null ? imagemService.salvarImagemUrl(imagem, "produtos-real") : null;
+        } catch (Exception e) {
+            System.err.println("Erro ao extrair imagem social para slug: " + slug);
+            return null;
+        }
+    }
+
+    private ProdutoScraperDTO processarMagazine(ProdutoJsonDto promo, List<LinksProdutos> linksSalvos) {
+        Pattern pattern = Pattern.compile("/p/([^/]+)");
+        Matcher matcher = pattern.matcher(promo.getShortUrl());
+
+        if (matcher.find()) {
+            String url = matcher.group(1);
+            ProdutoScraperDTO produto = magazineService.getProdutoMagazine(url);
+
+            adicionarLinks(linksSalvos, produto);
+            return produto;
+        }
+
+        return null;
+    }
+
+    private ProdutoScraperDTO processarAmazon(ProdutoJsonDto promo, List<LinksProdutos> linksSalvos) {
+        ProdutoScraperDTO produto = handleAmazon(promo.getShortUrl());
+        adicionarLinks(linksSalvos, produto);
+        return produto;
+    }
+
+    private void adicionarLinks(List<LinksProdutos> linksSalvos, ProdutoScraperDTO produto) {
+        linksSalvos.add(new LinksProdutos(null, produto.urlProdutoSe(), 1L, null));
+        linksSalvos.add(new LinksProdutos(null, produto.urlProdutoOfm(), 2L, null));
+        linkProdutoRepository.saveAll(linksSalvos);
+    }
+
+    private void salvarProduto(ProdutoJsonDto produto, Categoria categoria, String imagemSite, String imagemSocial, List<LinksProdutos> linksSalvos) {
+        try {
+
+            Loja loja = null;
+
+            if (produto.getShortUrl().contains("magazine")) {
+                loja = lojaRepository.findByNomeLojaContainingIgnoreCase("magazine");
+            }else {
+                loja = lojaRepository.findByNomeLojaContainingIgnoreCase("amazon");
+            }
+
+            NumberFormat precoFormatado = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+
+            Double preco = converterPreco(produto.getPrice());
+            String valroFormatado = precoFormatado.format(preco);
+
+            Produto produtoSalvar = Produto.builder()
+                    .titulo(produto.getTitle())
+                    .preco(valroFormatado)
+                    .linksProdutos(linksSalvos)
+                    .urlImagem(imagemSite)
+                    .imagemSocial(imagemSocial)
+                    .freteVariacoes("Frete Grátis Algumas Regiões")
+                    .categoria(categoria)
+                    .loja(loja)
+                    .mensagemAdicional("Promoção sujeita a alteração a qualquer momento.")
+                    .build();
+
+            produtoRepository.save(produtoSalvar);
+        } catch (Exception e) {
+            System.err.println("Erro ao salvar produto: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 }

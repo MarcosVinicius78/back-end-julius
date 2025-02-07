@@ -4,6 +4,7 @@ import java.awt.FontFormatException;
 import java.io.IOException;
 import java.util.List;
 
+import com.julius.julius.DTO.response.IProdutoResponseDto;
 import org.apache.commons.io.FileExistsException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.core.io.Resource;
@@ -43,12 +44,12 @@ public class ProdutoController {
 
     @GetMapping("{id}")
     public ResponseEntity<ProdutoDto> pegarProduto(@PathVariable Long id,
-            @RequestParam(value = "r", required = false) Integer r) {
+                                                   @RequestParam(value = "r", required = false) Integer r) {
         // return ResponseEntity.ok().body(produtoService.pegarProduto(id));
         if (r != null && r == 1) {
             // Lógica para obter a URL do site oficial do produto baseado no ID
             ProdutoDto officialProductUrl = produtoService.pegarProduto(id);
-            
+
             // return ResponseEntity.status(302).header("Location", officialProductUrl.link_se()).build();
             return ResponseEntity.status(200).body(officialProductUrl);
         } else {
@@ -58,7 +59,7 @@ public class ProdutoController {
     }
 
     @GetMapping("/encerrar-promocao")
-    public ResponseEntity<?> encerrarPromocao(@RequestParam Boolean status, @RequestParam Long id){
+    public ResponseEntity<?> encerrarPromocao(@RequestParam Boolean status, @RequestParam Long id) {
 
         if (produtoService.encerrarPromocao(status, id)) {
             return ResponseEntity.ok().build();
@@ -68,45 +69,25 @@ public class ProdutoController {
     }
 
     @GetMapping()
-    public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosPaginacao(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size, @RequestParam(defaultValue = "1" ,required = false) Long site) {
+    public ResponseEntity<Page<IProdutoResponseDto>> listarProdutosPaginacao(@RequestParam(defaultValue = "0") int page,
+                                                                             @RequestParam(defaultValue = "12") int size, @RequestParam(defaultValue = "1", required = false) Long site) {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ProdutoResponseDto> produtos = produtoService.getProdutosPaginados(site, pageable);
+        Page<IProdutoResponseDto> produtos = produtoService.getProdutosPaginados(site, pageable);
 
         return new ResponseEntity<>(produtos, HttpStatus.OK);
     }
 
     @PostMapping("/salvar")
     public ResponseEntity<ProdutoResponseDto> salvarProduto(@RequestBody @Valid ProdutoSalvarDto produtoSalvarDto) {
-        if (produtoSalvarDto != null) {
-            return ResponseEntity.ok().body(produtoService.salvarProduto(produtoSalvarDto));
-        }
-
-        return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping("/upload")
-    public ResponseEntity<?> uploadImage(@RequestParam(name = "file", required = false) MultipartFile file,
-            @RequestParam(name = "fileSocial", required = false) MultipartFile fileSocial, @RequestParam("id") Long id,
-            @RequestParam(name = "idOmc", required = false) Long idOmc,
-            @RequestParam(name = "urlImagem", required = false) String urlImagem,
-            @RequestParam(name = "urlImagemReal", required = false) String urlImagemReal)
-            throws FileUploadException, FileExistsException {
-        produtoService.salvarImagemProduto(file, id, urlImagem, fileSocial, urlImagemReal);
-        if (idOmc != 0) {
-            produtoService.salvarImagemProduto(file, idOmc, urlImagem, fileSocial, urlImagemReal);
-        }
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(produtoService.salvarProduto(produtoSalvarDto));
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id,
-            @RequestParam(name = "urlImagem", required = false) String urlImagem,
-            @RequestParam(name = "imagemSocial", required = false) String imagemSocial)
+    public ResponseEntity<?> deletarProduto(@RequestParam("id") Long id)
             throws FileExistsException {
-        Boolean apagado = this.produtoService.apagarProduto(id, urlImagem, imagemSocial);
+        Boolean apagado = this.produtoService.apagarProduto(id);
         if (apagado) {
             return ResponseEntity.ok().build();
         }
@@ -119,7 +100,7 @@ public class ProdutoController {
     }
 
     @GetMapping("/por-categoria")
-    public ResponseEntity<Page<ProdutoResponseDto>> obterProdutosPorCategoria(
+    public ResponseEntity<Page<IProdutoResponseDto>> obterProdutosPorCategoria(
             @RequestParam("categoriaId") Long categoriaId,
             @RequestParam("site") Long site,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -127,7 +108,7 @@ public class ProdutoController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ProdutoResponseDto> produtos = produtoService.obterProdutosPorCategoria(site, categoriaId, pageable);
+        Page<IProdutoResponseDto> produtos = produtoService.obterProdutosPorCategoria(site, categoriaId, pageable);
 
         return new ResponseEntity<>(produtos, HttpStatus.OK);
     }
@@ -155,30 +136,13 @@ public class ProdutoController {
     }
 
     @GetMapping("/pesquisar")
-    public ResponseEntity<Page<ProdutoResponseDto>> pesquisarProdutos(@RequestParam String termoPesquisa,
-            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-            @RequestParam(value = "size", defaultValue = "12", required = false) int size,
-            @RequestParam(value = "site", required = false) Long site) {
-        Page<ProdutoResponseDto> resultados = produtoService.pesquisarProdutos(site,termoPesquisa, page, size);
-        
+    public ResponseEntity<Page<IProdutoResponseDto>> pesquisarProdutos(@RequestParam String termoPesquisa,
+                                                                      @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                                                                      @RequestParam(value = "size", defaultValue = "12", required = false) int size,
+                                                                      @RequestParam(value = "site", required = false) Long site) {
+        Page<IProdutoResponseDto> resultados = produtoService.pesquisarProdutos(site, termoPesquisa, page, size);
+
         return ResponseEntity.ok().body(resultados);
-    }
-
-    @GetMapping("/download/{imagem}")
-    public ResponseEntity<Resource> downloadImagem(@PathVariable String imagem) {
-
-        Resource resource = null;
-        if (imagem != null) {
-            resource = produtoService.loadImagemAResource(imagem);
-        }
-
-        if (resource.exists()) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .contentType(MediaType.valueOf("image/jpg"))
-                    .body(resource);
-        }
-
-        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/download-imagem-real/{imagemSocial}")
@@ -200,8 +164,8 @@ public class ProdutoController {
 
     @GetMapping("/generate-image")
     public ResponseEntity<byte[]> generateImage(@RequestParam(name = "preco", required = false) String preco,
-            @RequestParam("titulo") String titulo, @RequestParam("urlImagem") String urlImagem,
-            @RequestParam("frete") String frete, @RequestParam("cupom") String cupom)
+                                                @RequestParam("titulo") String titulo, @RequestParam("urlImagem") String urlImagem,
+                                                @RequestParam("frete") String frete, @RequestParam("cupom") String cupom)
             throws FileExistsException, FontFormatException {
 
         byte[] bytes = produtoService.gerarStory(preco, titulo, urlImagem, frete, cupom);
@@ -211,7 +175,7 @@ public class ProdutoController {
         headers.setContentDispositionFormData("attachment", "nome_da_imagem.jpg");
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }
-    
+
 
     @GetMapping("gerarFeed/{id}")
     public ResponseEntity<byte[]> gerarFeed(@PathVariable Long id)
@@ -231,7 +195,7 @@ public class ProdutoController {
     }
 
     @GetMapping("destaque")
-    public ResponseEntity<Page<ProdutoResponseDto>> listarProdutosDestaque(@RequestParam Long site ,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size){
+    public ResponseEntity<Page<IProdutoResponseDto>> listarProdutosDestaque(@RequestParam Long site, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size) {
         return ResponseEntity.ok().body(produtoService.listarProdutosDestaque(site, page, size));
     }
 

@@ -75,6 +75,8 @@ public class JWTValidationFilter extends OncePerRequestFilter{
 
                 }else if(path.contains("/eventos")){
                     return false;
+                }else if(path.contains("/imagem")){
+                    return false;
                 }
             case "PUT":
                 if (path.contains("/produto")) {
@@ -90,6 +92,8 @@ public class JWTValidationFilter extends OncePerRequestFilter{
                 }else if(path.contains("/promos")){
                     return false;
                 }else if(path.contains("/eventos")){
+                    return false;
+                }else if(path.contains("/imagem")){
                     return false;
                 }
             case "DELETE":
@@ -108,6 +112,8 @@ public class JWTValidationFilter extends OncePerRequestFilter{
                 }else if(path.contains("/promos")){
                     return false;
                 }else if(path.contains("/eventos")){
+                    return false;
+                }else if(path.contains("/imagem")){
                     return false;
                 }
         }

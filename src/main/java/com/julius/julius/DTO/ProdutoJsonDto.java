@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,10 +16,11 @@ import lombok.Setter;
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProdutoJsonDto {
-    private String price;
-    private String slug;
+    private List<String> coupons;
     private String title;
+    private String slug;
+    private String price;
     private String image;
-    private String short_url;
-    List<String> coupons;
+    @JsonProperty("short_url")
+    private String shortUrl;
 }

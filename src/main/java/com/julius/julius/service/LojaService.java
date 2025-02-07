@@ -32,6 +32,8 @@ public class LojaService {
 
     private final LojaRepository lojaRepository;
 
+    private final ImagemService imagemService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -39,45 +41,8 @@ public class LojaService {
         return lojaRepository.findAllByOrderByNomeLojaAsc().stream().map(LojaResponseDto::toResonse).toList();
     }
 
-    public Resource loadImagemAResource(String imagemNome) {
-        try {
-            File uploadDir = new File(UPLOAD_DIR);
-
-            Path imagemPath = Paths.get(uploadDir.getAbsolutePath()).resolve(imagemNome);
-            Resource resource = new UrlResource(imagemPath.toUri());
-
-            if (resource.exists() || resource.isReadable()) {
-                return resource;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     private String salvarImagemLoja(MultipartFile file) {
-
-        File uploadsDir = new File(UPLOAD_DIR);
-        if (!uploadsDir.exists()) {
-            uploadsDir.mkdirs();
-        }
-
-        Date data = new Date();
-
-        String fileName = file.getOriginalFilename();
-        String nomeImagem = data.getTime() + fileName;
-        Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-
-        try {
-            Files.copy(file.getInputStream(), filePath,
-                    StandardCopyOption.REPLACE_EXISTING);
-
-            return nomeImagem;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return imagemService.salvarImagem(file, "lojas");
     }
 
     public LojaResponseDto salvarLoja(String nomeLoja, MultipartFile file) {

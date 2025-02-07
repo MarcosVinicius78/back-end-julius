@@ -46,23 +46,6 @@ public class LojaController {
         return ResponseEntity.ok().body(this.lojaService.listarLojas());
     }
 
-    @GetMapping("/mostar-imagem/{nomeImagem}")
-    public ResponseEntity<Resource> mostrarImagem(@PathVariable String nomeImagem){
-        
-        Resource resource = null;
-        if (nomeImagem != null) {
-            resource = lojaService.loadImagemAResource(nomeImagem);
-        }
-
-        if (resource.exists()) {
-            return ResponseEntity.ok()
-                    .contentType(MediaType.valueOf("image/png"))
-                    .body(resource);
-        }
-
-        return ResponseEntity.notFound().build();
-    }
-
     @GetMapping("{id}")
     public ResponseEntity<LojaResponseDto> pegarLoja(@PathVariable Long id) {
 

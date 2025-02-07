@@ -7,14 +7,14 @@ public record ProdutoAtualizarDto(
     String preco,
     String precoParcelado,
     String descricao,
-    String link_se,
-    String link_ofm,
+    String linkSe,
+    String linkOmc,
     String cupom,
     String copy,
     String freteVariacoes,
     String mensagemAdicional,
-    Long  id_categoria,
-    Long id_loja
+    Long  idCategoria,
+    Long idLoja
 
 ) {
     

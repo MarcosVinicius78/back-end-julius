@@ -27,9 +27,9 @@ public class ScraperLojasAwin {
 
     public ProdutoScraperDTO pegarDadosDoProdutoAwin(String urlSe,String urlOmc, String nomeLoja) {
 
-            if (nomeLoja.equals("boti")) {
-                return boticarioScrapper.pegarInformacoes(urlSe, urlOmc);
-            }
+//            if (nomeLoja.equals("boti")) {
+//                return boticarioScrapper.pegarInformacoes(urlSe, urlOmc);
+//            }
 
             return new ProdutoScraperDTO("", "", "", urlSe, urlOmc, "");
     }

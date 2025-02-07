@@ -20,9 +20,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import com.julius.julius.DTO.response.*;
 import com.julius.julius.service.Scraper.Amazon.ImageProcessingService;
 import org.apache.commons.io.FileExistsException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
@@ -38,11 +40,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.julius.julius.DTO.ProdutoAtualizarDto;
 import com.julius.julius.DTO.ProdutoSalvarDto;
-import com.julius.julius.DTO.response.CategoriaResponseDto;
-import com.julius.julius.DTO.response.LojaResponseDto;
-import com.julius.julius.DTO.response.ProdutoDto;
-import com.julius.julius.DTO.response.ProdutoPesquisa;
-import com.julius.julius.DTO.response.ProdutoResponseDto;
 import com.julius.julius.models.Categoria;
 import com.julius.julius.models.LinksProdutos;
 import com.julius.julius.models.Loja;
@@ -76,139 +73,11 @@ public class ProdutoService {
 
     private final ImageProcessingService imageProcessingService;
 
+    private final ImagemService imagemService;
+
     private final List<String> colaboradores = Arrays.asList("Alex", "Maria", "Amanda", "Erick");
 
-    private static final String UPLOAD_DIR = "/uploads/produtos";
-
-    private String salvarImagemReal(MultipartFile fileSocial) {
-        File uploadsDir = new File(UPLOAD_DIR + "-real");
-        if (!uploadsDir.exists()) {
-            uploadsDir.mkdirs();
-        }
-
-        Date data = new Date();
-
-        String fileName = fileSocial.getOriginalFilename();
-        String nomeImagem = data.getTime() + fileName;
-        Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-
-        try {
-            Files.copy(fileSocial.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-
-            e.printStackTrace();
-        }
-
-        return nomeImagem;
-    }
-
-    public String salvarImagemProduto(MultipartFile file, Long id, String urlImagem, MultipartFile fileSocial,
-            String urlImagemReal)
-            throws FileUploadException, FileExistsException {
-
-        Optional<Produto> produto = produtoRepository.findById(id);
-
-        String nomeImagem = "";
-        String imagemUrl = "";
-
-        try {
-            if (file != null) {
-                if (urlImagem != null) {
-                    apagarImagem(urlImagem);
-                }
-                File uploadsDir = new File(UPLOAD_DIR);
-                if (!uploadsDir.exists()) {
-                    uploadsDir.mkdirs();
-                }
-
-                Date data = new Date();
-
-                String fileName = file.getOriginalFilename();
-                nomeImagem = data.getTime() + fileName;
-                Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-
-                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-                imagemUrl = uploadsDir.getAbsolutePath() + fileName;
-
-                produto.get().setUrlImagem(nomeImagem);
-
-                if (fileSocial != null) {
-                    nomeImagem = salvarImagemReal(fileSocial);
-                    produto.get().setImagemSocial(nomeImagem);
-                }
-            }
-
-            if (fileSocial != null) {
-                if (urlImagemReal != null) {
-                    apagarImagemReal(urlImagemReal);
-                }
-                nomeImagem = salvarImagemReal(fileSocial);
-                produto.get().setImagemSocial(nomeImagem);
-            }
-
-            produtoRepository.save(produto.get());
-
-            return imagemUrl;
-        } catch (Exception e) {
-            throw new FileUploadException();
-        }
-
-    }
-
-    public String salvarImagem(String url) {
-
-        try {
-
-            URL file = new URL(url);
-
-            File uploadsDir = new File(UPLOAD_DIR);
-            if (!uploadsDir.exists()) {
-                uploadsDir.mkdirs();
-            }
-
-            Date data = new Date();
-
-            String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
-
-            String nomeImagem = data.getTime() + fileName;
-            Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-
-            Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            return nomeImagem;
-
-        } catch (Exception e) {
-            throw new NotFoundException("Imagem não foi salva");
-        }
-    }
-    
-    public String salvarImagemRealUrl(String url) {
-
-        try {
-
-            URL file = new URL(url);
-
-            File uploadsDir = new File(UPLOAD_DIR + "-real");
-            if (!uploadsDir.exists()) {
-                uploadsDir.mkdirs();
-            }
-
-            Date data = new Date();
-
-            String fileName = url.toString().substring(url.lastIndexOf("/") + 1);
-
-            String nomeImagem = data.getTime() + fileName;
-            Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
-
-            Files.copy(file.openStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            return nomeImagem;
-
-        } catch (Exception e) {
-            throw new NotFoundException("Imagem não foi salva");
-        }
-    }
+    private static final String UPLOAD_DIR = "/uploads";
 
     public LinksProdutos salvarLinkProduto(String url, Long site) {
 
@@ -221,155 +90,149 @@ public class ProdutoService {
     }
 
     public ProdutoResponseDto salvarProduto(ProdutoSalvarDto produtoSalvarDto) {
-
         Random random = new Random();
 
-        Optional<Categoria> categoria = categoriaRepository.findById(produtoSalvarDto.id_categoria());
-        Optional<Loja> loja = lojaRepository.findById(produtoSalvarDto.id_loja());
+        Categoria categoria = categoriaRepository.findById(produtoSalvarDto.idCategoria())
+                .orElseThrow(() -> new RuntimeException("Categoria inexistente"));
+        Loja loja = lojaRepository.findById(produtoSalvarDto.idLoja())
+                .orElseThrow(() -> new RuntimeException("Loja inexistente"));
 
-        Long idOmc = 0L;
+        String colaborador = colaboradores.get(random.nextInt(colaboradores.size()));
 
+        // Verifica se deve criar dois produtos
+        boolean criarDoisProdutos =
+                !produtoSalvarDto.linkSe().isEmpty() &&
+                !produtoSalvarDto.linkOmc().isEmpty() &&
+                loja.getNomeLoja().equalsIgnoreCase("magazine luiza") &&
+                !produtoSalvarDto.cupomSe().isEmpty() &&
+                produtoSalvarDto.cupomSe().toLowerCase().contains("sergipe");
+
+        // Criar e salvar produto principal (SERGIPE ou único)
+        Produto produtoPrincipal = criarProduto(produtoSalvarDto, categoria, loja, colaborador, criarDoisProdutos);
+
+        if (criarDoisProdutos) {
+            adicionarLinks(produtoPrincipal, produtoSalvarDto.link(), produtoSalvarDto.linkSe(), "", "", true);
+            produtoRepository.save(produtoPrincipal);
+            produtoPrincipal = criarProduto(produtoSalvarDto, categoria, loja, colaborador, false);
+            adicionarLinks(produtoPrincipal, "", "", produtoSalvarDto.linkOmc(), produtoSalvarDto.descricao(), criarDoisProdutos);
+            produtoRepository.save(produtoPrincipal);
+        } else {
+            adicionarLinks(produtoPrincipal, produtoSalvarDto.link(), produtoSalvarDto.linkSe(), produtoSalvarDto.linkOmc(), produtoSalvarDto.descricao(), criarDoisProdutos);
+            produtoRepository.save(produtoPrincipal);
+        }
+
+        return ProdutoResponseDto.toResonse(produtoPrincipal);
+    }
+
+
+    /**
+     * Cria um novo produto com base no DTO.
+     *
+     * @param isSergipe Indica se é o produto principal (SERGIPE) ou o duplicado (OMC)
+     */
+    private Produto criarProduto(ProdutoSalvarDto dto, Categoria categoria, Loja loja, String colaborador, boolean isSergipe) {
         Produto produto = new Produto();
 
-        if (!produtoSalvarDto.urlImagem().equals("")) {
-            produto.setUrlImagem(salvarImagem(produtoSalvarDto.urlImagem()));
-        } else {
-            produto.setUrlImagem("");
+        if (!dto.urlImagem().isEmpty()) {
+            produto.setUrlImagem(imagemService.salvarImagemUrl(dto.urlImagem(), "produtos"));
         }
 
-        produto.setTitulo(produtoSalvarDto.titulo());
-        produto.setPreco(produtoSalvarDto.preco());
-        produto.setPrecoParcelado(produtoSalvarDto.precoParcelado());
-        produto.setDescricao(produtoSalvarDto.descricao());
-        produto.setCupom(produtoSalvarDto.cupom());
-        produto.setFreteVariacoes(produtoSalvarDto.freteVariacoes());
-        produto.setMensagemAdicional(produtoSalvarDto.mensagemAdicional());
-        produto.setCategoria(categoria.get());
-        produto.setLoja(loja.get());
-        produto.setNomeColaborador(colaboradores.get(random.nextInt(colaboradores.size())));
-
-        if (produtoSalvarDto.link().isEmpty()) {
-            produto.setLink(produtoSalvarDto.link_se());
-        }else{
-            produto.setLink(produtoSalvarDto.link());
-        }
-        produto.setCopy(produtoSalvarDto.copy());
-
-        loja.get().getProdutos().add(produto);
-
-        if (!produtoSalvarDto.link_ofm().isEmpty() || produtoSalvarDto.descricao() != null) {
-
-            if (loja.get().getNomeLoja().contains("Maga")) {
-                LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.descricao(), 2L);
-
-                Produto produtoOmc = produto.duplicar();
-                produtoOmc.setLink(produtoSalvarDto.descricao());
-                produtoOmc.setDescricao(produtoSalvarDto.link_ofm());
-                if (!produtoSalvarDto.urlImagem().equals("")) {
-                    produtoOmc.setUrlImagem(salvarImagem(produtoSalvarDto.urlImagem()));
-                } else {
-                    produtoOmc.setUrlImagem("");
-                }
-                produtoOmc.getLinksProdutos().add(linksProdutosOfm);
-
-                if (produtoSalvarDto.cupomOmc() != null) {
-                    produtoOmc.setCupom(produtoSalvarDto.cupomOmc());
-                } else {
-                    produtoOmc.setCupom(produtoSalvarDto.cupom());
-                }
-                idOmc = produtoRepository.save(produtoOmc).getId();
-            } else {
-                LinksProdutos linksProdutosOfm = salvarLinkProduto(produtoSalvarDto.link_ofm(), 2L);
-                produto.getLinksProdutos().add(linksProdutosOfm);
-            }
-
-            produto.setDescricao(produtoSalvarDto.link_se());
-        }
-
-        if (!produtoSalvarDto.link_se().isEmpty() || !produtoSalvarDto.link().isEmpty()) {
-            LinksProdutos linksProdutosSe = salvarLinkProduto(produtoSalvarDto.link(), 1L);
-            produto.getLinksProdutos().add(linksProdutosSe);
-        }
+        produto.setTitulo(dto.titulo());
+        produto.setPreco(dto.preco());
+        produto.setPrecoParcelado(dto.precoParcelado());
+        produto.setDescricao(isSergipe ? dto.link() : dto.descricao()); // SERGIPE -> link() | OMC -> descricao
+        produto.setCupom(isSergipe ? dto.cupomSe() : dto.cupomOmc());
+        produto.setFreteVariacoes(dto.freteVariacoes());
+        produto.setMensagemAdicional(dto.mensagemAdicional());
+        produto.setCategoria(categoria);
+        produto.setLoja(loja);
+        produto.setNomeColaborador(colaborador);
+        produto.setCopy(dto.copy());
 
         try {
-            if (!produtoSalvarDto.urlImagem().isEmpty()){
-                produto.setImagemSocial(imageProcessingService.processImageFromUrl(produtoSalvarDto.urlImagem()));
+            if (!dto.urlImagem().isEmpty()) {
+                produto.setImagemSocial(imageProcessingService.processImageFromUrl(dto.urlImagem()));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return ProdutoResponseDto.toResonse(produtoRepository.save(produto), "", idOmc);
+        return produto;
     }
 
-    public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable pageable) {
+    private void adicionarLinks(Produto produto, String linkSe, String linkSeApp, String linkOmcApp, String linkOmc, boolean doisProdutos) {
+        adicionarLinkSe(produto, linkSe, linkSeApp, doisProdutos);
+        adicionarLinkOmc(produto, linkOmc, linkOmcApp, doisProdutos);
+    }
 
-        Page<ProdutoResponseDto> produtoTeste = null;
-
-        produtoTeste = produtoRepository.listarProdutos(site, pageable)
-                .map(produto -> {
-                    Loja loja = new Loja();
-                    loja.setUrlImagem(produto.imagemLoja());
-                    loja.setNomeLoja(produto.nomeLoja());
-                    ProdutoResponseDto produtoResponseDto = new ProdutoResponseDto(
-                            produto.id(),
-                            0L,
-                            produto.titulo(),
-                            produto.preco(), produto.parcelado(), produto.descricao(), produto.cupom(), produto.link(),
-                            null, produto.freteVariacoes(), produto.dataCriacao(),
-                            produto.imagem(), LojaResponseDto.toResonse(loja), produto.imagemSocial(), produto.copy(),
-                            produto.mensagemAdicional(), produto.promocaoEncerrada());
-                    return produtoResponseDto;
-                });
-
-        if (produtoTeste.isEmpty()) {
-            return Page.empty();
+    private void adicionarLinkSe(Produto produto, String linkSe, String linkSeApp, boolean doisProdutos) {
+        if (!doisProdutos || !linkSe.isEmpty()) {
+            produto.getLinksProdutos().add(salvarLinkProduto(linkSe.isEmpty() ? linkSeApp : linkSe, 1L));
+            if (linkSeApp.contains("onelink")) {
+                produto.getLinksProdutos().add(salvarLinkProduto(linkSeApp, 1L));
+            }
         }
-
-        return produtoTeste;
     }
 
-    // public Page<ProdutoResponseDto> getProdutosPaginados(Long site, Pageable
-    // pageable) {
+    private void adicionarLinkOmc(Produto produto, String linkOmc, String linkOmcApp, boolean doisProdutos) {
+        if (!doisProdutos || !linkOmc.isEmpty()) {
+            produto.getLinksProdutos().add(salvarLinkProduto(linkOmc == null ? linkOmcApp : linkOmc, 2L));
+            if (linkOmcApp.contains("onelink")) {
+                produto.getLinksProdutos().add(salvarLinkProduto(linkOmcApp, 2L));
+            }
+        }
+    }
 
-    // Page<ProdutoResponseDto> produtoTeste = null;
 
-    // if (site == 1) {
-    // produtoTeste = produtoRepository.findProdutosSe(2L,pageable)
-    // .map(produto -> ProdutoResponseDto.toResonse(produto,
-    // produtoRepository.sfindByProdutoBySite(produto.getId(), 1L)));
-    // } else {
-    // produtoTeste = produtoRepository.findProdutosOfm(site, pageable)
-    // .map(produto -> ProdutoResponseDto.toResonse(produto,
-    // produtoRepository.sfindByProdutoBySite(produto.getId(), 2L)));
-    // }
-
-    // if (produtoTeste.isEmpty()) {
-    // return Page.empty();
-    // }
-
-    // return produtoTeste;
-    // }
+    public Page<IProdutoResponseDto> getProdutosPaginados(Long site, Pageable pageable) {
+        return produtoRepository.listarProdutos("", site, pageable);
+    }
 
     public ProdutoDto pegarProduto(Long id) {
+        Produto produto = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-        // Optional<Produto> produto = produtoRepository.findById(id);
-        Optional<Produto> produto = produtoRepository.findById(id);
-        String urlSe = produtoRepository.sfindByProdutoBySite(id, 1L);
-        String urlOfm = produtoRepository.sfindByProdutoBySite(id, 2L);
+        List<LinksProdutos> urlSe = produto.getLinksProdutos().stream()
+                .filter(lp -> lp.getSite().equals(1L))
+                .collect(Collectors.toList());
 
-        if (!produto.isPresent()) {
-            return null;
-        }
+        List<LinksProdutos> urlOfm = produto.getLinksProdutos().stream()
+                .filter(lp -> lp.getSite().equals(2L))
+                .collect(Collectors.toList());
 
-        LojaResponseDto lojaResponseDto = LojaResponseDto.toResonse(produto.get().getLoja());
-        CategoriaResponseDto categoriaDto = CategoriaResponseDto.toResonse(produto.get().getCategoria());
+        // Obtém os links de forma segura
+        String linkAppSe = urlSe.stream()
+                .filter(se -> se.getUrl().contains("onelink"))
+                .map(LinksProdutos::getUrl)
+                .findFirst()
+                .orElse("");
 
-        return ProdutoDto.toResonse(produto.get(), lojaResponseDto, categoriaDto, urlSe, urlOfm);
+        String linkSiteSe = urlSe.stream()
+                .filter(se -> !se.getUrl().contains("onelink"))
+                .map(LinksProdutos::getUrl)
+                .findFirst()
+                .orElse("");
+
+        String linkAppOmc = urlOfm.stream()
+                .filter(omc -> omc.getUrl().contains("onelink"))
+                .map(LinksProdutos::getUrl)
+                .findFirst()
+                .orElse("");
+
+        String linkSiteOfm = urlOfm.stream()
+                .filter(omc -> !omc.getUrl().contains("onelink"))
+                .map(LinksProdutos::getUrl)
+                .findFirst()
+                .orElse("");
+
+        LojaResponseDto lojaResponseDto = LojaResponseDto.toResonse(produto.getLoja());
+        CategoriaResponseDto categoriaDto = CategoriaResponseDto.toResonse(produto.getCategoria());
+
+        return ProdutoDto.toResonse(produto, lojaResponseDto, categoriaDto, linkAppSe, linkSiteSe, linkAppOmc, linkSiteOfm);
     }
 
     @Transactional
-    public Boolean apagarProduto(Long id, String urlImagem, String imagemSocial) throws FileExistsException {
+    public Boolean apagarProduto(Long id) throws FileExistsException {
 
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com ID: " + id));
@@ -388,9 +251,8 @@ public class ProdutoService {
         apagarPromocoesSemProdutos(produto);
 
         // Apagar imagens associadas ao produto
-        apagarImagensProduto(urlImagem, imagemSocial);
-
-        // Por fim, excluir o próprio produto
+        imagemService.apagarImagem(UPLOAD_DIR.concat("/produtos/" + produto.getUrlImagem()));
+        imagemService.apagarImagem(UPLOAD_DIR.concat("/produtos-real/" + produto.getImagemSocial()));
 
         return true;
     }
@@ -422,46 +284,6 @@ public class ProdutoService {
 
     }
 
-    private void apagarImagensProduto(String urlImagem, String imagemSocial) throws FileExistsException {
-        if (urlImagem != null && !urlImagem.isEmpty()) {
-            apagarImagem(urlImagem);
-        }
-
-        if (imagemSocial != null && !imagemSocial.equals("null") && !imagemSocial.isEmpty()) {
-            apagarImagemReal(imagemSocial);
-        }
-    }
-
-    private void apagarImagem(String urlImagem) throws FileExistsException {
-
-        String caminhoImagem = UPLOAD_DIR + "/" + urlImagem;
-
-        if (!urlImagem.isEmpty()) {
-            File arquivoImagem = new File(caminhoImagem);
-            if (arquivoImagem.exists()) {
-                arquivoImagem.delete();
-            } else {
-                throw new FileExistsException("Imagem não existe");
-            }
-        }
-
-    }
-
-    private void apagarImagemReal(String urlImagem) throws FileExistsException {
-
-        String caminhoImagem = UPLOAD_DIR + "-real" + "/" + urlImagem;
-
-        if (!urlImagem.isEmpty()) {
-            File arquivoImagem = new File(caminhoImagem);
-            if (arquivoImagem.exists()) {
-                arquivoImagem.delete();
-            } else {
-                throw new FileExistsException("Imagem não existe");
-            }
-        }
-
-    }
-
     public Boolean encerrarPromocao(Boolean status, Long id) {
 
         Optional<Produto> produto = produtoRepository.findById(id);
@@ -477,63 +299,18 @@ public class ProdutoService {
 
     @Transactional
     public ProdutoResponseDto atualizarProduto(ProdutoAtualizarDto produtoAtualizarDto) {
-
-        Categoria categoria = categoriaRepository.findById(produtoAtualizarDto.id_categoria())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Categoria not found with id " + produtoAtualizarDto.id_categoria()));
-        Loja loja = lojaRepository.findById(produtoAtualizarDto.id_loja())
-                .orElseThrow(
-                        () -> new EntityNotFoundException("Loja not found with id " + produtoAtualizarDto.id_loja()));
+        // Buscar entidades associadas
+        Categoria categoria = categoriaRepository.findById(produtoAtualizarDto.idCategoria())
+                .orElseThrow(() -> new EntityNotFoundException("Categoria não encontrada com ID " + produtoAtualizarDto.idCategoria()));
+        Loja loja = lojaRepository.findById(produtoAtualizarDto.idLoja())
+                .orElseThrow(() -> new EntityNotFoundException("Loja não encontrada com ID " + produtoAtualizarDto.idLoja()));
         Produto produto = produtoRepository.findById(produtoAtualizarDto.id())
-                .orElseThrow(
-                        () -> new EntityNotFoundException("Produto not found with id " + produtoAtualizarDto.id()));
+                .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado com ID " + produtoAtualizarDto.id()));
 
-        List<LinksProdutos> linksProdutos = produto.getLinksProdutos();
-
-        // Atualização ou remoção de links existentes
-        Iterator<LinksProdutos> iterator = linksProdutos.iterator();
-        while (iterator.hasNext()) {
-            LinksProdutos linkProduto = iterator.next();
-            if (linkProduto.getSite() == 1 && produtoAtualizarDto.link_se() != null
-                    && !produtoAtualizarDto.link_se().isEmpty()) {
-                linkProdutoRepository.atualizarUrlSe(produtoAtualizarDto.link_se(), 1L, linkProduto.getId());
-            } else if (linkProduto.getSite() == 2 && produtoAtualizarDto.link_ofm() != null
-                    && !produtoAtualizarDto.link_ofm().isEmpty()) {
-                linkProdutoRepository.atualizarUrlSe(produtoAtualizarDto.link_ofm(), 2L, linkProduto.getId());
-            } else {
-                iterator.remove();
-                linkProdutoRepository.deletarChaveEstrangeiraLink(linkProduto.getId());
-                linkProdutoRepository.deleteById(linkProduto.getId());
-            }
-        }
-
-        // Adicionando novos links, se necessário
-        if (produtoAtualizarDto.link_se() != null && !produtoAtualizarDto.link_se().isEmpty()
-                && linksProdutos.stream().noneMatch(lp -> lp.getSite() == 1)) {
-
-            if (!produtoAtualizarDto.link_se().contains("one")) {
-                LinksProdutos novoLinkSe = salvarLinkProduto(produtoAtualizarDto.link_se(), 1L);
-                produto.getLinksProdutos().add(novoLinkSe);
-            }
-        }
-        if (produtoAtualizarDto.link_ofm() != null && !produtoAtualizarDto.link_ofm().isEmpty()
-                && linksProdutos.stream().noneMatch(lp -> lp.getSite() == 2)) {
-            if (!produtoAtualizarDto.link_se().contains("one")) {
-                LinksProdutos novoLinkOfm = salvarLinkProduto(produtoAtualizarDto.link_ofm(), 2L);
-                produto.getLinksProdutos().add(novoLinkOfm);
-            }
-        }
-
-        produto.setId(produtoAtualizarDto.id());
+        // Atualizar os campos do produto
         produto.setTitulo(produtoAtualizarDto.titulo());
         produto.setPreco(produtoAtualizarDto.preco());
         produto.setPrecoParcelado(produtoAtualizarDto.precoParcelado());
-        if (produtoAtualizarDto.link_se().contains("one")) {
-            produto.setDescricao(produtoAtualizarDto.link_se());
-        } else {
-            produto.setLink(produtoAtualizarDto.link_se());
-        }
-        // linkProdutoRepository.atualizarUrlsPorProduto(produtoAtualizarDto.id(),
         produto.setCupom(produtoAtualizarDto.cupom());
         produto.setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
         produto.setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
@@ -541,25 +318,34 @@ public class ProdutoService {
         produto.setLoja(loja);
         produto.setCopy(produtoAtualizarDto.copy());
 
-        return ProdutoResponseDto.toResonse(this.produtoRepository.save(produto), "", 0L);
+        // Remover links existentes e adicionar os novos
+        linkProdutoRepository.deleteAll(produto.getLinksProdutos());
+        produto.setLinksProdutos(new ArrayList<>());
+        adicionarLinks(produto, produtoAtualizarDto.linkSe(), produtoAtualizarDto.linkOmc());
+
+        // Salvar e retornar
+        return ProdutoResponseDto.toResonse(produtoRepository.save(produto));
     }
 
-    public Page<ProdutoResponseDto> obterProdutosPorCategoria(Long site, Long categoriaId, Pageable pageable) {
-        if (site == 1) {
-            return produtoRepository.findByCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
-                    .map(produto -> ProdutoResponseDto.toResonse(produto,
-                            produtoRepository.sfindByProdutoBySite(produto.getId(), 1L), 0L));
+    /**
+     * Método para adicionar links a um produto.
+     */
+    private void adicionarLinks(Produto produto, String linkSe, String linkOmc) {
+        if (linkSe != null && !linkSe.isEmpty()) {
+            produto.getLinksProdutos().add(salvarLinkProduto(linkSe, 1L));
         }
+        if (linkOmc != null && !linkOmc.isEmpty()) {
+            produto.getLinksProdutos().add(salvarLinkProduto(linkOmc, 2L));
+        }
+    }
 
-        return produtoRepository.findCategoriIdOrderByDataCriacaoDesc(categoriaId, pageable)
-                .map(produto -> ProdutoResponseDto.toResonse(produto,
-                        produtoRepository.sfindByProdutoBySite(produto.getId(), 2L), 0L));
+
+    public Page<IProdutoResponseDto> obterProdutosPorCategoria(Long site, Long categoriaId, Pageable pageable) {
+        return produtoRepository.buscarProdutosPorCategoria(site, categoriaId, pageable);
     }
 
     public Page<ProdutoResponseDto> obterProdutosPorLoja(Long site, Long lojaId, Pageable pageable) {
-            return produtoRepository.buscarProdutosPorLoja(lojaId, site, pageable)
-                    .map(produto -> ProdutoResponseDto.toResonse(produto,
-                            produtoRepository.sfindByProdutoBySite(produto.getId(), 1L), 0L));
+        return produtoRepository.buscarProdutosPorLoja(lojaId, site, pageable).map(ProdutoResponseDto::toResonse);
     }
 
     @Transactional
@@ -569,51 +355,11 @@ public class ProdutoService {
         produtoRepository.deleteByIdIn(ids);
     }
 
-    public Page<ProdutoResponseDto> pesquisarProdutos(Long site, String termoPesquisa, int pagina, int tamanho) {
+    public Page<IProdutoResponseDto> pesquisarProdutos(Long site, String termoPesquisa, int pagina, int tamanho) {
 
         Pageable pageable = PageRequest.of(pagina, tamanho);
 
-        Page<ProdutoResponseDto> produtosResponse = produtoRepository.procurarProdutos(termoPesquisa, site, pageable)
-                .map(produtoPesquisa -> {
-                    Loja loja = new Loja();
-                    loja.setUrlImagem(produtoPesquisa.imagemLoja());
-                    ProdutoResponseDto produtoResponseDto = new ProdutoResponseDto(
-                            produtoPesquisa.id(),
-                            0L,
-                            produtoPesquisa.titulo(),
-                            produtoPesquisa.preco(), produtoPesquisa.parcelado(),
-                            "", produtoPesquisa.cupom(),
-                            produtoPesquisa.link(), "",
-                            produtoPesquisa.freteVariacoes(), produtoPesquisa.dataCriacao(),
-                            produtoPesquisa.imagem(),
-                            LojaResponseDto.toResonse(loja),
-                            produtoPesquisa.imagemSocial(), "",
-                            "", false);
-                    return produtoResponseDto;
-                });
-
-        return produtosResponse;
-
-        // return produtoRepository.procurarProdutos(termoPesquisa, site, pageable)
-        // .map(produto -> ProdutoResponseDto.toResonse(produto, ""));
-
-    }
-
-    public Resource loadImagemAResource(String imagemNome) {
-
-        try {
-            File uploadDir = new File(UPLOAD_DIR);
-
-            Path imagemPath = Paths.get(uploadDir.getAbsolutePath()).resolve(imagemNome);
-            Resource resource = new UrlResource(imagemPath.toUri());
-
-            if (resource.exists() || resource.isReadable()) {
-                return resource;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        return produtoRepository.listarProdutos(termoPesquisa, site, pageable);
     }
 
     public Resource loadImagemAResourceReal(String imagemNome) {
@@ -636,14 +382,11 @@ public class ProdutoService {
         return null;
     }
 
-    public Page<ProdutoResponseDto> listarProdutosDestaque(Long site, int page, int size) {
+    public Page<IProdutoResponseDto> listarProdutosDestaque(Long site, int page, int size) {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ProdutoResponseDto> produtosPage = produtoRepository.listarProdutosDestaque(site, pageable)
-                .map(produto -> ProdutoResponseDto.toResonse(produto,
-                        produtoRepository.sfindByProdutoBySite(produto.getId(), 2L), 0L));
-        return produtosPage;
+        return produtoRepository.listarProdutosDestaque(site, pageable);
     }
 
     public byte[] gerarStory(String preco, String titulo, String urlImagem, String frete, String cupom)
@@ -777,14 +520,14 @@ public class ProdutoService {
                         textoQuebrado = textoQuebrado.subList(0, maxLines); // Manter apenas as primeiras 33 linhas
                         String ultimaLinha = textoQuebrado.get(maxLines - 1); // Última linha
                         ultimaLinha = ultimaLinha.substring(0, Math.min(ultimaLinha.length(), ultimaLinha.length() - 3))
-                                + "..."; // Adicionar reticências
+                                      + "..."; // Adicionar reticências
                         textoQuebrado.set(maxLines - 1, ultimaLinha); // Atualizar a última linha
                     }
 
                     // Calcular a altura total do texto (considerando várias linhas)
                     int totalTextHeight = textoQuebrado.size() * metrics.getHeight();
                     int startY = rectY + (rectHeight - totalTextHeight) / 2 + metrics.getAscent(); // Início para
-                                                                                                   // centralizar
+                    // centralizar
 
                     // Desenhar o texto linha por linha
                     for (String linha : textoQuebrado) {
@@ -1084,12 +827,13 @@ public class ProdutoService {
                 linkProdutoRepository.deleteById(item.getId());
             });
 
+
             if (produto.getUrlImagem() != null) {
-                apagarImagem(produto.getUrlImagem());
+                imagemService.apagarImagem(UPLOAD_DIR.concat("/produtos/" + produto.getUrlImagem()));
             }
 
             if (produto.getImagemSocial() != null) {
-                apagarImagemReal(produto.getImagemSocial());
+                imagemService.apagarImagem(UPLOAD_DIR.concat("/produtos-real/" + produto.getImagemSocial()));
             }
         }
 

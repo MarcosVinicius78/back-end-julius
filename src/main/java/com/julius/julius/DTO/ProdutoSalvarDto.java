@@ -13,20 +13,20 @@ public record ProdutoSalvarDto(
 
         String precoParcelado,
         String descricao,
-        String link_se,
-        String link_ofm,
+        String linkSe,
+        String linkOmc,
         String cupomOmc,
-        String cupom,
+        String cupomSe,
         String mensagemAdicional,
         String link,
         String freteVariacoes,
         String urlImagem,
 
         @NotNull(message = "O Campo 'id_categoria' é obrigatorio")
-        Long id_categoria,
+        Long idCategoria,
 
         @NotNull(message = "O Campo 'id_loja' é obrigatorio")
-        Long id_loja,
+        Long idLoja,
 
         String copy
 ){}

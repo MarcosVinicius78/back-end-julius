@@ -33,37 +33,39 @@ public class SecurityFilter {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        
+
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
-        
+
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-        .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**","/loja/**", "/categoria/**","/banners/**", "/generate-image","/report/**","/post/**", "/promos/**", "/mensagem/**", "/eventos/**")
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .csrf(csrf -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/produto/**", "/loja/**", "/categoria/**", "/banners/**", "/generate-image", "/report/**", "/post/**", "/promos/**", "/mensagem/**", "/eventos/**", "/imagem/**")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 // .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTGeneratorFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new JWTValidationFilter(), BasicAuthenticationFilter.class);
 
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET,"/produto/**").permitAll()
-                .requestMatchers("/produto/**").authenticated()
-                .requestMatchers(HttpMethod.GET,"/categoria/**").permitAll()
-                .requestMatchers("/categoria/**").authenticated()
-                .requestMatchers(HttpMethod.GET ,"/loja/**").permitAll()
-                .requestMatchers("/loja/**").authenticated()
-                .requestMatchers(HttpMethod.GET, "/report/**").permitAll()
-                .requestMatchers("/report/**").authenticated()
-                .requestMatchers("/user").authenticated()
-                .requestMatchers(HttpMethod.GET,"/banners/**").permitAll()
-                .requestMatchers("/banners/**").authenticated()
-                .requestMatchers("/generate-image").permitAll()
-                .requestMatchers( HttpMethod.GET,"/scraper/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/post/**").permitAll()
-                .requestMatchers("/post/**").authenticated()
-                .requestMatchers(HttpMethod.GET,"/promos/**").permitAll()
-                .requestMatchers("/promos/**").permitAll()
-                .requestMatchers("/mensagem/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/produto/**").permitAll()
+                        .requestMatchers("/produto/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/categoria/**").permitAll()
+                        .requestMatchers("/categoria/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/loja/**").permitAll()
+                        .requestMatchers("/loja/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/report/**").permitAll()
+                        .requestMatchers("/report/**").authenticated()
+                        .requestMatchers("/user").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/banners/**").permitAll()
+                        .requestMatchers("/banners/**").authenticated()
+                        .requestMatchers("/generate-image").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/scraper/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/post/**").permitAll()
+                        .requestMatchers("/post/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/promos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/imagem/**").permitAll()
+                        .requestMatchers("/imagem/**").authenticated()
+                        .requestMatchers("/promos/**").permitAll()
+                        .requestMatchers("/mensagem/**").permitAll()
                         .requestMatchers("/eventos/**").permitAll())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());

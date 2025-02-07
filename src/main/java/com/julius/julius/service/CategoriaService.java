@@ -51,7 +51,7 @@ public class CategoriaService {
 
         for (Produto i : produtos) {
             try {
-                produtoService.apagarProduto(i.getId(), i.getUrlImagem(), i.getImagemSocial());
+                produtoService.apagarProduto(i.getId());
             } catch (FileExistsException e) {
                 e.printStackTrace();
             }

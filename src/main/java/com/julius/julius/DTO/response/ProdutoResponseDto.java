@@ -8,14 +8,12 @@ import com.julius.julius.models.Produto;
 public record ProdutoResponseDto(
 
         Long id,
-        Long idOmc,
         String titulo,
         String preco,
         String parcelado,
         String descricao,
         String cupom,
         String link,
-        String linkOfm,
         String freteVariacoes,
         Date dataCriacao,
         String imagem,
@@ -24,11 +22,9 @@ public record ProdutoResponseDto(
         String copy,
         String mensagemAdicional,
         Boolean promocaoEncerrada
-        // List<LinksProdutos> linksProdutos
-
 ) {
 
-    public static ProdutoResponseDto toResonse(Produto produto, String url, Long idOmc) {
+    public static ProdutoResponseDto toResonse(Produto produto) {
         
          LojaResponseDto lojaDto = null;     
         
@@ -40,14 +36,12 @@ public record ProdutoResponseDto(
 
         return new ProdutoResponseDto(
             produto.getId(),
-            idOmc,
             produto.getTitulo(),
             produto.getPreco(),
             produto.getPrecoParcelado(),
             produto.getDescricao(),
             produto.getCupom(),
             produto.getLink(),
-            url,
             produto.getFreteVariacoes(),
             produto.getDataCriacao(),
             produto.getUrlImagem(),
