@@ -394,9 +394,9 @@ public class ProdutoService {
 
         try {
             // Carregar a imagem
-            BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/story.jpeg"));
+            BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/produtos/story.jpeg"));
 
-            Image foto = ImageIO.read(new File(UPLOAD_DIR + "-real" + "/" + urlImagem));
+            Image foto = ImageIO.read(new File(UPLOAD_DIR + "/produtos-real" + "/" + urlImagem));
 
             // Carregar a fonte personalizada
             // Carregar a fonte personalizada usando class loader
@@ -410,7 +410,7 @@ public class ProdutoService {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setColor(Color.BLACK);
-            g.drawImage(foto, 69, 130, 950, 950, null);
+            g.drawImage(foto, 60, 150, 980, 980, null);
 
             // Configurar fonte para o título
             // Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
