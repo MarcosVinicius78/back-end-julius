@@ -35,9 +35,10 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
              SELECT
                         p.produto_id as id, p.titulo,
                         p.copy, p.preco,
-                        p.preco_parcelado, p.cupom,
+                        p.preco_parcelado as parcelado, p.cupom,
                         lp.url as link, p.frete_variacoes as freteVariacoes,
-                        p.mensagem_adicional, p.promocao_encerrada as promocaoEncerrada,
+                        p.mensagem_adicional as mensagemAdicional, 
+                        p.promocao_encerrada as promocaoEncerrada,
                         p.data_criacao as dataCriacao, p.url_imagem as imagem,
                         p.imagem_social as imagemSocial , lj.url_imagem as imagemLoja,
                         lj.nome_loja as nomeLoja, p.descricao

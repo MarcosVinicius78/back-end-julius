@@ -108,7 +108,7 @@ public class ProdutoService {
                 produtoSalvarDto.cupomSe().toLowerCase().contains("sergipe");
 
         // Criar e salvar produto principal (SERGIPE ou único)
-        Produto produtoPrincipal = criarProduto(produtoSalvarDto, categoria, loja, colaborador, criarDoisProdutos);
+        Produto produtoPrincipal = criarProduto(produtoSalvarDto, categoria, loja, colaborador, true);
 
         if (criarDoisProdutos) {
             adicionarLinks(produtoPrincipal, produtoSalvarDto.link(), produtoSalvarDto.linkSe(), "", "", true);
