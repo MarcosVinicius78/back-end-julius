@@ -9,7 +9,7 @@ public record ProdutoAtualizarDto(
     String descricao,
     String linkSe,
     String linkOmc,
-    String cupom,
+    String cupomSe,
     String copy,
     String freteVariacoes,
     String mensagemAdicional,

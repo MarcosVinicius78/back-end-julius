@@ -176,7 +176,7 @@ public class ProdutoService {
 
     private void adicionarLinkOmc(Produto produto, String linkOmc, String linkOmcApp, boolean doisProdutos) {
         if (!doisProdutos || !linkOmc.isEmpty()) {
-            produto.getLinksProdutos().add(salvarLinkProduto(linkOmc == null ? linkOmcApp : linkOmc, 2L));
+            produto.getLinksProdutos().add(salvarLinkProduto(linkOmc.isEmpty() ? linkOmcApp : linkOmc, 2L));
             if (linkOmcApp.contains("onelink")) {
                 produto.getLinksProdutos().add(salvarLinkProduto(linkOmcApp, 2L));
             }
@@ -311,7 +311,7 @@ public class ProdutoService {
         produto.setTitulo(produtoAtualizarDto.titulo());
         produto.setPreco(produtoAtualizarDto.preco());
         produto.setPrecoParcelado(produtoAtualizarDto.precoParcelado());
-        produto.setCupom(produtoAtualizarDto.cupom());
+        produto.setCupom(produtoAtualizarDto.cupomSe());
         produto.setFreteVariacoes(produtoAtualizarDto.freteVariacoes());
         produto.setMensagemAdicional(produtoAtualizarDto.mensagemAdicional());
         produto.setCategoria(categoria);
