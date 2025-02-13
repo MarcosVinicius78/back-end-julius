@@ -176,7 +176,7 @@ public class ProdutoService {
 
     private void adicionarLinkOmc(Produto produto, String linkOmc, String linkOmcApp, boolean doisProdutos) {
         if (!doisProdutos || !linkOmc.isEmpty()) {
-            produto.getLinksProdutos().add(salvarLinkProduto(linkOmc.isEmpty() ? linkOmcApp : linkOmc, 2L));
+            produto.getLinksProdutos().add(salvarLinkProduto(linkOmc == null || linkOmc.isEmpty() ? linkOmcApp : linkOmc, 2L));
             if (linkOmcApp.contains("onelink")) {
                 produto.getLinksProdutos().add(salvarLinkProduto(linkOmcApp, 2L));
             }

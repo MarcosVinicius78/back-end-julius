@@ -1,9 +1,15 @@
 package com.julius.julius.service;
 
+import com.julius.julius.DTO.ProdutosCliquesDto;
+import com.julius.julius.DTO.evento.EventoQuantidadePorTipo;
 import com.julius.julius.models.Evento;
+import com.julius.julius.models.Produto;
 import com.julius.julius.repository.EventoRepository;
+import com.julius.julius.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -19,11 +25,30 @@ public class EventoService {
 
     private final EventoRepository eventoRepository;
 
+    private final ProdutoRepository produtoRepository;
+
     public void registrarEvento(String tipoEvento, String detalhes) {
         Evento evento = new Evento();
         evento.setTipoEvento(tipoEvento);
         evento.setDetalhes(detalhes);
         evento.setDataEvento(LocalDateTime.now());
+        eventoRepository.save(evento);
+    }
+
+    public Page<ProdutosCliquesDto> listarProdutosComMaisCliques(Pageable pageable) {
+        return eventoRepository.listarProdutosComMaisAcessos(pageable);
+    }
+
+    public void registrarEventoDoProduto(Long id, String tipoEvento, String detalhes) {
+
+        Produto produto = produtoRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto nao encontrado"));
+
+        Evento evento = new Evento();
+        evento.setTipoEvento(tipoEvento);
+        evento.setDetalhes(detalhes);
+        evento.setDataEvento(LocalDateTime.now());
+        evento.setProduto(produto);
+
         eventoRepository.save(evento);
     }
 
@@ -57,20 +82,15 @@ public class EventoService {
         return acessosPorDia;
     }
 
-    public Map<String, Long> buscarEventosPorDia(LocalDate dataSelecionada) {
-        // Gera o início do dia selecionado
-        LocalDateTime dataInicio = dataSelecionada.atStartOfDay();
+    public EventoQuantidadePorTipo buscarEventosPorDia(LocalDate dataSelecionada, String tipoEvento) {
 
-        List<Object[]> resultados = eventoRepository.contarEventosPorTipo(dataInicio);
-
-        Map<String, Long> contagemEventos = new HashMap<>();
-        for (Object[] resultado : resultados) {
-            String tipoEvento = (String) resultado[0];
-            Long contagem = (Long) resultado[1];
-            contagemEventos.put(tipoEvento, contagem);
+        if (dataSelecionada == null) {
+            dataSelecionada = LocalDate.now();
         }
 
-        return contagemEventos;
+        EventoQuantidadePorTipo dados = eventoRepository.contarEventosPorTipo(dataSelecionada, tipoEvento);
+
+        return dados;
     }
 
 

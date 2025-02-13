@@ -24,4 +24,8 @@ public class Evento {
 
     @Column(name = "data_evento")
     private LocalDateTime dataEvento;
+
+    @ManyToOne
+    @JoinColumn(name = "produto_id")
+    private Produto produto;
 }

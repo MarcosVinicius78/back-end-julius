@@ -1,8 +1,13 @@
 package com.julius.julius.controller;
 
+import com.julius.julius.DTO.ProdutosCliquesDto;
+import com.julius.julius.DTO.evento.EventoQuantidadePorTipo;
 import com.julius.julius.service.EventoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +30,18 @@ public class EventoController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/registrar-produto/{id}")
+    public ResponseEntity<String> registrarEventoDoProduto(@PathVariable Long id ,@RequestParam String tipo, @RequestParam(required = false) String detalhes) {
+        eventoService.registrarEventoDoProduto(id, tipo, detalhes);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/listar-produtos-com-mais-cliques")
+    public ResponseEntity<Page<ProdutosCliquesDto>> listarProdutosComMaisCliques() {
+        Pageable pageable = PageRequest.of(0, 100);
+        return ResponseEntity.ok().body(eventoService.listarProdutosComMaisCliques(pageable));
+    }
+
     @GetMapping("/acessos-semana")
     public ResponseEntity<Map<String, Long>> contarAcessos(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicioSemana,
@@ -35,9 +52,9 @@ public class EventoController {
     }
 
     @GetMapping("/buscar-por-dia")
-    public ResponseEntity<Map<String, Long>> buscarEventosPorDia(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-        return ResponseEntity.ok().body(eventoService.buscarEventosPorDia(data));
+    public ResponseEntity<EventoQuantidadePorTipo> buscarEventosPorDia(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data, @RequestParam String tipoEvento) {
+        return ResponseEntity.ok().body(eventoService.buscarEventosPorDia(data, tipoEvento));
     }
 
     @GetMapping("/estatisticas")
