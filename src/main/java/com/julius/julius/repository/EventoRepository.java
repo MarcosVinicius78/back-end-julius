@@ -2,6 +2,7 @@ package com.julius.julius.repository;
 
 import com.julius.julius.DTO.ProdutosCliquesDto;
 import com.julius.julius.DTO.evento.EventoQuantidadePorTipo;
+import com.julius.julius.DTO.evento.TotalDeEventosDto;
 import com.julius.julius.models.Evento;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,4 +50,15 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             ORDER BY totalEventos DESC;
     """)
     Page<ProdutosCliquesDto> listarProdutosComMaisAcessos(Pageable pageable);
+
+    @Query(nativeQuery = true ,value = """
+        select
+        	 count(*) as totalDeEventos,
+        	 MIN(e.data_evento) as primeiroAcesso
+        from
+        	eventos e
+        where
+        	e.tipo_evento like '%ACESSO_SISTEMA%'
+    """)
+    TotalDeEventosDto totalDeAcessosNoSistema();
 }

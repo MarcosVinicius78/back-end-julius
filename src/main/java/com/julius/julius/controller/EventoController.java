@@ -2,6 +2,7 @@ package com.julius.julius.controller;
 
 import com.julius.julius.DTO.ProdutosCliquesDto;
 import com.julius.julius.DTO.evento.EventoQuantidadePorTipo;
+import com.julius.julius.DTO.evento.TotalDeEventosDto;
 import com.julius.julius.service.EventoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,11 @@ public class EventoController {
         stats.put("totalEventos", eventoService.contarTotalEventos());
 
         return ResponseEntity.ok().body(stats);
+    }
+
+    @GetMapping("/total-de-acessos")
+    public ResponseEntity<TotalDeEventosDto> totalDeAcessos() {
+        return ResponseEntity.ok().body(eventoService.totalDeAcessos());
     }
 
     @GetMapping("/porcentagem-cliques-nao-cliques")

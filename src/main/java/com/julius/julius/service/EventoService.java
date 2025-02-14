@@ -2,6 +2,7 @@ package com.julius.julius.service;
 
 import com.julius.julius.DTO.ProdutosCliquesDto;
 import com.julius.julius.DTO.evento.EventoQuantidadePorTipo;
+import com.julius.julius.DTO.evento.TotalDeEventosDto;
 import com.julius.julius.models.Evento;
 import com.julius.julius.models.Produto;
 import com.julius.julius.repository.EventoRepository;
@@ -91,6 +92,10 @@ public class EventoService {
         EventoQuantidadePorTipo dados = eventoRepository.contarEventosPorTipo(dataSelecionada, tipoEvento);
 
         return dados;
+    }
+
+    public TotalDeEventosDto totalDeAcessos() {
+        return eventoRepository.totalDeAcessosNoSistema();
     }
 
 
