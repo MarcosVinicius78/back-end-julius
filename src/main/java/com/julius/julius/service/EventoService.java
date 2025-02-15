@@ -2,6 +2,8 @@ package com.julius.julius.service;
 
 import com.julius.julius.DTO.ProdutosCliquesDto;
 import com.julius.julius.DTO.evento.EventoQuantidadePorTipo;
+import com.julius.julius.DTO.evento.TotalDeAcessosPorCategoria;
+import com.julius.julius.DTO.evento.TotalDeAcessosPorLoja;
 import com.julius.julius.DTO.evento.TotalDeEventosDto;
 import com.julius.julius.models.Evento;
 import com.julius.julius.models.Produto;
@@ -116,6 +118,14 @@ public class EventoService {
         resultado.put("porcentagemNaoCliques", porcentagemNaoCliques);
 
         return resultado;
+    }
+
+    public List<TotalDeAcessosPorCategoria> totalDeAcessosPorCategoria() {
+        return eventoRepository.totalDeAcessosPorCategoria();
+    }
+
+    public List<TotalDeAcessosPorLoja> totalDeAcessosPorLoja() {
+        return eventoRepository.totalDeAcessosPorLoja();
     }
 
 }

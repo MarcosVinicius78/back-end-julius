@@ -2,6 +2,8 @@ package com.julius.julius.controller;
 
 import com.julius.julius.DTO.ProdutosCliquesDto;
 import com.julius.julius.DTO.evento.EventoQuantidadePorTipo;
+import com.julius.julius.DTO.evento.TotalDeAcessosPorCategoria;
+import com.julius.julius.DTO.evento.TotalDeAcessosPorLoja;
 import com.julius.julius.DTO.evento.TotalDeEventosDto;
 import com.julius.julius.service.EventoService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -79,4 +82,13 @@ public class EventoController {
         return ResponseEntity.ok().body(eventoService.calcularPorcentagemCliquesNaoCliques());
     }
 
+    @GetMapping("/total-de-acessos-por-categoria")
+    public ResponseEntity<List<TotalDeAcessosPorCategoria>> totalDeAcessosPorCategoria() {
+        return ResponseEntity.ok().body(eventoService.totalDeAcessosPorCategoria());
+    }
+
+    @GetMapping("/total-de-acessos-por-loja")
+    public ResponseEntity<List<TotalDeAcessosPorLoja>> totalDeAcessosPorLoja() {
+        return ResponseEntity.ok().body(eventoService.totalDeAcessosPorLoja());
+    }
 }

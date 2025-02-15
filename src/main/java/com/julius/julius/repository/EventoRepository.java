@@ -2,6 +2,8 @@ package com.julius.julius.repository;
 
 import com.julius.julius.DTO.ProdutosCliquesDto;
 import com.julius.julius.DTO.evento.EventoQuantidadePorTipo;
+import com.julius.julius.DTO.evento.TotalDeAcessosPorCategoria;
+import com.julius.julius.DTO.evento.TotalDeAcessosPorLoja;
 import com.julius.julius.DTO.evento.TotalDeEventosDto;
 import com.julius.julius.models.Evento;
 import org.springframework.data.domain.Page;
@@ -61,4 +63,30 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
         	e.tipo_evento like '%ACESSO_SISTEMA%'
     """)
     TotalDeEventosDto totalDeAcessosNoSistema();
+
+    @Query(nativeQuery = true ,value = """
+        SELECT
+        	c.nome_categoria as nomeCategoria,
+        	COUNT(e.id) as totalAcessos
+        FROM eventos e
+        JOIN produtos p ON e.produto_id = p.produto_id
+        JOIN categorias c ON p.fk_categoria = c.categoria_id
+        WHERE e.tipo_evento = 'ACESSO_PRODUTO'
+        GROUP BY c.nome_categoria
+        ORDER BY totalAcessos DESC
+    """)
+    List<TotalDeAcessosPorCategoria> totalDeAcessosPorCategoria();
+
+    @Query(nativeQuery = true, value = """
+        SELECT
+        	l.nome_loja as nomeLoja,
+        	COUNT(e.id) as totalAcessos
+        FROM eventos e
+        JOIN produtos p ON e.produto_id = p.produto_id
+        JOIN lojas l ON p.fk_loja = l.loja_id
+        WHERE e.tipo_evento = 'ACESSO_PRODUTO'
+        GROUP BY l.nome_loja
+        ORDER BY totalAcessos desc;
+    """)
+    List<TotalDeAcessosPorLoja> totalDeAcessosPorLoja();
 }
