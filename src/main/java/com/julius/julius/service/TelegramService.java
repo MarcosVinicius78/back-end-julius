@@ -18,7 +18,7 @@ public class TelegramService {
     // private final String TELEGRAM_CHAT_ID = "-1002017124017"; // Chat ID do canal/grupo julius
     private final String TELEGRAM_CHAT_ID_SE = "-1001724288449"; // Chat ID do canal/grupo Sergipe Ofertas
     private final String TELEGRAM_CHAT_ID_OMC = "-1002108490823"; // Chat ID do canal/grupo Sergipe Ofertas
-    private final String API_IMAGEM = "https://sergipeofertas.com.br/api/";
+    private final String API_IMAGEM = "https://sergipeofertas.com.br/api/imagem/";
     // private final String API_IMAGEM = "https://lojawap.vteximg.com.br/arquivos/AIRFRYOVEN_fogaca_apontando_dedo_mobile.png";
 
     public void enviarProdutoParaTelegram(MensagemRequest mensagem) {
