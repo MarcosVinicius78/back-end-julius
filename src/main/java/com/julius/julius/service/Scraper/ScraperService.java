@@ -80,7 +80,7 @@ public class ScraperService {
 
     static {
         AWIN_LINKS.put("extra", 17874);
-        AWIN_LINKS.put("pague", 17806);
+        AWIN_LINKS.put("pague", 64086);
         AWIN_LINKS.put("biscuit", 24620);
         AWIN_LINKS.put("carrefour", 17665);
         AWIN_LINKS.put("boti", 17659);
@@ -95,6 +95,15 @@ public class ScraperService {
         AWIN_LINKS.put("eudora", 17837);
         AWIN_LINKS.put("madeira", 17762);
         AWIN_LINKS.put("natura", 17658);
+        AWIN_LINKS.put("kabum", 17729);
+        AWIN_LINKS.put("dafiti", 17697);
+        AWIN_LINKS.put("drogasil", 17842);
+        AWIN_LINKS.put("efacil", 47533);
+        AWIN_LINKS.put("cea", 17648);
+        AWIN_LINKS.put("webcontinental", 17743);
+        AWIN_LINKS.put("fastshop", 17590);
+        AWIN_LINKS.put("motorola", 24534);
+        AWIN_LINKS.put("americanas", 22193);
     }
 
     public ProdutoScraperDTO scraperProduto(String url) {
