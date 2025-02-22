@@ -60,12 +60,8 @@ public class ProdutoController {
 
     @GetMapping("/encerrar-promocao")
     public ResponseEntity<?> encerrarPromocao(@RequestParam Boolean status, @RequestParam Long id) {
-
-        if (produtoService.encerrarPromocao(status, id)) {
-            return ResponseEntity.ok().build();
-        }
-
-        return ResponseEntity.noContent().build();
+        produtoService.encerrarPromocao(status, id);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping()
@@ -137,9 +133,9 @@ public class ProdutoController {
 
     @GetMapping("/pesquisar")
     public ResponseEntity<Page<IProdutoResponseDto>> pesquisarProdutos(@RequestParam String termoPesquisa,
-                                                                      @RequestParam(value = "page", defaultValue = "0", required = false) int page,
-                                                                      @RequestParam(value = "size", defaultValue = "12", required = false) int size,
-                                                                      @RequestParam(value = "site", required = false) Long site) {
+                                                                       @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                                                                       @RequestParam(value = "size", defaultValue = "12", required = false) int size,
+                                                                       @RequestParam(value = "site", required = false) Long site) {
         Page<IProdutoResponseDto> resultados = produtoService.pesquisarProdutos(site, termoPesquisa, page, size);
 
         return ResponseEntity.ok().body(resultados);

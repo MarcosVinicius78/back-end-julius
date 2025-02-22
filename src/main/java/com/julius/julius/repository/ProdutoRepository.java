@@ -159,4 +159,14 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     long countByPromosId(Long promoId);
 
     boolean existsByTitulo(String titulo);
+
+    @Query(nativeQuery = true, value = """
+        SELECT
+            pro.*
+        FROM
+            produtos pro
+        WHERE
+            pro.cupom LIKE concat('%', :cupom, '%')
+    """)
+    List<Produto> buscarProdutosComCupom(@Param("cupom") String cupom);
 }

@@ -111,13 +111,13 @@ public class ProdutoService {
         Produto produtoPrincipal = criarProduto(produtoSalvarDto, categoria, loja, colaborador, true);
 
         if (criarDoisProdutos) {
-            adicionarLinks(produtoPrincipal, produtoSalvarDto.link(), produtoSalvarDto.linkSe(), "", "", true);
+            adicionarLinks(produtoPrincipal, produtoSalvarDto.linkSe(), produtoSalvarDto.linkSeApp(), "", "", true);
             produtoRepository.save(produtoPrincipal);
             produtoPrincipal = criarProduto(produtoSalvarDto, categoria, loja, colaborador, false);
-            adicionarLinks(produtoPrincipal, "", "", produtoSalvarDto.linkOmc(), produtoSalvarDto.descricao(), criarDoisProdutos);
+            adicionarLinks(produtoPrincipal, "", "", produtoSalvarDto.linkOmcApp(), produtoSalvarDto.linkOmc(), criarDoisProdutos);
             produtoRepository.save(produtoPrincipal);
         } else {
-            adicionarLinks(produtoPrincipal, produtoSalvarDto.link(), produtoSalvarDto.linkSe(), produtoSalvarDto.linkOmc(), produtoSalvarDto.descricao(), criarDoisProdutos);
+            adicionarLinks(produtoPrincipal, produtoSalvarDto.linkSe(), produtoSalvarDto.linkSeApp(), produtoSalvarDto.linkOmcApp(), produtoSalvarDto.linkOmc(), criarDoisProdutos);
             produtoRepository.save(produtoPrincipal);
         }
 
@@ -140,7 +140,7 @@ public class ProdutoService {
         produto.setTitulo(dto.titulo());
         produto.setPreco(dto.preco());
         produto.setPrecoParcelado(dto.precoParcelado());
-        produto.setDescricao(isSergipe ? dto.link() : dto.descricao()); // SERGIPE -> link() | OMC -> descricao
+//        produto.setDescricao(isSergipe ? dto.link() : dto.descricao());
         produto.setCupom(isSergipe ? dto.cupomSe() : dto.cupomOmc());
         produto.setFreteVariacoes(dto.freteVariacoes());
         produto.setMensagemAdicional(dto.mensagemAdicional());
@@ -284,17 +284,22 @@ public class ProdutoService {
 
     }
 
-    public Boolean encerrarPromocao(Boolean status, Long id) {
+    public void encerrarPromocao(Boolean status, Long id) {
 
-        Optional<Produto> produto = produtoRepository.findById(id);
+        Produto produto = produtoRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto nao encontrado"));
 
-        produto.get().setPromocaoEncerrada(status);
-
-        if (produtoRepository.save(produto.get()) != null) {
-            return true;
+        if (produto.getCupom() == null) {
+            produto.setPromocaoEncerrada(status);
+            produtoRepository.save(produto);
         }
 
-        return false;
+        List<Produto> produtos = produtoRepository.buscarProdutosComCupom(produto.getCupom());
+
+        produtos.forEach(item -> {
+            item.setPromocaoEncerrada(status);
+        });
+
+        produtoRepository.saveAll(produtos);
     }
 
     @Transactional
@@ -321,7 +326,7 @@ public class ProdutoService {
         // Remover links existentes e adicionar os novos
         linkProdutoRepository.deleteAll(produto.getLinksProdutos());
         produto.setLinksProdutos(new ArrayList<>());
-        adicionarLinks(produto, produtoAtualizarDto.linkSe(), produtoAtualizarDto.linkOmc());
+        adicionarLinks(produto, produtoAtualizarDto.linkSe(), produtoAtualizarDto.linkSeApp(), produtoAtualizarDto.linkOmcApp(), produtoAtualizarDto.linkOmc(), true);
 
         // Salvar e retornar
         return ProdutoResponseDto.toResonse(produtoRepository.save(produto));
@@ -330,14 +335,14 @@ public class ProdutoService {
     /**
      * Método para adicionar links a um produto.
      */
-    private void adicionarLinks(Produto produto, String linkSe, String linkOmc) {
-        if (linkSe != null && !linkSe.isEmpty()) {
-            produto.getLinksProdutos().add(salvarLinkProduto(linkSe, 1L));
-        }
-        if (linkOmc != null && !linkOmc.isEmpty()) {
-            produto.getLinksProdutos().add(salvarLinkProduto(linkOmc, 2L));
-        }
-    }
+//    private void adicionarLinks(Produto produto, String linkSe, String linkOmc) {
+//        if (linkSe != null && !linkSe.isEmpty()) {
+//            produto.getLinksProdutos().add(salvarLinkProduto(linkSe, 1L));
+//        }
+//        if (linkOmc != null && !linkOmc.isEmpty()) {
+//            produto.getLinksProdutos().add(salvarLinkProduto(linkOmc, 2L));
+//        }
+//    }
 
 
     public Page<IProdutoResponseDto> obterProdutosPorCategoria(Long site, Long categoriaId, Pageable pageable) {

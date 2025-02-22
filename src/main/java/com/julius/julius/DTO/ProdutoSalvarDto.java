@@ -14,11 +14,12 @@ public record ProdutoSalvarDto(
         String precoParcelado,
         String descricao,
         String linkSe,
+        String linkSeApp,
         String linkOmc,
+        String linkOmcApp,
         String cupomOmc,
         String cupomSe,
         String mensagemAdicional,
-        String link,
         String freteVariacoes,
         String urlImagem,
 
