@@ -110,6 +110,17 @@ public class ScraperController {
         return ResponseEntity.ok().body(configSiteService.buscarLinkCurto());
     }
 
+    @GetMapping("/ativar-link-sem-dominio")
+    public ResponseEntity<Void> ativarLinkSemDominio(@RequestParam Boolean valor) {
+        configSiteService.mudarSemDominio(valor);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/status-link-sem-dominio")
+    public ResponseEntity<Boolean> statusLinkSemDominio() {
+        return ResponseEntity.ok().body(configSiteService.buscarLinkSemDominio());
+    }
+
     @GetMapping("/teste")
     public void processarPromocoes() {
         try {

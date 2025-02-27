@@ -17,6 +17,8 @@ public class ConfigSiteService {
 
     private Boolean LINK_CURTO = Boolean.FALSE;
 
+    private Boolean LINK_SEM_DOMINIO = Boolean.FALSE;
+
     public void mudarTempoRobo(Long tempo) {
         this.TEMPO_ROBO = tempo * 60 * 1000;
     }
@@ -31,5 +33,13 @@ public class ConfigSiteService {
 
     public Boolean buscarLinkCurto(){
         return LINK_CURTO;
+    }
+
+    public void mudarSemDominio(Boolean valor) {
+        LINK_SEM_DOMINIO = valor;
+    }
+
+    public Boolean buscarLinkSemDominio(){
+        return LINK_SEM_DOMINIO;
     }
 }
