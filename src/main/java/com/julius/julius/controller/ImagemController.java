@@ -2,12 +2,16 @@ package com.julius.julius.controller;
 
 import com.julius.julius.service.ImagemService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FileExistsException;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.awt.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,5 +43,17 @@ public class ImagemController {
         }
 
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/baixar-imagem/{imagem}/{caminho}")
+    public ResponseEntity<Resource> baixarImagem(@PathVariable String imagem, @PathVariable String caminho) {
+
+        Resource resource = imagemService.carregarImagemNormal(imagem, caminho);
+//        byte[] bytes = produtoService.gerarStory(preco, titulo, urlImagem, frete, cupom);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG);
+//        headers.setContentLength(bytes.length);
+        headers.setContentDispositionFormData("attachment", "caminho");
+        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 }
