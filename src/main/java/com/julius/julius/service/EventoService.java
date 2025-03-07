@@ -38,8 +38,8 @@ public class EventoService {
         eventoRepository.save(evento);
     }
 
-    public Page<ProdutosCliquesDto> listarProdutosComMaisCliques(Pageable pageable) {
-        return eventoRepository.listarProdutosComMaisAcessos(pageable);
+    public Page<ProdutosCliquesDto> listarProdutosComMaisCliques(String termo, Pageable pageable) {
+        return eventoRepository.listarProdutosComMaisAcessos(termo, pageable);
     }
 
     public void registrarEventoDoProduto(Long id, String tipoEvento, String detalhes) {
@@ -98,26 +98,6 @@ public class EventoService {
 
     public TotalDeEventosDto totalDeAcessos() {
         return eventoRepository.totalDeAcessosNoSistema();
-    }
-
-
-    public Map<String, Double> calcularPorcentagemCliquesNaoCliques() {
-        long totalAcessosOfertas = contarEventosPorTipo("ACESSO_OFERTAS");
-        long totalCliquesBotao = contarEventosPorTipo("CLIQUE_BOTAO");
-
-        double porcentagemCliques = 0.0;
-        double porcentagemNaoCliques = 0.0;
-
-        if (totalAcessosOfertas > 0) {
-            porcentagemCliques = ((double) (totalCliquesBotao * 100) / totalAcessosOfertas);
-            porcentagemNaoCliques = 100 - porcentagemCliques; // Complemento
-        }
-
-        Map<String, Double> resultado = new HashMap<>();
-        resultado.put("porcentagemCliques", porcentagemCliques);
-        resultado.put("porcentagemNaoCliques", porcentagemNaoCliques);
-
-        return resultado;
     }
 
     public List<TotalDeAcessosPorCategoria> totalDeAcessosPorCategoria() {

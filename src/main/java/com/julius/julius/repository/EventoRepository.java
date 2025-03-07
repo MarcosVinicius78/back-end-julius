@@ -48,10 +48,11 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
                 COUNT(e.id) AS totalEventos
             FROM eventos e
             JOIN produtos p ON e.produto_id = p.produto_id
+            WHERE (:termo IS NULL OR lower(p.titulo) like lower(concat('%', :termo, '%')))
             GROUP BY p.produto_id , p.titulo
             ORDER BY totalEventos DESC;
     """)
-    Page<ProdutosCliquesDto> listarProdutosComMaisAcessos(Pageable pageable);
+    Page<ProdutosCliquesDto> listarProdutosComMaisAcessos(@Param("termo") String termo, Pageable pageable);
 
     @Query(nativeQuery = true ,value = """
         select
@@ -66,13 +67,14 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
 
     @Query(nativeQuery = true ,value = """
         SELECT
+            c.categoria_id as categoriaId,
         	c.nome_categoria as nomeCategoria,
         	COUNT(e.id) as totalAcessos
         FROM eventos e
         JOIN produtos p ON e.produto_id = p.produto_id
         JOIN categorias c ON p.fk_categoria = c.categoria_id
         WHERE e.tipo_evento = 'ACESSO_PRODUTO'
-        GROUP BY c.nome_categoria
+        GROUP BY c.nome_categoria, c.categoria_id
         ORDER BY totalAcessos DESC
     """)
     List<TotalDeAcessosPorCategoria> totalDeAcessosPorCategoria();

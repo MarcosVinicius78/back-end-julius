@@ -21,13 +21,22 @@ public class ImagemController {
     private final ImagemService imagemService;
 
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadImage(@RequestParam("id") Long id,
+    public ResponseEntity<?> uploadImage(@RequestParam(value = "id", required = false) Long id,
                                          @RequestParam(name = "urlImagem", required = false) MultipartFile urlImagem,
                                          @RequestParam(name = "urlImagemReal", required = false) MultipartFile urlImagemReal) {
         imagemService.salvarImagemProduto(id, urlImagem, urlImagemReal);
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/salvar-imagem")
+    public ResponseEntity<?> salvarImagem(@RequestParam(name = "urlImagem", required = false) MultipartFile urlImagem,
+                                         @RequestParam(name = "caminho", required = false) String caminho) {
+        imagemService.salvarImagem(urlImagem, caminho);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/download/{imagem}/{caminho}")
     public ResponseEntity<Resource> carregarImagem(@PathVariable String imagem, @PathVariable String caminho) {
 

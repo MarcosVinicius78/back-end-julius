@@ -38,7 +38,7 @@ public class ImagemService {
         Date data = new Date();
 
         String fileName = file.getOriginalFilename();
-        String nomeImagem = data.getTime() + fileName;
+        String nomeImagem = fileName.contains("feed") ? fileName : data.getTime() + fileName;
         Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
 
         try {

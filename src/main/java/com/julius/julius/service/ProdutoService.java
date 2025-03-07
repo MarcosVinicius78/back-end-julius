@@ -619,11 +619,11 @@ public class ProdutoService {
     }
 
     public byte[] gerarFeed(Long id) throws IOException, FontFormatException {
-        BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/feed.jpeg"));
+        BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/produtos" + "/feed.jpeg"));
 
         Produto produto = produtoRepository.findById(id).orElseThrow();
 
-        Image foto = ImageIO.read(new File(UPLOAD_DIR + "-real" + "/" + produto.getImagemSocial()));
+        Image foto = ImageIO.read(new File(UPLOAD_DIR + "/produtos-real/" + produto.getImagemSocial()));
 
         // Carregar a fonte personalizada
         InputStream is = getClass().getClassLoader().getResourceAsStream("fonts/Chonky_Cat.ttf");
@@ -636,13 +636,13 @@ public class ProdutoService {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setColor(Color.BLACK);
-        g.drawImage(foto, 86, 75, 910, 860, null);
+        g.drawImage(foto, 86, 225, 910, 930, null);
 
         // Desenhar o preço no retângulo
         int fontSize = 50;
         Font priceFont = customFont.deriveFont(Font.BOLD, fontSize);
-        int yPreco = 960;
-        int xPreco = 730;
+        int yPreco = 1180;
+        int xPreco = 740;
         int width = 220;
         int height = 90;
         FontMetrics metrics;
@@ -677,7 +677,7 @@ public class ProdutoService {
 
         // Retângulo de exemplo (posição e tamanho)
         int rectX = 130;
-        int rectY = 960;
+        int rectY = 1180;
         int rectWidth = 540; // Largura do retângulo
         int rectHeight = 90; // Altura do retângulo (aproximadamente 2 linhas de texto)
 

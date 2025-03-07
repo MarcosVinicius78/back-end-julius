@@ -35,17 +35,21 @@ public class EventoController {
     }
 
     @PostMapping("/registrar-produto/{id}")
-    public ResponseEntity<String> registrarEventoDoProduto(@PathVariable Long id ,@RequestParam String tipo, @RequestParam(required = false) String detalhes) {
+    public ResponseEntity<String> registrarEventoDoProduto(@PathVariable Long id, @RequestParam String tipo, @RequestParam(required = false) String detalhes) {
         eventoService.registrarEventoDoProduto(id, tipo, detalhes);
         return ResponseEntity.ok().build();
     }
 
+    //usando
     @GetMapping("/listar-produtos-com-mais-cliques")
-    public ResponseEntity<Page<ProdutosCliquesDto>> listarProdutosComMaisCliques() {
+    public ResponseEntity<Page<ProdutosCliquesDto>> listarProdutosComMaisCliques(@RequestParam(required = false) String termo,
+                                                                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicioSemana,
+                                                                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fimSemana) {
         Pageable pageable = PageRequest.of(0, 100);
-        return ResponseEntity.ok().body(eventoService.listarProdutosComMaisCliques(pageable));
+        return ResponseEntity.ok().body(eventoService.listarProdutosComMaisCliques(termo, pageable));
     }
 
+    // usando
     @GetMapping("/acessos-semana")
     public ResponseEntity<Map<String, Long>> contarAcessos(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicioSemana,
@@ -55,38 +59,26 @@ public class EventoController {
         return ResponseEntity.ok().body(acessos);
     }
 
+    //usando
     @GetMapping("/buscar-por-dia")
     public ResponseEntity<EventoQuantidadePorTipo> buscarEventosPorDia(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data, @RequestParam String tipoEvento) {
         return ResponseEntity.ok().body(eventoService.buscarEventosPorDia(data, tipoEvento));
     }
 
-    @GetMapping("/estatisticas")
-    public ResponseEntity<Map<String, Long>> obterEstatisticas() {
-        Map<String, Long> stats = new HashMap<>();
-        stats.put("totalAcessosSistema", eventoService.contarEventosPorTipo("ACESSO_SISTEMA"));
-        stats.put("totalCliquesBotao", eventoService.contarEventosPorTipo("CLIQUE_BOTAO"));
-        stats.put("totalAcessosOfertas", eventoService.contarEventosPorTipo("ACESSO_OFERTAS"));
-        stats.put("totalEventos", eventoService.contarTotalEventos());
-
-        return ResponseEntity.ok().body(stats);
-    }
-
+    //usando
     @GetMapping("/total-de-acessos")
     public ResponseEntity<TotalDeEventosDto> totalDeAcessos() {
         return ResponseEntity.ok().body(eventoService.totalDeAcessos());
     }
 
-    @GetMapping("/porcentagem-cliques-nao-cliques")
-    public ResponseEntity<Map<String, Double>> obterPorcentagemCliquesNaoCliques() {
-        return ResponseEntity.ok().body(eventoService.calcularPorcentagemCliquesNaoCliques());
-    }
-
+    //sando
     @GetMapping("/total-de-acessos-por-categoria")
     public ResponseEntity<List<TotalDeAcessosPorCategoria>> totalDeAcessosPorCategoria() {
         return ResponseEntity.ok().body(eventoService.totalDeAcessosPorCategoria());
     }
 
+    //usando
     @GetMapping("/total-de-acessos-por-loja")
     public ResponseEntity<List<TotalDeAcessosPorLoja>> totalDeAcessosPorLoja() {
         return ResponseEntity.ok().body(eventoService.totalDeAcessosPorLoja());
