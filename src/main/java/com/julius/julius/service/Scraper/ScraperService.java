@@ -8,20 +8,17 @@ import java.util.regex.Pattern;
 import com.julius.julius.DTO.produtoScrapperPeDto.ResponseScrapper;
 import com.julius.julius.models.Loja;
 import com.julius.julius.repository.LinkProdutoRepository;
+import com.julius.julius.service.ConfigSiteService;
 import com.julius.julius.service.ImagemService;
 import lombok.Getter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.julius.julius.DTO.ProdutoJsonDto;
@@ -39,7 +36,6 @@ import com.julius.julius.service.Scraper.awin.ScraperLojasAwin;
 import com.julius.julius.service.Scraper.magazine.MagazineService;
 import com.julius.julius.service.Scraper.mercadolivre.MercadoLivre;
 
-import io.jsonwebtoken.io.IOException;
 import lombok.RequiredArgsConstructor;
 
 @Service

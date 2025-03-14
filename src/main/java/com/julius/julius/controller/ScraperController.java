@@ -1,8 +1,5 @@
 package com.julius.julius.controller;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.julius.julius.DTO.ProdutoJsonDto;
 import com.julius.julius.DTO.produtoScrapperPeDto.ResponseScrapper;
@@ -15,11 +12,9 @@ import com.julius.julius.repository.LinkProdutoRepository;
 import com.julius.julius.repository.LojaRepository;
 import com.julius.julius.repository.ProdutoRepository;
 import com.julius.julius.service.ImagemService;
-import com.julius.julius.service.Scraper.ConfigSiteService;
+import com.julius.julius.service.ConfigSiteService;
 import com.julius.julius.service.Scraper.JsoupConexaoService;
 import com.julius.julius.service.Scraper.magazine.MagazineService;
-import lombok.Getter;
-import lombok.Setter;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +32,6 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.net.ConnectException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -112,13 +106,13 @@ public class ScraperController {
 
     @GetMapping("/ativar-link-sem-dominio")
     public ResponseEntity<Void> ativarLinkSemDominio(@RequestParam Boolean valor) {
-        configSiteService.mudarSemDominio(valor);
+        configSiteService.mudarSemDominioSe(valor);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/status-link-sem-dominio")
     public ResponseEntity<Boolean> statusLinkSemDominio() {
-        return ResponseEntity.ok().body(configSiteService.buscarLinkSemDominio());
+        return ResponseEntity.ok().body(configSiteService.buscarLinkSemDominioSe());
     }
 
     @GetMapping("/teste")

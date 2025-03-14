@@ -1,4 +1,4 @@
-package com.julius.julius.service.Scraper;
+package com.julius.julius.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +17,9 @@ public class ConfigSiteService {
 
     private Boolean LINK_CURTO = Boolean.FALSE;
 
-    private Boolean LINK_SEM_DOMINIO = Boolean.FALSE;
+    private Boolean LINK_SEM_DOMINIO_SE = Boolean.FALSE;
+
+    private Boolean LINK_SEM_DOMINIO_OMC = Boolean.FALSE;
 
     public void mudarTempoRobo(Long tempo) {
         this.TEMPO_ROBO = tempo * 60 * 1000;
@@ -35,11 +37,20 @@ public class ConfigSiteService {
         return LINK_CURTO;
     }
 
-    public void mudarSemDominio(Boolean valor) {
-        LINK_SEM_DOMINIO = valor;
+    public void mudarSemDominioSe(Boolean valor) {
+        LINK_SEM_DOMINIO_SE = valor;
     }
 
-    public Boolean buscarLinkSemDominio(){
-        return LINK_SEM_DOMINIO;
+    public Boolean buscarLinkSemDominioSe(){
+        return LINK_SEM_DOMINIO_SE;
+    }
+
+    public void mudarSemDominioOmc(Boolean valor) {
+        LINK_SEM_DOMINIO_OMC = valor;
+        System.out.println(LINK_SEM_DOMINIO_OMC);
+    }
+
+    public Boolean buscarLinkSemDominioOmc(){
+        return LINK_SEM_DOMINIO_OMC;
     }
 }
