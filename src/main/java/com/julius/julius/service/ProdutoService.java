@@ -817,30 +817,29 @@ public class ProdutoService {
         LocalDateTime dataLimite = LocalDateTime.now().minusDays(7);
         List<Produto> produtosAntigos = produtoRepository.findProdutosComMaisDe7Dias(dataLimite);
 
-        produtosAntigos.stream().forEach(item -> {
-            reportRepository.deleteByProdutoReport(item.getId());
-            produtoRepository.deleteByProdutoPromos(item.getId());
-        });
-
-        produtoRepository.deleteAll(produtosAntigos);
-
         for (Produto produto : produtosAntigos) {
+            // 🔹 Remove referências em outras tabelas primeiro
+            reportRepository.deleteByProdutoReport(produto.getId());
+            produtoRepository.deleteByProdutoPromos(produto.getId());
 
+            // 🔹 Remove links associados ao produto
+            if (produto.getLinksProdutos() != null && !produto.getLinksProdutos().isEmpty()) {
+                linkProdutoRepository.deleteAll(produto.getLinksProdutos());
+            }
+
+            // 🔹 Remove promoções associadas
             apagarPromocoesSemProdutos(produto);
 
-            produto.getLinksProdutos().stream().forEach(item -> {
-                linkProdutoRepository.deleteById(item.getId());
-            });
-
-
+            // 🔹 Exclui as imagens associadas
             if (produto.getUrlImagem() != null) {
                 imagemService.apagarImagem(UPLOAD_DIR.concat("/produtos/" + produto.getUrlImagem()));
             }
-
             if (produto.getImagemSocial() != null) {
                 imagemService.apagarImagem(UPLOAD_DIR.concat("/produtos-real/" + produto.getImagemSocial()));
             }
         }
 
+        // 🔹 Agora, excluímos os produtos SEM referências ativas
+        produtoRepository.deleteAll(produtosAntigos);
     }
 }

@@ -6,6 +6,7 @@ import com.julius.julius.DTO.evento.TotalDeAcessosPorCategoria;
 import com.julius.julius.DTO.evento.TotalDeAcessosPorLoja;
 import com.julius.julius.DTO.evento.TotalDeEventosDto;
 import com.julius.julius.models.Evento;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -48,11 +49,12 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
                 COUNT(e.id) AS totalEventos
             FROM eventos e
             JOIN produtos p ON e.produto_id = p.produto_id
-            WHERE (:termo IS NULL OR lower(p.titulo) like lower(concat('%', :termo, '%')))
+            WHERE DATE(e.data_evento) = TO_DATE(:data, 'YYYY-MM-DD')
+            AND (:termo IS NULL OR lower(p.titulo) like lower(concat('%', :termo, '%')))
             GROUP BY p.produto_id , p.titulo
             ORDER BY totalEventos DESC;
     """)
-    Page<ProdutosCliquesDto> listarProdutosComMaisAcessos(@Param("termo") String termo, Pageable pageable);
+    Page<ProdutosCliquesDto> listarProdutosComMaisAcessos(@Param("termo") String termo, @Param("data") LocalDate data, Pageable pageable);
 
     @Query(nativeQuery = true ,value = """
         select
@@ -73,11 +75,11 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
         FROM eventos e
         JOIN produtos p ON e.produto_id = p.produto_id
         JOIN categorias c ON p.fk_categoria = c.categoria_id
-        WHERE e.tipo_evento = 'ACESSO_PRODUTO'
+        WHERE e.tipo_evento = 'ACESSO_PRODUTO' and DATE(e.data_evento) = TO_DATE(:data, 'YYYY-MM-DD')
         GROUP BY c.nome_categoria, c.categoria_id
         ORDER BY totalAcessos DESC
     """)
-    List<TotalDeAcessosPorCategoria> totalDeAcessosPorCategoria();
+    List<TotalDeAcessosPorCategoria> totalDeAcessosPorCategoria(@Param("data")LocalDate data);
 
     @Query(nativeQuery = true, value = """
         SELECT
@@ -86,9 +88,9 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
         FROM eventos e
         JOIN produtos p ON e.produto_id = p.produto_id
         JOIN lojas l ON p.fk_loja = l.loja_id
-        WHERE e.tipo_evento = 'ACESSO_PRODUTO'
+        WHERE e.tipo_evento = 'ACESSO_PRODUTO' and DATE(e.data_evento) = TO_DATE(:data, 'YYYY-MM-DD')
         GROUP BY l.nome_loja
         ORDER BY totalAcessos desc;
     """)
-    List<TotalDeAcessosPorLoja> totalDeAcessosPorLoja();
+    List<TotalDeAcessosPorLoja> totalDeAcessosPorLoja(@Param("data") LocalDate data);
 }

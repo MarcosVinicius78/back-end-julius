@@ -38,8 +38,8 @@ public class EventoService {
         eventoRepository.save(evento);
     }
 
-    public Page<ProdutosCliquesDto> listarProdutosComMaisCliques(String termo, Pageable pageable) {
-        return eventoRepository.listarProdutosComMaisAcessos(termo, pageable);
+    public Page<ProdutosCliquesDto> listarProdutosComMaisCliques(String termo, LocalDate data, Pageable pageable) {
+        return eventoRepository.listarProdutosComMaisAcessos(termo, data, pageable);
     }
 
     public void registrarEventoDoProduto(Long id, String tipoEvento, String detalhes) {
@@ -100,12 +100,12 @@ public class EventoService {
         return eventoRepository.totalDeAcessosNoSistema();
     }
 
-    public List<TotalDeAcessosPorCategoria> totalDeAcessosPorCategoria() {
-        return eventoRepository.totalDeAcessosPorCategoria();
+    public List<TotalDeAcessosPorCategoria> totalDeAcessosPorCategoria(LocalDate data) {
+        return eventoRepository.totalDeAcessosPorCategoria(data);
     }
 
-    public List<TotalDeAcessosPorLoja> totalDeAcessosPorLoja() {
-        return eventoRepository.totalDeAcessosPorLoja();
+    public List<TotalDeAcessosPorLoja> totalDeAcessosPorLoja(LocalDate data) {
+        return eventoRepository.totalDeAcessosPorLoja(data);
     }
 
 }

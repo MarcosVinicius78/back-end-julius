@@ -85,7 +85,7 @@ public class Produto {
 
     @JsonManagedReference
     @ManyToMany
-    @JoinTable(name = "produto_link", joinColumns = @JoinColumn(name = "produto_id"), inverseJoinColumns = @JoinColumn(name = "link_produto_id"))
+    @JoinTable(name = "produto_link" ,joinColumns = @JoinColumn(name = "produto_id"), inverseJoinColumns = @JoinColumn(name = "link_produto_id"))
     private List<LinksProdutos> linksProdutos = new ArrayList<>();
 
     @ManyToMany(mappedBy = "produtos", fetch = FetchType.EAGER)

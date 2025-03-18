@@ -43,10 +43,10 @@ public class EventoController {
     //usando
     @GetMapping("/listar-produtos-com-mais-cliques")
     public ResponseEntity<Page<ProdutosCliquesDto>> listarProdutosComMaisCliques(@RequestParam(required = false) String termo,
-                                                                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicioSemana,
-                                                                                 @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fimSemana) {
+                                                                                 @RequestParam LocalDate data) {
         Pageable pageable = PageRequest.of(0, 100);
-        return ResponseEntity.ok().body(eventoService.listarProdutosComMaisCliques(termo, pageable));
+        System.out.println(data);
+        return ResponseEntity.ok().body(eventoService.listarProdutosComMaisCliques(termo ,data, pageable));
     }
 
     // usando
@@ -74,13 +74,13 @@ public class EventoController {
 
     //sando
     @GetMapping("/total-de-acessos-por-categoria")
-    public ResponseEntity<List<TotalDeAcessosPorCategoria>> totalDeAcessosPorCategoria() {
-        return ResponseEntity.ok().body(eventoService.totalDeAcessosPorCategoria());
+    public ResponseEntity<List<TotalDeAcessosPorCategoria>> totalDeAcessosPorCategoria(@RequestParam LocalDate data) {
+        return ResponseEntity.ok().body(eventoService.totalDeAcessosPorCategoria(data));
     }
 
     //usando
     @GetMapping("/total-de-acessos-por-loja")
-    public ResponseEntity<List<TotalDeAcessosPorLoja>> totalDeAcessosPorLoja() {
-        return ResponseEntity.ok().body(eventoService.totalDeAcessosPorLoja());
+    public ResponseEntity<List<TotalDeAcessosPorLoja>> totalDeAcessosPorLoja(@RequestParam LocalDate data) {
+        return ResponseEntity.ok().body(eventoService.totalDeAcessosPorLoja(data));
     }
 }
