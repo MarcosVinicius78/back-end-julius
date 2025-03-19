@@ -288,9 +288,10 @@ public class ProdutoService {
 
         Produto produto = produtoRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto nao encontrado"));
 
-        if (produto.getCupom() == null) {
+        if (produto.getCupom() == null || produto.getCupom().isEmpty()) {
             produto.setPromocaoEncerrada(status);
             produtoRepository.save(produto);
+            return;
         }
 
         List<Produto> produtos = produtoRepository.buscarProdutosComCupom(produto.getCupom());
@@ -324,7 +325,7 @@ public class ProdutoService {
         produto.setCopy(produtoAtualizarDto.copy());
 
         // Remover links existentes e adicionar os novos
-        linkProdutoRepository.deleteAll(produto.getLinksProdutos());
+//        linkProdutoRepository.deleteAll(produto.getLinksProdutos());
         produto.setLinksProdutos(new ArrayList<>());
         adicionarLinks(produto, produtoAtualizarDto.linkSe(), produtoAtualizarDto.linkSeApp(), produtoAtualizarDto.linkOmcApp(), produtoAtualizarDto.linkOmc(), true);
 
