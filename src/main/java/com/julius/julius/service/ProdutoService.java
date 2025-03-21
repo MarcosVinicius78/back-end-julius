@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -402,7 +403,7 @@ public class ProdutoService {
             // Carregar a imagem
             BufferedImage image = ImageIO.read(new File(UPLOAD_DIR + "/produtos/story.jpeg"));
 
-            Image foto = ImageIO.read(new File(UPLOAD_DIR + "/produtos-real" + "/" + urlImagem));
+            Image foto = ImageIO.read(new File(UPLOAD_DIR + "/produtos-real/" + urlImagem));
 
             // Carregar a fonte personalizada
             // Carregar a fonte personalizada usando class loader
@@ -416,7 +417,12 @@ public class ProdutoService {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setColor(Color.BLACK);
-            g.drawImage(foto, 60, 150, 980, 980, null);
+            RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(65, 150, 950, 950,40, 40);
+            // Recortar a imagem no formato arredondado
+            g.setClip(roundedRect);
+
+            g.drawImage(foto, 65, 150, 950, 950, null);
+
 
             // Configurar fonte para o título
             // Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
@@ -624,7 +630,8 @@ public class ProdutoService {
 
         Produto produto = produtoRepository.findById(id).orElseThrow();
 
-        Image foto = ImageIO.read(new File(UPLOAD_DIR + "/produtos-real/" + produto.getImagemSocial()));
+        File imageFile = new File(UPLOAD_DIR + "/produtos-real/" + produto.getImagemSocial());
+        Image foto = ImageIO.read(imageFile);
 
         // Carregar a fonte personalizada
         InputStream is = getClass().getClassLoader().getResourceAsStream("fonts/Chonky_Cat.ttf");
@@ -637,6 +644,9 @@ public class ProdutoService {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setColor(Color.BLACK);
+        RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(86, 225, 910, 930,40, 40);
+        // Recortar a imagem no formato arredondado
+        g.setClip(roundedRect);
         g.drawImage(foto, 86, 225, 910, 930, null);
 
         // Desenhar o preço no retângulo

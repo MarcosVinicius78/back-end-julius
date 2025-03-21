@@ -11,6 +11,8 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -30,26 +32,45 @@ public class ImagemService {
     private static final String UPLOAD_DIR = "/uploads/";
 
     public String salvarImagem(MultipartFile file, String caminho) {
+        // Criar o diretório de uploads se não existir
         File uploadsDir = new File(UPLOAD_DIR.concat(caminho));
         if (!uploadsDir.exists()) {
             uploadsDir.mkdirs();
         }
 
         Date data = new Date();
-
         String fileName = file.getOriginalFilename();
-        String nomeImagem = fileName.contains("feed") ? fileName : data.getTime() + fileName;
+
+        // Gerar nome único para a imagem (evitar conflito)
+        String nomeImagem = fileName.contains("feed") ? fileName : data.getTime() + ".jpg";
+
+        // Definir o caminho final para salvar a imagem convertida
         Path filePath = Path.of(uploadsDir.getAbsolutePath(), nomeImagem);
 
         try {
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
+            // Converter a imagem recebida para o formato desejado
+            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
 
+            // Se a imagem não puder ser lida, lançar uma exceção
+            if (bufferedImage == null) {
+                throw new IOException("Não foi possível processar a imagem.");
+            }
+
+            // Salvar a imagem convertida no formato desejado (jpg)
+            boolean isSuccess = ImageIO.write(bufferedImage, "jpg", new File(filePath.toString()));
+
+            if (!isSuccess) {
+                throw new IOException("Falha ao salvar a imagem convertida.");
+            }
+
+        } catch (IOException e) {
             e.printStackTrace();
+            return null; // Se ocorrer um erro, retorna null
         }
 
-        return nomeImagem;
+        return nomeImagem; // Retorna o nome da imagem salva
     }
+
 
     public String salvarImagemUrl(String url, String caminho) {
 
