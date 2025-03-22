@@ -1,13 +1,6 @@
 package com.julius.julius.service;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -21,6 +14,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
@@ -419,10 +413,12 @@ public class ProdutoService {
             g.setColor(Color.BLACK);
             RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(65, 150, 950, 950,40, 40);
             // Recortar a imagem no formato arredondado
+            Shape originalClip = g.getClip();
             g.setClip(roundedRect);
 
             g.drawImage(foto, 65, 150, 950, 950, null);
 
+            g.setClip(originalClip);
 
             // Configurar fonte para o título
             // Font fonteNegrito = new Font(Font.SANS_SERIF, Font.BOLD, 45);
@@ -646,9 +642,11 @@ public class ProdutoService {
         g.setColor(Color.BLACK);
         RoundRectangle2D.Float roundedRect = new RoundRectangle2D.Float(86, 225, 910, 930,40, 40);
         // Recortar a imagem no formato arredondado
+        Shape originalClip = g.getClip();
         g.setClip(roundedRect);
         g.drawImage(foto, 86, 225, 910, 930, null);
 
+        g.setClip(originalClip);
         // Desenhar o preço no retângulo
         int fontSize = 50;
         Font priceFont = customFont.deriveFont(Font.BOLD, fontSize);
